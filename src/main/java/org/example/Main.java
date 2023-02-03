@@ -2,6 +2,8 @@ package org.example;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
+import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
@@ -28,9 +30,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
-
 
 public class Main {
     static ListDb db;
@@ -41,9 +43,10 @@ public class Main {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
 //        book.experimentMethod();
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(Author.class);
-
+//        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(Author.class);
+//        graphQLEnumTypeFromEnum(GenreType.class);
     }
+
 
     static void task1() {
         db = new ListDb();

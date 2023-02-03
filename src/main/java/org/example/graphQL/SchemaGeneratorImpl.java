@@ -7,6 +7,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
@@ -20,6 +21,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 public class SchemaGeneratorImpl {
     HashSet<Class<?>> components;
@@ -34,32 +36,30 @@ public class SchemaGeneratorImpl {
         // todo fix to eliminate duplicate operations but to not omit nested components
         HashSet<Class<?>> components = new HashSet<>();
         for (Class<?> cls : classes) {
-            components = getUniqueClasses(cls, components);
+            components = addNestedClasses(cls, components);
         }
         this.components = components;
         System.out.println(this.components);
     }
 
-    private HashSet<Class<?>> getUniqueClasses(Class<?> cls, HashSet<Class<?>> components) {
-        System.out.println(cls);
-        Field[] fields = cls.getDeclaredFields();
-        for (Field field : fields) {
+    private HashSet<Class<?>> addNestedClasses(Class<?> cls, HashSet<Class<?>> components) {
+        // todo refactor extract conditionals
+        for (Field field : cls.getDeclaredFields()) {
             GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-            System.out.println("- " + category + " " + field.getName());
             if (category == GraphQlIdentifyer.TYPE) {
                 Class<?> type = field.getType();
                 if (components.contains(type)) {
                     break;
                 }
                 components.add(type);
-                components = getUniqueClasses(type, components);
+                components = addNestedClasses(type, components);
             } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
                 Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                 if (components.contains((Class<?>) generic)) {
                     break;
                 }
                 components.add((Class<?>) generic);
-                components = getUniqueClasses((Class<?>) generic, components);
+                components = addNestedClasses((Class<?>) generic, components);
             } else if (category == GraphQlIdentifyer.ENUM) {
                 Class<?> type = field.getType();
                 if (components.contains(type)) {
@@ -71,13 +71,17 @@ public class SchemaGeneratorImpl {
         return components;
     }
 
-    void test() {
-        SDLDefinition aa;
-    }
-
-    static GraphQLEnumType graphQLObjectTypeFromClass(Enum<?> enumType) {
-//        GraphQLEnumType
-                return null;
+    static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
+        String typeName = enumType.getSimpleName();
+        return GraphQLEnumType.newEnum()
+                              .name(typeName)
+                              .values(Arrays.stream(enumType.getEnumConstants())
+                                            .map((eConst) -> GraphQLEnumValueDefinition
+                                                    .newEnumValueDefinition()
+                                                    .value(eConst.name())
+                                                    .build())
+                                            .collect(Collectors.toList()))
+                              .build();
     }
 
     static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
