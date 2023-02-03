@@ -3,16 +3,13 @@ package org.example.db;
 import lombok.Getter;
 import org.example.entity.Author;
 import org.example.entity.Book;
-import org.example.entity.Client;
-import org.example.GenreType;
+import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Getter
 public class ListDb {

@@ -1,14 +1,11 @@
 package org.example.db;
 
 import graphql.schema.DataFetcher;
-import org.example.GenreType;
-import org.example.db.ListDb;
 import org.example.entity.Book;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CustomFetcher {
     private ListDb listDb;

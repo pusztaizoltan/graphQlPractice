@@ -1,7 +1,6 @@
 package org.example.entity;
 
 import lombok.Getter;
-import org.example.GenreType;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.ScalarFitter;
 import org.example.graphQL.annotation.UseMarker;
