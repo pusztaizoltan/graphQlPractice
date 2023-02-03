@@ -17,8 +17,12 @@ import org.example.entity.TestClass;
 import org.example.db.ListDb;
 import org.example.db.CustomFetcher;
 import org.example.graphQL.SchemaLoader;
+import org.example.graphQL.annotation.GraphQlIdentifyer;
+import org.example.graphQL.annotation.UseMarker;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,9 +49,17 @@ public class Main {
         HashSet<Class<?>> components = new HashSet<>();
         Field[] fields = cls.getDeclaredFields();
         for (Field field: fields){
-            field.getType().componentType();
-            System.out.println(field.getName() + " "+field.getType().descriptorString());
+            GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
+            if(category == GraphQlIdentifyer.TYPE){
+                components.add(field.getType());
+            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                System.out.println(generic);
+                components.add((Class<?>) generic);
+            }
+            System.out.println("-"+field.getName() + " "+field.getGenericType());
         }
+        System.out.println(components);
         return components;
     }
 
