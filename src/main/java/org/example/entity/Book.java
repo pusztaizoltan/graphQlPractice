@@ -9,6 +9,7 @@ import org.example.graphQL.annotation.UseMarker;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Getter
 public class Book implements Schemable {
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
