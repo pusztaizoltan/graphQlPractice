@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class Book implements Schemable {
+public class Book{
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
     private final long id;
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
@@ -20,7 +20,7 @@ public class Book implements Schemable {
     @UseMarker(category = GraphQlIdentifyer.TYPE)
     private final Author author;
     @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
-    private List<Reader> readers = new ArrayList<>();
+    private final List<Reader> readers = new ArrayList<>();
 
     public Book(long id, String title, GenreType genreAsEnum, Author author) {
         this.id = id;

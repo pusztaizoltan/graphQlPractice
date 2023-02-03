@@ -16,6 +16,7 @@ import org.example.entity.Schemable;
 import org.example.entity.TestClass;
 import org.example.db.ListDb;
 import org.example.db.CustomFetcher;
+import org.example.graphQL.SchemaGeneratorImpl;
 import org.example.graphQL.SchemaLoader;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
@@ -30,6 +31,7 @@ import java.util.Set;
 
 import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
+
 public class Main {
     static ListDb db;
     static SchemaLoader source = new SchemaLoader("schema.graphqls");
@@ -39,41 +41,9 @@ public class Main {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
 //        book.experimentMethod();
-        initWith(Book.class, Author.class, Reader.class);
-    }
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl();
+        generator.initWith(Author.class);
 
-    static Set<Class<?>> initWith(Class<?>... classes) {
-        HashSet<Class<?>> components = new HashSet<>(Arrays.asList(classes));
-        for (Class<?> cls : components) {
-            components = getUniqueClasses(cls, components);
-
-        }
-        System.out.println(components);
-        return components;
-    }
-
-    static HashSet<Class<?>> getUniqueClasses(Class<?> cls, HashSet<Class<?>> components) {
-        System.out.println(cls);
-        Field[] fields = cls.getDeclaredFields();
-        for (Field field : fields) {
-            GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-            if (category == GraphQlIdentifyer.TYPE) {
-                Class<?> type = field.getType();
-                if (components.contains(type)) {
-                    break;
-                }
-                components.add(type);
-                components = getUniqueClasses(type, components); // recursive usage
-            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                if (components.contains((Class<?>) generic)) {
-                    break;
-                }
-                components.add((Class<?>) generic);
-                components = getUniqueClasses((Class<?>) generic, components);
-            }
-        }
-        return components;
     }
 
     static void task1() {
