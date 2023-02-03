@@ -20,7 +20,9 @@ public class Book implements Schemable {
     @UseMarker(category = GraphQlIdentifyer.ENUM)
     private final GenreType genreAsEnum;
 
+    @UseMarker(category = GraphQlIdentifyer.TYPE)
     private final Author author;
+    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
     private List<Reader> readers = new ArrayList<>();
 
     public Book(long id, String title, GenreType genreAsEnum, Author author) {
