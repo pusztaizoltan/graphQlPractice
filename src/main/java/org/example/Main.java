@@ -41,9 +41,7 @@ public class Main {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
 //        book.experimentMethod();
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl();
-        generator.initWith(Author.class);
-        System.out.println(GenreType.class);
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(Author.class);
 
     }
 

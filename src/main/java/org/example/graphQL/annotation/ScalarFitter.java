@@ -15,7 +15,7 @@ public enum ScalarFitter {
     BOOLEAN(Scalars.GraphQLBoolean),
     ID(Scalars.GraphQLID),
     DEFAULT(null);
-    GraphQLScalarType graphQLScalarType;
+    public GraphQLScalarType graphQLScalarType;
 
     ScalarFitter(GraphQLScalarType graphQLScalarType) {
         this.graphQLScalarType = graphQLScalarType;
