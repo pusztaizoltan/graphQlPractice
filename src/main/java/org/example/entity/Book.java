@@ -1,22 +1,24 @@
 package org.example.entity;
 
-import graphql.Scalars;
-import graphql.schema.GraphQLFieldDefinition;
-import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLObjectType.Builder;
-import graphql.schema.GraphQLScalarType;
 import lombok.Getter;
 import org.example.GenreType;
+import org.example.graphQL.annotation.GraphQlIdentifyer;
+import org.example.graphQL.annotation.ScalarFitter;
+import org.example.graphQL.annotation.UseMarker;
 
-import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class Book implements Schemable {
+    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
     private final long id;
+
+    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
     private final String title;
+    @UseMarker(category = GraphQlIdentifyer.ENUM)
     private final GenreType genreAsEnum;
+
     private final Author author;
     private List<Reader> readers = new ArrayList<>();
 
