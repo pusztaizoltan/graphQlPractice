@@ -6,6 +6,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
+import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
@@ -32,7 +33,6 @@ public class SchemaGeneratorImpl {
         // todo now it is operational as get all the nested components
         // todo fix to eliminate duplicate operations but to not omit nested components
         HashSet<Class<?>> components = new HashSet<>();
-
         for (Class<?> cls : classes) {
             components = getUniqueClasses(cls, components);
         }
@@ -60,7 +60,7 @@ public class SchemaGeneratorImpl {
                 }
                 components.add((Class<?>) generic);
                 components = getUniqueClasses((Class<?>) generic, components);
-            } else if (category == GraphQlIdentifyer.ENUM){
+            } else if (category == GraphQlIdentifyer.ENUM) {
                 Class<?> type = field.getType();
                 if (components.contains(type)) {
                     break;
@@ -75,36 +75,44 @@ public class SchemaGeneratorImpl {
         SDLDefinition aa;
     }
 
+    static GraphQLEnumType graphQLObjectTypeFromClass(Enum<?> enumType) {
+//        GraphQLEnumType
+                return null;
+    }
+
     static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
         GraphQLObjectType.Builder typeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         Field[] fields = classType.getDeclaredFields();
         for (Field field : fields) {
             UseMarker fieldAnnotation = field.getAnnotation(UseMarker.class);
-            if(fieldAnnotation.category() == GraphQlIdentifyer.TYPE){
+            if (fieldAnnotation.category() == GraphQlIdentifyer.TYPE) {
                 String genericTypeName = field.getType().getTypeName();
                 typeBuilder = typeBuilder.field(GraphQLFieldDefinition
                         .newFieldDefinition()
                         .name(field.getName())
                         .type(GraphQLTypeReference.typeRef(genericTypeName)));
-            } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE){
+            } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
                 String genericTypeName = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName();
                 typeBuilder = typeBuilder.field(GraphQLFieldDefinition
                         .newFieldDefinition()
                         .name(field.getName())
                         .type(GraphQLList.list(GraphQLTypeReference.typeRef(genericTypeName))));
-            }else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM){
-
-            }else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR){
+            } else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM) {
+                // todo to test if typeReference works with enums
+                String enumTypeName = field.getType().getTypeName();
+                typeBuilder = typeBuilder.field(GraphQLFieldDefinition
+                        .newFieldDefinition()
+                        .name(field.getName())
+                        .type(GraphQLTypeReference.typeRef(enumTypeName)));
+            } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
                 GraphQLScalarType graphQLScalarType = fieldAnnotation.asScalar().graphQLScalarType;
                 typeBuilder = typeBuilder.field(GraphQLFieldDefinition.newFieldDefinition()
                                                                       .name(field.getName())
                                                                       .type(graphQLScalarType));
-
             }
         }
         return typeBuilder.build();
     }
-
 
     // todo example of typerefferenceList
     GraphQLObjectType person = GraphQLObjectType.newObject()
