@@ -1,7 +1,6 @@
 package org.example.graphQL;
 
 import graphql.Scalars;
-import graphql.language.SDLDefinition;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
@@ -13,6 +12,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
+import graphql.schema.idl.TypeDefinitionRegistry;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -24,21 +24,33 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class SchemaGeneratorImpl {
-    HashSet<Class<?>> components;
-//    TypeDefinitionRegistry typeDefinitionRegistry;
+    HashSet<Class<?>> components = new HashSet<>();
+    TypeDefinitionRegistry typeDefinitionRegistry = new TypeDefinitionRegistry();
+
 
     public SchemaGeneratorImpl(Class<?>... classes) {
-        initWith(classes);
+        initTypesWith(classes);
+        initTypeDefinitionRegistry();
     }
 
-    private void initWith(Class<?>... classes) {
+    void initTypeDefinitionRegistry(){
+        for (Class<?> component:components){
+            if (component.isEnum()){
+                Class<? extends Enum> enumType =  component.asSubclass(Enum.class);
+                typeDefinitionRegistry.add(graphQLEnumTypeFromEnum(enumType).getDefinition());
+            } else {
+                typeDefinitionRegistry.add(graphQLObjectTypeFromClass(component).getDefinition());
+            }
+        }
+    }
+    private void initTypesWith(Class<?>... classes) {
         // todo now it is operational as get all the nested components
         // todo fix to eliminate duplicate operations but to not omit nested components
         HashSet<Class<?>> components = new HashSet<>();
         for (Class<?> cls : classes) {
             components = addNestedClasses(cls, components);
         }
-        this.components = components;
+        this.components.addAll(components);
         System.out.println(this.components);
     }
 
@@ -72,6 +84,7 @@ public class SchemaGeneratorImpl {
     }
 
     static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
+        // todo raw use of enum fix it
         String typeName = enumType.getSimpleName();
         return GraphQLEnumType.newEnum()
                               .name(typeName)
@@ -146,4 +159,6 @@ public class SchemaGeneratorImpl {
                                                                   FieldCoordinates.coordinates("ObjectType", "foo"),
                                                                   exampleDataFetcher)
                                                           .build();
+
+
 }
