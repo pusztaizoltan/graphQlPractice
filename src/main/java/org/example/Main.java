@@ -43,6 +43,7 @@ public class Main {
 //        book.experimentMethod();
         SchemaGeneratorImpl generator = new SchemaGeneratorImpl();
         generator.initWith(Author.class);
+        System.out.println(GenreType.class);
 
     }
 

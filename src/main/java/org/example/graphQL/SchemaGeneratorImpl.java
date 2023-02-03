@@ -55,12 +55,17 @@ public class SchemaGeneratorImpl {
                 components = getUniqueClasses(type, components); // recursive usage
             } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
                 Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-//                System.out.println(generic);
                 if (components.contains((Class<?>) generic)) {
                     break;
                 }
                 components.add((Class<?>) generic);
                 components = getUniqueClasses((Class<?>) generic, components);
+            } else if (category == GraphQlIdentifyer.ENUM){
+                Class<?> type = field.getType();
+                if (components.contains(type)) {
+                    break;
+                }
+                components.add(type);
             }
         }
         return components;
