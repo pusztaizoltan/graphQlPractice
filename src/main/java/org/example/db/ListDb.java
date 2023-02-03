@@ -21,11 +21,11 @@ public class ListDb {
     private List<Author> authorDB = new ArrayList<>();
     private List<Book> bookDB = new ArrayList<>();
 
-    public List<Client> allClients() {
-        return readerDB.stream().map(reader -> (Client) reader).collect(Collectors.toList());
+    public List<Reader> allClients() {
+        return readerDB;
     }
 
-    public Client clientById(long id) {
+    public Reader clientById(long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 

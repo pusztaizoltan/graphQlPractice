@@ -9,17 +9,14 @@ import org.example.graphQL.annotation.UseMarker;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Getter
 public class Book implements Schemable {
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
     private final long id;
-
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
     private final String title;
     @UseMarker(category = GraphQlIdentifyer.ENUM)
     private final GenreType genreAsEnum;
-
     @UseMarker(category = GraphQlIdentifyer.TYPE)
     private final Author author;
     @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)

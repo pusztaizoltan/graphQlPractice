@@ -23,6 +23,7 @@ import org.example.graphQL.annotation.UseMarker;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,42 +36,47 @@ public class Main {
     static CustomFetcher customFetcher;
 
     public static void main(String[] args) {
-
-
-
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
 //        book.experimentMethod();
-
-        getUniqueClasses(Book.class);
+        initWith(Book.class, Author.class, Reader.class);
     }
 
-    static Set<Class<?>> getUniqueClasses(Class<?> cls){
-        HashSet<Class<?>> components = new HashSet<>();
-        Field[] fields = cls.getDeclaredFields();
-        for (Field field: fields){
-            GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-            if(category == GraphQlIdentifyer.TYPE){
-                components.add(field.getType());
-            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                System.out.println(generic);
-                components.add((Class<?>) generic);
-            }
-            System.out.println("-"+field.getName() + " "+field.getGenericType());
+    static Set<Class<?>> initWith(Class<?>... classes) {
+        HashSet<Class<?>> components = new HashSet<>(Arrays.asList(classes));
+        for (Class<?> cls : components) {
+            components = getUniqueClasses(cls, components);
+
         }
         System.out.println(components);
         return components;
     }
 
-
-    static Set<Class<?>> getUniqueClasses(List<Class<?>> classes){
-        return new HashSet<>();
+    static HashSet<Class<?>> getUniqueClasses(Class<?> cls, HashSet<Class<?>> components) {
+        System.out.println(cls);
+        Field[] fields = cls.getDeclaredFields();
+        for (Field field : fields) {
+            GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
+            if (category == GraphQlIdentifyer.TYPE) {
+                Class<?> type = field.getType();
+                if (components.contains(type)) {
+                    break;
+                }
+                components.add(type);
+                components = getUniqueClasses(type, components); // recursive usage
+            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                if (components.contains((Class<?>) generic)) {
+                    break;
+                }
+                components.add((Class<?>) generic);
+                components = getUniqueClasses((Class<?>) generic, components);
+            }
+        }
+        return components;
     }
 
-
-
-    static void task1(){
+    static void task1() {
         db = new ListDb();
         db.initDb();
         customFetcher = new CustomFetcher(db);
@@ -95,8 +101,8 @@ public class Main {
         ExecutionResult er4 = build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}");
         er4.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}").getData().toString());
-
     }
+
     static RuntimeWiring getRuntimeWiring() {
         return newRuntimeWiring()
                 .type(Schemable.TypeRuntimeWiringFromClass(TestClass.class))
@@ -111,7 +117,6 @@ public class Main {
 //                                                 .dataFetcher("booksByGenreEnum", customFetcher.booksByGenreEnum)
                 )
                 .type("GenreType", builder -> builder.dataFetcher("title", env -> ((Book) env.getSource()).getTitle())
-
                 ).type(Schemable.TypeRuntimeWiringFromClass(Book.class))
                 .build();
     }
