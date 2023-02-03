@@ -1,0 +1,35 @@
+type TestClass {
+    id: Int
+    content: String
+}
+
+type Book {
+    id: Int
+    title: String!
+    authors: [Author]
+    authors: [Reader]
+}
+
+type Reader {
+    id: Int
+    fullName: String
+    email: String
+    books: [Book]
+}
+
+type Author {
+    id: Int
+    name: String
+    isAlive: Boolean
+    books: [Book]
+}
+
+type Query {
+    allClients: [Reader]
+    clientById(id: Int): Reader
+    bookById(id: Int): Book
+}
+
+schema {
+    query: Query
+}

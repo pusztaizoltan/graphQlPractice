@@ -1,0 +1,60 @@
+type TestClass {
+    id: Int
+    content: String
+}
+
+enum GenreType {
+    SCIENCE
+    ROMANTIC
+    FICTION
+    FANTASY
+}
+
+type Book {
+    id: Int
+    title: String
+    #    authors: [Author]
+    author: String
+    genreAsString:String
+    genreAsEnum:GenreType
+    #    readers: [Reader]
+}
+
+#interface Person{
+#    name :String
+#}
+#
+#interface Client{
+#    id: Int
+#    email:String
+#}
+#
+#type Reader implements Client,Person{
+#    id: Int
+#    name: String
+#    email: String
+#    books: [Book]
+#}
+
+type Author {
+    id: Int
+    name: String
+    isAlive: Boolean
+    books: [Book]
+}
+
+type Query {
+    allTestClass:[TestClass]
+    #    allTestClass:String
+    testClassById(id:Int):TestClass
+    booksByGenreString(genreAsString:String):[Book]
+    booksByGenreEnum(genreAsEnum:GenreType):[Book]
+    #    allBooks: [Book]
+    #    allClients: [Reader]
+    #    clientById(id: Int): Reader
+    #    bookById(id: Int): Book
+}
+
+schema {
+    query: Query
+}
