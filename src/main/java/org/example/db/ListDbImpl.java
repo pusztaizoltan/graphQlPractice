@@ -7,6 +7,7 @@ import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
+import org.example.graphQL.annotation.ScalarFitter;
 import org.example.graphQL.annotation.UseMarker;
 
 import java.util.ArrayList;
@@ -30,7 +31,8 @@ public class ListDbImpl implements ListDb {
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public TestClass testClassById(long id) {
+    public TestClass testClassById(
+            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
@@ -40,12 +42,14 @@ public class ListDbImpl implements ListDb {
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public Reader clientById(long id) {
+    public Reader clientById(
+            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public Book bookById(long id) {
+    public Book bookById(
+            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 

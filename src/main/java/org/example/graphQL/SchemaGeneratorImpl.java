@@ -18,6 +18,7 @@ import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -45,14 +46,29 @@ public class SchemaGeneratorImpl {
         initGraphQLSchema();
     }
 
-    void initQueryType(Class<?> datasourceInterface){
+    void initQueryType(Class<?> datasourceImplementation){
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
 //        GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-        queryType.field(GraphQLFieldDefinition.newFieldDefinition()
-                                              .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
-                                              .name("allTestClass"))
-                                              .build();
-        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDbImpl.getTestClassDB());
+        Method[] methods = datasourceImplementation.getDeclaredMethods();
+        for (Method method: methods) {
+            GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+            if (category == GraphQlIdentifyer.TYPE) {
+                queryType.field(GraphQLFieldDefinition.newFieldDefinition()
+                                                      .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
+                                                      .name("allTestClass"))
+                         .build();
+                registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDbImpl.getTestClassDB());
+
+            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
+
+            }
+
+        }
+
+
+
+
+
         graphQLSchema.query(queryType);
     }
 
