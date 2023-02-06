@@ -22,6 +22,19 @@ public class ListDb {
         return readerDB;
     }
 
+    public ListDb() {
+        initDb();
+    }
+
+    public List<TestClass> allTestClass() {
+        return testClassDB;
+    }
+
+    public TestClass testClassById(long id) {
+        return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
+    }
+
+
     public Reader clientById(long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
@@ -30,11 +43,8 @@ public class ListDb {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-    public TestClass testClassById(long id) {
-        return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
-    }
 
-    public void initDb() {
+    private void initDb() {
         // init 10 testClass
         for (int i = 0; i < 10; i++) {
             testClassDB.add(new TestClass(i, String.format("TestContent_%s", i)));

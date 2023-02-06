@@ -47,7 +47,6 @@ public class SchemaGeneratorImpl {
     }
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
-        listDb.initDb();
 //        initTypeDefinitionRegistry();
 //        this.runtimeWiring = initRuntimeWiringFromClass();
         this.graphQLSchema = initGraphQLSchema();
