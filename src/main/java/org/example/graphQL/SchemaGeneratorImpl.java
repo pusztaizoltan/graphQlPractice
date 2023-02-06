@@ -91,17 +91,9 @@ public class SchemaGeneratorImpl {
         for (Field field : fields) {
             UseMarker fieldAnnotation = field.getAnnotation(UseMarker.class);
             if (fieldAnnotation.category() == GraphQlIdentifyer.TYPE) {
-                String genericTypeName = field.getType().getSimpleName();
-                System.out.println("--------genericTypeName " + genericTypeName);
-                typeBuilder = typeBuilder.field(newFieldDefinition()
-                        .name(field.getName())
-                        .type(GraphQLTypeReference.typeRef(genericTypeName)));
+                typeBuilder.field(FieldAdapter.typeField(field));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
-                String genericTypeName = ((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getSimpleName();
-                System.out.println("--------genericTypeName_Nested " + genericTypeName);
-                typeBuilder = typeBuilder.field(newFieldDefinition()
-                        .name(field.getName())
-                        .type(GraphQLList.list(GraphQLTypeReference.typeRef(genericTypeName))));
+                typeBuilder.field(FieldAdapter.nestedField(field));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM) {
                 // todo to test if typeReference works with enums
 //                String enumTypeName = field.getType().getTypeName();
@@ -109,10 +101,7 @@ public class SchemaGeneratorImpl {
 //                        .name(field.getName())
 //                        .type(GraphQLTypeReference.typeRef(enumTypeName)));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
-                GraphQLScalarType graphQLScalarType = fieldAnnotation.asScalar().graphQLScalarType;
-                typeBuilder = typeBuilder.field(newFieldDefinition()
-                        .name(field.getName())
-                        .type(graphQLScalarType));
+                typeBuilder.field(FieldAdapter.scalarField(field));
             }
         }
         return typeBuilder.build();
@@ -218,5 +207,22 @@ public class SchemaGeneratorImpl {
                                                     .build())
                                             .collect(Collectors.toList()))
                               .build();
+    }
+
+    private static class FieldAdapter {
+        private static GraphQLFieldDefinition scalarField(Field field) {
+            GraphQLScalarType scalar = field.getAnnotation(UseMarker.class).asScalar().graphQLScalarType;
+            return newFieldDefinition().name(field.getName()).type(scalar).build();
+        }
+
+        private static GraphQLFieldDefinition nestedField(Field field) {
+            String type = ((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getSimpleName();
+            return newFieldDefinition().name(field.getName()).type(GraphQLList.list(GraphQLTypeReference.typeRef(type))).build();
+        }
+
+        private static GraphQLFieldDefinition typeField(Field field) {
+            String type = field.getType().getSimpleName();
+            return newFieldDefinition().name(field.getName()).type(GraphQLTypeReference.typeRef(type)).build();
+        }
     }
 }
