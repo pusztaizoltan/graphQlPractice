@@ -35,6 +35,10 @@ public class ListDb {
     }
 
     public void initDb() {
+        // init 10 testClass
+        for (int i = 0; i < 10; i++) {
+            testClassDB.add(new TestClass(i, String.format("TestContent_%s", i)));
+        }
         // init 10 generated author without books
         for (int i = 0; i < 10; i++) {
             authorDB.add(new Author(i, String.format("AuthorName_%s", i), new boolean[]{true, false}[i % 2]));

@@ -26,9 +26,9 @@ public class Main {
 
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
-        task1();
+//        task1();
 //        book.experimentMethod();
-//        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(Author.class);
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class);
 //        graphQLEnumTypeFromEnum(GenreType.class);
 
     }
@@ -38,7 +38,7 @@ public class Main {
         db = new ListDb();
         db.initDb();
         customFetcher = new CustomFetcher(db);
-        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl();
+        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(TestClass.class, Author.class);
         GraphQL build = schemaGenerator.getGraphQL();
 //        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
 ////        RuntimeWiring runtimeWiring = getRuntimeWiring();
