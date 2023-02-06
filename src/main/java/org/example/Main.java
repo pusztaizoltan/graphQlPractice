@@ -28,7 +28,11 @@ public class Main {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
         taskPartial();
-        Method[] methods = ListDb.class.getDeclaredMethods();
+
+    }
+
+    static void methodReflectionExperiments(Class<?> datasource){
+        Method[] methods = datasource.getDeclaredMethods();
         for (Method method : methods) {
             if (Modifier.isPublic(method.getModifiers())) {
                 if (method.getParameters().length == 0) {
@@ -44,8 +48,6 @@ public class Main {
             }
         }
     }
-
-
 
     static void taskPartial(){
         SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class, Author.class);

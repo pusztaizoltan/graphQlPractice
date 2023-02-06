@@ -41,30 +41,11 @@ public class SchemaGeneratorImpl {
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
     public GraphQL getGraphQL() {
-        GraphQLCodeRegistry r = registry.typeResolver("Reader", (env)->env.getSchema().getObjectType("Reader"))
-                                        .typeResolver("TestClass", (env)->env.getSchema().getObjectType("TestClass"))
-                                        .typeResolver("Book", (env)->env.getSchema().getObjectType("Book"))
-                                        .typeResolver("Author", (env)->env.getSchema().getObjectType("Author")).build();
+        GraphQLCodeRegistry r = registry.build();
 
         GraphQLSchema schema = graphQLSchema.codeRegistry(r).build();
 
         return GraphQL.newGraphQL(schema).build();
-    }
-    private TypeResolver getTypeResolver() {
-        return (env) -> {
-            GraphQLObjectType result = null;
-            Object obj = env.getObject();
-            if (obj instanceof TestClass) {
-                result = env.getSchema().getObjectType("TestClass");
-            } else if (obj instanceof Book) {
-                result = env.getSchema().getObjectType("Book");
-            } else if (obj instanceof Author) {
-                result = env.getSchema().getObjectType("Author");
-            } else if (obj instanceof Reader) {
-                result = env.getSchema().getObjectType("Reader");
-            }
-            return result;
-        };
     }
 
     public SchemaGeneratorImpl(Class<?>... classes) {
