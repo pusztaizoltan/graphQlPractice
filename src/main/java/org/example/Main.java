@@ -27,7 +27,7 @@ public class Main {
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
-//        taskPartial();
+        taskPartial();
         Method[] methods = ListDb.class.getDeclaredMethods();
         for (Method method : methods) {
             if (Modifier.isPublic(method.getModifiers())) {
@@ -48,18 +48,22 @@ public class Main {
 
 
     static void taskPartial(){
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class);
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class, Author.class);
         GraphQL build = generator.getGraphQL();
 //        graphQLEnumTypeFromEnum(GenreType.class);
         System.out.println("-------------------------ALL FROM TESTCLASSES----------");
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
+        System.out.println("-------------------------ALL FROM Readers----------");
+        ExecutionResult er3 = build.execute("{allReader {id}}");
+        er2.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allReader {id}}").getData().toString());
     }
     static void task1() {
         db = new ListDbImpl();
         customFetcher = new CustomFetcher(db);
-        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(TestClass.class, Author.class);
+        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(TestClass.class, Author.class, Reader.class);
         GraphQL build = schemaGenerator.getGraphQL();
 //        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
 ////        RuntimeWiring runtimeWiring = getRuntimeWiring();
