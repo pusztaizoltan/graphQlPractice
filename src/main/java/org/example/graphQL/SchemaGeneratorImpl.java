@@ -12,7 +12,9 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
+import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.TypeDefinitionRegistry;
+import graphql.schema.idl.TypeRuntimeWiring;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -26,14 +28,17 @@ import java.util.stream.Collectors;
 public class SchemaGeneratorImpl {
     HashSet<Class<?>> components = new HashSet<>();
     TypeDefinitionRegistry typeDefinitionRegistry = new TypeDefinitionRegistry();
-
+    RuntimeWiring runtimeWiring;
 
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
         initTypeDefinitionRegistry();
+        this.runtimeWiring = initRuntimeWiringFromClass();
+
+
     }
 
-    void initTypeDefinitionRegistry(){
+    private void initTypeDefinitionRegistry(){
         for (Class<?> component:components){
             if (component.isEnum()){
                 Class<? extends Enum> enumType =  component.asSubclass(Enum.class);
@@ -43,6 +48,32 @@ public class SchemaGeneratorImpl {
             }
         }
     }
+
+    private RuntimeWiring initRuntimeWiringFromClass(){
+        RuntimeWiring.Builder runtimeWiring = RuntimeWiring.newRuntimeWiring();
+        for (Class<?> component: components) {
+            if (component.isEnum()){
+                //todo enum wire
+            } else{
+                runtimeWiring.type(typeRuntimeWiringFromClass(component));
+            }
+        }
+        return runtimeWiring.build();
+
+    }
+
+    private TypeRuntimeWiring typeRuntimeWiringFromClass(Class<?> classType) {
+        TypeRuntimeWiring.Builder builder = new TypeRuntimeWiring.Builder().typeName(classType.getSimpleName());
+        Field[] fields = classType.getDeclaredFields();
+        for (Field field : fields) {
+            Class<?> fieldType = field.getType();
+            String fieldName = field.getType().getSimpleName();
+            builder = builder.dataFetcher(fieldName, env ->
+                    fieldType.cast(field.get(classType.cast(env.getSource()))));
+        }
+        return builder.build();
+    }
+
     private void initTypesWith(Class<?>... classes) {
         // todo now it is operational as get all the nested components
         // todo fix to eliminate duplicate operations but to not omit nested components
