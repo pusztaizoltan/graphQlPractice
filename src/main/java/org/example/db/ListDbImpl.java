@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Getter
-public class ListDbImpl implements ListDb {
+
+//public class ListDbImpl implements ListDb {
+public class ListDbImpl{
     private final List<TestClass> testClassDB = new ArrayList<>();
     private final List<Reader> readerDB = new ArrayList<>();
     private final List<Author> authorDB = new ArrayList<>();
@@ -36,13 +37,8 @@ public class ListDbImpl implements ListDb {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
-    public List<Reader> allClients() {
-        return readerDB;
-    }
-
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public Reader clientById(
+    public Reader readerById(
             @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
@@ -51,6 +47,18 @@ public class ListDbImpl implements ListDb {
     public Book bookById(
             @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
+    }
+
+
+    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    public List<Reader> allReader() {
+        return readerDB;
+    }
+
+
+    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    public List<Book> allBook() {
+        return bookDB;
     }
 
     private void initDb() {

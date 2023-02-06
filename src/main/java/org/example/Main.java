@@ -5,6 +5,7 @@ import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
 import org.example.db.CustomFetcher;
+import org.example.db.ListDb;
 import org.example.db.ListDbImpl;
 import org.example.entity.Author;
 import org.example.entity.Book;
@@ -12,6 +13,11 @@ import org.example.entity.Reader;
 import org.example.entity.TestClass;
 import org.example.graphQL.SchemaGeneratorImpl;
 import org.example.graphQL.SchemaLoader;
+import org.example.graphQL.annotation.UseMarker;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 
 public class Main {
     static ListDbImpl db;
@@ -21,7 +27,27 @@ public class Main {
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
-//        book.experimentMethod();
+//        taskPartial();
+        Method[] methods = ListDb.class.getDeclaredMethods();
+        for (Method method : methods) {
+            if (Modifier.isPublic(method.getModifiers())) {
+                if (method.getParameters().length == 0) {
+////                    System.out.println(method);
+                    var aa = ((Class<?>)((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
+                    System.out.println("" + method.getName() + " " + ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]);
+                    System.out.println("- " + aa);
+                    System.out.println("- "+method.getReturnType().getSimpleName());
+                    //                    System.out.println("- "+method.getModifiers());
+//                    System.out.println("- "+(method.getAnnotatedReturnType().getType().getTypeName()));
+//                String genericTypeName = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0].getClass().getSimpleName();
+                }
+            }
+        }
+    }
+
+
+
+    static void taskPartial(){
         SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class);
         GraphQL build = generator.getGraphQL();
 //        graphQLEnumTypeFromEnum(GenreType.class);
@@ -30,7 +56,6 @@ public class Main {
         er2.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
     }
-
     static void task1() {
         db = new ListDbImpl();
         customFetcher = new CustomFetcher(db);

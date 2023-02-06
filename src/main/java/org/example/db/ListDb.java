@@ -11,9 +11,12 @@ public interface ListDb {
 
     TestClass testClassById(long id);
 
-    List<Reader> allClients();
 
-    Reader clientById(long id);
+    Reader readerById(long id);
 
     Book bookById(long id);
+
+    List<Reader> allReader();
+
+    List<Book> allBook();
 }
