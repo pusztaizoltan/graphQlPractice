@@ -58,31 +58,32 @@ public class SchemaGeneratorImpl {
                                                       .name("allTestClass"))
                          .build();
                 registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDbImpl.getTestClassDB());
-
             } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-
             }
-
         }
-
-
-
-
 
         graphQLSchema.query(queryType);
     }
 
     private void initGraphQLSchema() {
-        // todo this is temp query rewrite
         for (Class<?> component : components) {
-            GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
-            graphQLSchema.additionalType(objectType);
-            Field[] fields = component.getDeclaredFields();
-            for (Field field : fields) {
-                Class<?> fieldType = field.getType();
-                String fieldName = field.getType().getSimpleName();
-                DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
-                registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+            if(component.isEnum()) {
+                // todo find better casting mechanism
+                // todo does it need registry?
+                GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum>) component);
+//                DataFetcher<?> fetcher = (env) -> env.e enumType. .cast(field.get(component.cast(env.)));
+                graphQLSchema.additionalType(enumType);
+//                registry.dataFetchers()
+            } else {
+                GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
+                graphQLSchema.additionalType(objectType);
+                Field[] fields = component.getDeclaredFields();
+                for (Field field : fields) {
+                    Class<?> fieldType = field.getType();
+                    String fieldName = field.getType().getSimpleName();
+                    DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
+                    registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+                }
             }
         }
     }
