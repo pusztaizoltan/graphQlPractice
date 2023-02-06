@@ -4,16 +4,14 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
+import org.example.db.CustomFetcher;
+import org.example.db.ListDbImpl;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
-import org.example.db.ListDbImpl;
-import org.example.db.CustomFetcher;
 import org.example.graphQL.SchemaGeneratorImpl;
 import org.example.graphQL.SchemaLoader;
-
-import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class Main {
     static ListDbImpl db;
@@ -31,9 +29,7 @@ public class Main {
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
-
     }
-
 
     static void task1() {
         db = new ListDbImpl();
@@ -62,7 +58,6 @@ public class Main {
         er4.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}").getData().toString());
     }
-
 
     static TypeResolver getTypeResolver() {
         return (env) -> {

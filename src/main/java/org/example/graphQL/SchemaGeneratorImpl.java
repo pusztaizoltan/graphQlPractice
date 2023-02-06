@@ -47,7 +47,7 @@ public class SchemaGeneratorImpl {
 
     void initQueryType(Class<?> datasourceInterface){
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-
+//        GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
         queryType.field(GraphQLFieldDefinition.newFieldDefinition()
                                               .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
                                               .name("allTestClass"))
