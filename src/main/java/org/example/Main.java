@@ -25,7 +25,8 @@ public class Main {
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
-        taskPartial();
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class, Author.class);
+//        taskPartial();
     }
 
     static void methodReflectionExperiments(Class<?> datasource) {

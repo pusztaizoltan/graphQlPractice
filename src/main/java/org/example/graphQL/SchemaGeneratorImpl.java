@@ -14,7 +14,6 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import org.example.db.ListDb;
 import org.example.db.ListDbImpl;
-import org.example.entity.Reader;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -22,14 +21,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
 public class SchemaGeneratorImpl {
+    Logger logger = Logger.getLogger("SchemaGeneratorImpl");
     ListDbImpl listDbImpl = new ListDbImpl();
     HashSet<Class<?>> components = new HashSet<>();
     GraphQLObjectType query;
@@ -37,6 +37,7 @@ public class SchemaGeneratorImpl {
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
     public SchemaGeneratorImpl(Class<?>... classes) {
+        logger.info("Instantiate SchemaGeneratorImpl");
         initTypesWith(classes);
         initQueryType(ListDb.class);
         initGraphQLSchema();
@@ -136,45 +137,45 @@ public class SchemaGeneratorImpl {
     }
 
     private void initTypesWith(Class<?>... classes) {
-        // todo now it is operational as get all the nested components
-        // todo fix to eliminate duplicate operations but to not omit nested components
-        HashSet<Class<?>> components = new HashSet<>();
         for (Class<?> cls : classes) {
+            addNestedClasses(cls);
             components.add(cls);
-            components = addNestedClasses(cls, components);
         }
-        this.components.addAll(components);
-        this.components.add(Reader.class); // todo hachetJob
         System.out.println(this.components);
     }
 
-    private HashSet<Class<?>> addNestedClasses(Class<?> cls, HashSet<Class<?>> components) {
-        // todo refactor extract conditionals
+    private void addNestedClasses(Class<?> cls) {
         for (Field field : cls.getDeclaredFields()) {
-            GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-            if (category == GraphQlIdentifyer.TYPE) {
-                Class<?> type = field.getType();
-                if (components.contains(type)) {
-                    break;
+            if (field.isAnnotationPresent(UseMarker.class)) {
+                Class<?> type;
+                switch (field.getAnnotation(UseMarker.class).category()) {
+                    case ENUM -> {
+                        type = field.getType();
+                        if (!this.components.contains(type)) {
+                            components.add(type);
+                        }
+                    }
+                    case TYPE -> {
+                        type = field.getType();
+                        if (!this.components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    }
+                    case NESTED_TYPE -> {
+                        type = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        if (!this.components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    }
+                    case SCALAR -> {
+                    }
+                    default ->
+                            throw new IllegalStateException("Unexpected: " + field.getAnnotation(UseMarker.class).category());
                 }
-                components.add(type);
-                components = addNestedClasses(type, components);
-            } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                Type generic = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                if (components.contains((Class<?>) generic)) {
-                    break;
-                }
-                components.add((Class<?>) generic);
-                components = addNestedClasses((Class<?>) generic, components);
-            } else if (category == GraphQlIdentifyer.ENUM) {
-                Class<?> type = field.getType();
-                if (components.contains(type)) {
-                    break;
-                }
-                components.add(type);
             }
         }
-        return components;
     }
 
     private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
