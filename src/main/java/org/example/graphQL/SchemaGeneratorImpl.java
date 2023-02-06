@@ -1,10 +1,7 @@
 package org.example.graphQL;
 
 import graphql.GraphQL;
-import graphql.Scalars;
-import graphql.language.ObjectTypeDefinition;
 import graphql.schema.DataFetcher;
-import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLEnumType;
@@ -15,11 +12,6 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.TypeRuntimeWiring;
-import org.example.db.CustomFetcher;
 import org.example.db.ListDb;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
@@ -31,42 +23,41 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
 public class SchemaGeneratorImpl {
     ListDb listDb = new ListDb();
     HashSet<Class<?>> components = new HashSet<>();
-    TypeDefinitionRegistry typeDefinitionRegistry = new TypeDefinitionRegistry();
-    RuntimeWiring runtimeWiring;
-    GraphQLSchema graphQLSchema;
 
-    public GraphQL getGraphQL(){
-        return GraphQL.newGraphQL(graphQLSchema).build();
+    GraphQLObjectType query;
+    GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
+    public GraphQL getGraphQL() {
+        GraphQLSchema schema = graphQLSchema.codeRegistry(registry.build()).build();
+        return GraphQL.newGraphQL(schema).build();
     }
+
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
-//        initTypeDefinitionRegistry();
-//        this.runtimeWiring = initRuntimeWiringFromClass();
-        this.graphQLSchema = initGraphQLSchema();
+        initQueryType();
+        initGraphQLSchema();
     }
 
-    GraphQLSchema initGraphQLSchema(){
-        // todo this is temp query rewrite
-        GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    void initQueryType(){
         GraphQLObjectType queryType = GraphQLObjectType.newObject()
-                .name("Query")
-                .field(GraphQLFieldDefinition.newFieldDefinition()
-                        .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
-//                        .type(GraphQLString)
-                        .name("allTestClass"))
-                .build();
-        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env)->listDb.getTestClassDB());
-        GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema().query(queryType);
+                                                      .name("Query")
+                                                      .field(GraphQLFieldDefinition.newFieldDefinition()
+                                                                                   .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
+                                                                                   .name("allTestClass"))
+                                                      .build();
+        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDb.getTestClassDB());
+        graphQLSchema.query(queryType);
+    }
 
-
-        for (Class<?> component: components) {
+    private void initGraphQLSchema() {
+        // todo this is temp query rewrite
+        for (Class<?> component : components) {
             GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
             graphQLSchema.additionalType(objectType);
             Field[] fields = component.getDeclaredFields();
@@ -74,22 +65,15 @@ public class SchemaGeneratorImpl {
                 Class<?> fieldType = field.getType();
                 String fieldName = field.getType().getSimpleName();
                 DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
-                registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName),fetcher);
+                registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
             }
         }
-        return graphQLSchema.codeRegistry(registry.build()).build();
-
-
     }
-
-
-
 
     private void initTypesWith(Class<?>... classes) {
         // todo now it is operational as get all the nested components
         // todo fix to eliminate duplicate operations but to not omit nested components
         HashSet<Class<?>> components = new HashSet<>();
-
         for (Class<?> cls : classes) {
             components.add(cls);
             components = addNestedClasses(cls, components);
@@ -127,7 +111,7 @@ public class SchemaGeneratorImpl {
         return components;
     }
 
-    static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
+    private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
         // todo raw use of enum fix it
         String typeName = enumType.getSimpleName();
         return GraphQLEnumType.newEnum()
@@ -141,7 +125,7 @@ public class SchemaGeneratorImpl {
                               .build();
     }
 
-    static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
+    private GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
         GraphQLObjectType.Builder typeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         Field[] fields = classType.getDeclaredFields();
         for (Field field : fields) {
@@ -165,11 +149,10 @@ public class SchemaGeneratorImpl {
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
                 GraphQLScalarType graphQLScalarType = fieldAnnotation.asScalar().graphQLScalarType;
                 typeBuilder = typeBuilder.field(newFieldDefinition()
-                                                                      .name(field.getName())
-                                                                      .type(graphQLScalarType));
+                        .name(field.getName())
+                        .type(graphQLScalarType));
             }
         }
         return typeBuilder.build();
     }
-
 }
