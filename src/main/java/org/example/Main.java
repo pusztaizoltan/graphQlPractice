@@ -25,7 +25,7 @@ public class Main {
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class, Author.class);
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
 //        taskPartial();
     }
 
@@ -48,7 +48,7 @@ public class Main {
     }
 
     static void taskPartial() {
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class, Author.class);
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
         GraphQL build = generator.getGraphQL();
 //        graphQLEnumTypeFromEnum(GenreType.class);
         System.out.println("-------------------------ALL FROM TESTCLASSES----------");
@@ -64,7 +64,7 @@ public class Main {
     static void task1() {
         db = new ListDbImpl();
         customFetcher = new CustomFetcher(db);
-        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(TestClass.class, Author.class, Reader.class);
+        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(new ListDbImpl());
         GraphQL build = schemaGenerator.getGraphQL();
 //        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
 ////        RuntimeWiring runtimeWiring = getRuntimeWiring();

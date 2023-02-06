@@ -12,8 +12,6 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
-import org.example.db.ListDb;
-import org.example.db.ListDbImpl;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -30,29 +28,36 @@ import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
 public class SchemaGeneratorImpl {
     Logger logger = Logger.getLogger("SchemaGeneratorImpl");
-    ListDbImpl listDbImpl = new ListDbImpl();
+    Object dataService;
     HashSet<Class<?>> components = new HashSet<>();
     GraphQLObjectType query;
     GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
-    public SchemaGeneratorImpl(Class<?>... classes) {
+    public void withClasses(Class<?>... classes) {
         logger.info("Instantiate SchemaGeneratorImpl");
         initTypesWith(classes);
-        initQueryType(ListDb.class);
-        initGraphQLSchema();
+    }
+
+    public SchemaGeneratorImpl(Object dataService) {
+        logger.info("Instantiate SchemaGeneratorImpl");
+        this.dataService = dataService;
+        initTypesFromDataService();
+        initQueryType();
+        System.out.println(components);
     }
 
     public GraphQL getGraphQL() {
+        initGraphQLSchema();
         GraphQLCodeRegistry r = registry.build();
         GraphQLSchema schema = graphQLSchema.codeRegistry(r).build();
         return GraphQL.newGraphQL(schema).build();
     }
 
-    void initQueryType(Class<?> datasourceImplementation) {
+    void initQueryType() {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
 //        GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
-        Method[] methods = listDbImpl.getClass().getDeclaredMethods();
+        Method[] methods = dataService.getClass().getDeclaredMethods();
         for (Method method : methods) {
             // todo only public menthods
             if (Modifier.isPublic(method.getModifiers())) {
@@ -63,7 +68,7 @@ public class SchemaGeneratorImpl {
                                                           .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
                                                           .name(method.getName()))
                              .build();
-                    DataFetcher<?> fetcher = (env) -> method.invoke(listDbImpl);
+                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
                 }
 //                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
@@ -116,9 +121,8 @@ public class SchemaGeneratorImpl {
     private void initGraphQLSchema() {
         for (Class<?> component : components) {
             if (component.isEnum()) {
-                // todo find better casting mechanism
                 // todo does it need registry?
-                GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum>) component);
+                GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
 //                DataFetcher<?> fetcher = (env) -> env.e enumType. .cast(field.get(component.cast(env.)));
                 graphQLSchema.additionalType(enumType);
 //                registry.dataFetchers()
@@ -131,6 +135,30 @@ public class SchemaGeneratorImpl {
                     String fieldName = field.getType().getSimpleName();
                     DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
                     registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+                }
+            }
+        }
+    }
+
+    private void initTypesFromDataService() {
+        Method[] methods = dataService.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (Modifier.isPublic(method.getModifiers())) {
+                if (method.isAnnotationPresent(UseMarker.class)) {
+                    GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+                    if (category == GraphQlIdentifyer.TYPE) {
+                        Class<?> type = method.getReturnType();
+                        if (!this.components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                        Class<?> type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                        if (!this.components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    }
                 }
             }
         }
@@ -178,8 +206,7 @@ public class SchemaGeneratorImpl {
         }
     }
 
-    private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum> enumType) {
-        // todo raw use of enum fix it
+    private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
         String typeName = enumType.getSimpleName();
         return GraphQLEnumType.newEnum()
                               .name(typeName)
