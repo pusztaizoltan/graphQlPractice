@@ -73,7 +73,7 @@ public class SchemaGeneratorImpl {
             for (Field field : fields) {
                 Class<?> fieldType = field.getType();
                 String fieldName = field.getType().getSimpleName();
-                DataFetcher fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
+                DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
                 registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName),fetcher);
             }
         }
@@ -83,57 +83,7 @@ public class SchemaGeneratorImpl {
     }
 
 
-    private void initTypeDefinitionRegistry() {
 
-        for (Class<?> component : components) {
-            System.out.println("------------"+ component);
-            if (component.isEnum()) {
-                Class<? extends Enum> enumType = component.asSubclass(Enum.class);
-                typeDefinitionRegistry.add(graphQLEnumTypeFromEnum(enumType).getDefinition());
-            } else {
-                var a1  = graphQLObjectTypeFromClass(component);
-                System.out.println(a1);
-                var a2 =  a1.getDefinition();
-//                ObjectTypeDefinition def = ObjectTypeDefinition.newObjectTypeDefinition()..build()
-                System.out.println(a2);
-                typeDefinitionRegistry.add(a2);
-
-
-            }
-        }
-    }
-
-    private RuntimeWiring initRuntimeWiringFromClass() {
-        RuntimeWiring.Builder runtimeWiring = RuntimeWiring.newRuntimeWiring();
-        CustomFetcher customFetcher = new CustomFetcher(new ListDb()); // todo this and derivatives are temporary to test during development
-        for (Class<?> component : components) {
-            if (component.isEnum()) {
-                //todo enum wire
-            } else {
-                runtimeWiring.type(typeRuntimeWiringFromClass(component));
-            }
-        }
-        runtimeWiring.type("Query", builder -> builder.dataFetcher("allTestClass", customFetcher.testClassFetcher)
-                                                      .dataFetcher("testClassById", customFetcher.testClassByIdFetcher)
-                                                      .dataFetcher("allClients", customFetcher.readerFetcher)
-                                                      .dataFetcher("allBooks", customFetcher.bookFetcher)
-//                                                 .dataFetcher("booksByGenreString", customFetcher.booksByGenreString)
-//                                                 .dataFetcher("booksByGenreEnum", customFetcher.booksByGenreEnum)
-        );
-        return runtimeWiring.build();
-    }
-
-    private TypeRuntimeWiring typeRuntimeWiringFromClass(Class<?> classType) {
-        TypeRuntimeWiring.Builder builder = new TypeRuntimeWiring.Builder().typeName(classType.getSimpleName());
-        Field[] fields = classType.getDeclaredFields();
-        for (Field field : fields) {
-            Class<?> fieldType = field.getType();
-            String fieldName = field.getType().getSimpleName();
-            builder = builder.dataFetcher(fieldName, env ->
-                    fieldType.cast(field.get(classType.cast(env.getSource()))));
-        }
-        return builder.build();
-    }
 
     private void initTypesWith(Class<?>... classes) {
         // todo now it is operational as get all the nested components
@@ -219,36 +169,7 @@ public class SchemaGeneratorImpl {
                                                                       .type(graphQLScalarType));
             }
         }
-//        typeBuilder.definition(ObjectTypeDefinition.newObjectTypeDefinition().build());
         return typeBuilder.build();
     }
 
-    // todo example of typerefferenceList
-    GraphQLObjectType person = GraphQLObjectType.newObject()
-                                                .name("Person")
-                                                .field(newFieldDefinition()
-                                                                             .name("friends")
-                                                                             .type(GraphQLList.list(GraphQLTypeReference.typeRef("Person"))))
-                                                .build();
-    DataFetcher<Integer> exampleDataFetcher = new DataFetcher<Integer>() {
-        @Override
-        public Integer get(DataFetchingEnvironment environment) {
-            // environment.getSource() is the value of the surrounding
-            // object. In this case described by objectType
-//            T value = perhapsFromDatabase(); // Perhaps getting from a DB or whatever
-            return 1;
-        }
-    };
-    GraphQLObjectType objectType = GraphQLObjectType.newObject()
-                                                    .name("ObjectType")
-                                                    .field(newFieldDefinition()
-                                                                                 .name("foo")
-                                                                                 .type(GraphQLString)
-                                                    )
-                                                    .build();
-    GraphQLCodeRegistry codeRegistry = GraphQLCodeRegistry.newCodeRegistry()
-                                                          .dataFetcher(
-                                                                  FieldCoordinates.coordinates("ObjectType", "foo"),
-                                                                  exampleDataFetcher)
-                                                          .build();
 }
