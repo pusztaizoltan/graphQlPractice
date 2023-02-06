@@ -13,6 +13,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import org.example.db.ListDb;
+import org.example.db.ListDbImpl;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
 public class SchemaGeneratorImpl {
-    ListDb listDb = new ListDb();
+    ListDbImpl listDbImpl = new ListDbImpl();
     HashSet<Class<?>> components = new HashSet<>();
 
     GraphQLObjectType query;
@@ -40,18 +41,18 @@ public class SchemaGeneratorImpl {
 
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
-        initQueryType();
+        initQueryType(ListDb.class);
         initGraphQLSchema();
     }
 
-    void initQueryType(){
-        GraphQLObjectType queryType = GraphQLObjectType.newObject()
-                                                      .name("Query")
-                                                      .field(GraphQLFieldDefinition.newFieldDefinition()
-                                                                                   .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
-                                                                                   .name("allTestClass"))
-                                                      .build();
-        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDb.getTestClassDB());
+    void initQueryType(Class<?> datasourceInterface){
+        GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
+
+        queryType.field(GraphQLFieldDefinition.newFieldDefinition()
+                                              .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
+                                              .name("allTestClass"))
+                                              .build();
+        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env) -> listDbImpl.getTestClassDB());
         graphQLSchema.query(queryType);
     }
 

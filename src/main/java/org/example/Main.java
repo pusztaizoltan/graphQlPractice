@@ -3,16 +3,12 @@ package org.example;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.TypeDefinitionRegistry;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
-import org.example.db.ListDb;
+import org.example.db.ListDbImpl;
 import org.example.db.CustomFetcher;
 import org.example.graphQL.SchemaGeneratorImpl;
 import org.example.graphQL.SchemaLoader;
@@ -20,7 +16,7 @@ import org.example.graphQL.SchemaLoader;
 import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
 public class Main {
-    static ListDb db;
+    static ListDbImpl db;
     static SchemaLoader source = new SchemaLoader("schema.graphqls");
     static CustomFetcher customFetcher;
 
@@ -40,7 +36,7 @@ public class Main {
 
 
     static void task1() {
-        db = new ListDb();
+        db = new ListDbImpl();
         customFetcher = new CustomFetcher(db);
         SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(TestClass.class, Author.class);
         GraphQL build = schemaGenerator.getGraphQL();

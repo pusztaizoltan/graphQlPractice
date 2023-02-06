@@ -8,16 +8,16 @@ import org.example.entity.TestClass;
 import java.util.List;
 
 public class CustomFetcher {
-    private ListDb listDb;
+    private ListDbImpl listDbImpl;
 
-    public CustomFetcher(ListDb listDb) {
-        this.listDb = listDb;
+    public CustomFetcher(ListDbImpl listDbImpl) {
+        this.listDbImpl = listDbImpl;
     }
 
-    public DataFetcher<List<TestClass>> testClassFetcher = environment -> listDb.getTestClassDB();
+    public DataFetcher<List<TestClass>> testClassFetcher = environment -> listDbImpl.getTestClassDB();
     public DataFetcher<TestClass> testClassByIdFetcher = environment -> {
         long id = ((Integer) environment.getArgument("id")).intValue();
-        return listDb.testClassById(id);
+        return listDbImpl.testClassById(id);
     };
 //    public DataFetcher<List<Book>> booksByGenreEnum = environment -> {
 //        // explanation todo: argument return as string even if enum so every cross typing variation use string as mediator
@@ -30,8 +30,8 @@ public class CustomFetcher {
 //        //todo delegate filter to ListDb
 //        return listDb.getBookDB().stream().filter((i) -> i.getGenreAsString().equals(genre)).collect(Collectors.toList());
 //    };
-    public DataFetcher<List<Reader>> readerFetcher = environment -> listDb.getReaderDB();
-    public DataFetcher<List<Book>> bookFetcher = environment -> listDb.getBookDB();
+    public DataFetcher<List<Reader>> readerFetcher = environment -> listDbImpl.getReaderDB();
+    public DataFetcher<List<Book>> bookFetcher = environment -> listDbImpl.getBookDB();
     public DataFetcher<Integer> testIdFetcher = environment -> ((TestClass) environment.getSource()).getId();
     public DataFetcher<String> testContentFetcher = environment -> ((TestClass) environment.getSource()).getContent();
 }
