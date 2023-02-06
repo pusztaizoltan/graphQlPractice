@@ -24,8 +24,6 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
-
 public class SchemaGeneratorImpl {
     Logger logger = Logger.getLogger("SchemaGeneratorImpl");
     Object dataService;
@@ -212,17 +210,26 @@ public class SchemaGeneratorImpl {
     private static class FieldAdapter {
         private static GraphQLFieldDefinition scalarField(Field field) {
             GraphQLScalarType scalar = field.getAnnotation(UseMarker.class).asScalar().graphQLScalarType;
-            return newFieldDefinition().name(field.getName()).type(scalar).build();
+            return GraphQLFieldDefinition.newFieldDefinition()
+                                         .name(field.getName())
+                                         .type(scalar)
+                                         .build();
         }
 
         private static GraphQLFieldDefinition nestedField(Field field) {
             String type = ((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getSimpleName();
-            return newFieldDefinition().name(field.getName()).type(GraphQLList.list(GraphQLTypeReference.typeRef(type))).build();
+            return GraphQLFieldDefinition.newFieldDefinition()
+                                         .name(field.getName())
+                                         .type(GraphQLList.list(GraphQLTypeReference.typeRef(type)))
+                                         .build();
         }
 
         private static GraphQLFieldDefinition typeField(Field field) {
             String type = field.getType().getSimpleName();
-            return newFieldDefinition().name(field.getName()).type(GraphQLTypeReference.typeRef(type)).build();
+            return GraphQLFieldDefinition.newFieldDefinition()
+                                         .name(field.getName())
+                                         .type(GraphQLTypeReference.typeRef(type))
+                                         .build();
         }
     }
 }
