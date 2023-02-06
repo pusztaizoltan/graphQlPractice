@@ -35,20 +35,19 @@ import static graphql.Scalars.GraphQLString;
 import static graphql.schema.GraphQLFieldDefinition.newFieldDefinition;
 
 public class SchemaGeneratorImpl {
+    ListDb listDb = new ListDb();
     HashSet<Class<?>> components = new HashSet<>();
     TypeDefinitionRegistry typeDefinitionRegistry = new TypeDefinitionRegistry();
     RuntimeWiring runtimeWiring;
     GraphQLSchema graphQLSchema;
 
     public GraphQL getGraphQL(){
-        SchemaGenerator schemaGenerator = new SchemaGenerator();
-//        GraphQLSchema graphQLSchema = GraphQLSchema.newSchema().build();
-        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
         return GraphQL.newGraphQL(graphQLSchema).build();
 
     }
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
+        listDb.initDb();
 //        initTypeDefinitionRegistry();
 //        this.runtimeWiring = initRuntimeWiringFromClass();
         this.graphQLSchema = initGraphQLSchema();
@@ -56,14 +55,18 @@ public class SchemaGeneratorImpl {
 
     GraphQLSchema initGraphQLSchema(){
         // todo this is temp query rewrite
+        GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
         GraphQLObjectType queryType = GraphQLObjectType.newObject()
-                .name("allTestClass")
+                .name("Query")
                 .field(GraphQLFieldDefinition.newFieldDefinition()
-                        .type(GraphQLString)
+                        .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
+//                        .type(GraphQLString)
                         .name("allTestClass"))
                 .build();
+        registry.dataFetcher(FieldCoordinates.coordinates("Query", "allTestClass"), (DataFetcher<?>) (env)->listDb.getTestClassDB());
         GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema().query(queryType);
-        GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+
+
         for (Class<?> component: components) {
             GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
             graphQLSchema.additionalType(objectType);
@@ -137,7 +140,9 @@ public class SchemaGeneratorImpl {
         // todo now it is operational as get all the nested components
         // todo fix to eliminate duplicate operations but to not omit nested components
         HashSet<Class<?>> components = new HashSet<>();
+
         for (Class<?> cls : classes) {
+            components.add(cls);
             components = addNestedClasses(cls, components);
         }
         this.components.addAll(components);

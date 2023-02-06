@@ -29,8 +29,14 @@ public class Main {
 //        task1();
 //        book.experimentMethod();
         SchemaGeneratorImpl generator = new SchemaGeneratorImpl(TestClass.class);
+        GraphQL build = generator.getGraphQL();
 //        graphQLEnumTypeFromEnum(GenreType.class);
-
+        System.out.println("-------------------------ALL FROM TESTCLASSES----------");
+        ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
+//        ExecutionResult er2 = build.execute("{allTestClass}");
+        er2.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
+//        System.out.println(build.execute("{allTestClass}").getData().toString());
     }
 
 
