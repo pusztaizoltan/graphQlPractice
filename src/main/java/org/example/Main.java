@@ -2,35 +2,20 @@ package org.example;
 
 import graphql.ExecutionResult;
 import graphql.GraphQL;
-import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.TypeResolver;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.TypeDefinitionRegistry;
-import graphql.schema.idl.TypeRuntimeWiring;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.Reader;
-import org.example.entity.Schemable;
 import org.example.entity.TestClass;
 import org.example.db.ListDb;
 import org.example.db.CustomFetcher;
 import org.example.graphQL.SchemaGeneratorImpl;
 import org.example.graphQL.SchemaLoader;
-import org.example.graphQL.annotation.GraphQlIdentifyer;
-import org.example.graphQL.annotation.UseMarker;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static graphql.schema.idl.RuntimeWiring.newRuntimeWiring;
 
@@ -41,10 +26,11 @@ public class Main {
 
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
-//        task1();
+        task1();
 //        book.experimentMethod();
 //        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(Author.class);
 //        graphQLEnumTypeFromEnum(GenreType.class);
+
     }
 
 
@@ -52,11 +38,13 @@ public class Main {
         db = new ListDb();
         db.initDb();
         customFetcher = new CustomFetcher(db);
-        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
-        RuntimeWiring runtimeWiring = getRuntimeWiring();
-        SchemaGenerator schemaGenerator = new SchemaGenerator();
-        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(fromFile, runtimeWiring);
-        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
+        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl();
+        GraphQL build = schemaGenerator.getGraphQL();
+//        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
+////        RuntimeWiring runtimeWiring = getRuntimeWiring();
+//        SchemaGenerator schemaGenerator = new SchemaGenerator();
+//        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(fromFile, runtimeWiring);
+//        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
         System.out.println("-------------------------TESTcLASS BY ID-----------");
         ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
         er1.getErrors().forEach(System.out::println);
@@ -75,23 +63,6 @@ public class Main {
         System.out.println(build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}").getData().toString());
     }
 
-    static RuntimeWiring getRuntimeWiring() {
-        return newRuntimeWiring()
-                .type(Schemable.TypeRuntimeWiringFromClass(TestClass.class))
-                .type(Schemable.TypeRuntimeWiringFromClass(Book.class))
-                .type(Schemable.TypeRuntimeWiringFromClass(Author.class))
-                .type(Schemable.TypeRuntimeWiringFromClass(Reader.class))
-                .type("Query", builder -> builder.dataFetcher("allTestClass", customFetcher.testClassFetcher)
-                                                 .dataFetcher("testClassById", customFetcher.testClassByIdFetcher)
-                                                 .dataFetcher("allClients", customFetcher.readerFetcher)
-                                                 .dataFetcher("allBooks", customFetcher.bookFetcher)
-//                                                 .dataFetcher("booksByGenreString", customFetcher.booksByGenreString)
-//                                                 .dataFetcher("booksByGenreEnum", customFetcher.booksByGenreEnum)
-                )
-                .type("GenreType", builder -> builder.dataFetcher("title", env -> ((Book) env.getSource()).getTitle())
-                ).type(Schemable.TypeRuntimeWiringFromClass(Book.class))
-                .build();
-    }
 
     static TypeResolver getTypeResolver() {
         return (env) -> {

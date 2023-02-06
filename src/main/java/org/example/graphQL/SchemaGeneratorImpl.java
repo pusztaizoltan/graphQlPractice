@@ -1,5 +1,6 @@
 package org.example.graphQL;
 
+import graphql.GraphQL;
 import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -11,10 +12,14 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
+import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import graphql.schema.idl.RuntimeWiring;
+import graphql.schema.idl.SchemaGenerator;
 import graphql.schema.idl.TypeDefinitionRegistry;
 import graphql.schema.idl.TypeRuntimeWiring;
+import org.example.db.CustomFetcher;
+import org.example.db.ListDb;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -30,18 +35,22 @@ public class SchemaGeneratorImpl {
     TypeDefinitionRegistry typeDefinitionRegistry = new TypeDefinitionRegistry();
     RuntimeWiring runtimeWiring;
 
+    public GraphQL getGraphQL(){
+        SchemaGenerator schemaGenerator = new SchemaGenerator();
+        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
+        return GraphQL.newGraphQL(graphQLSchema).build();
+
+    }
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
         initTypeDefinitionRegistry();
         this.runtimeWiring = initRuntimeWiringFromClass();
-
-
     }
 
-    private void initTypeDefinitionRegistry(){
-        for (Class<?> component:components){
-            if (component.isEnum()){
-                Class<? extends Enum> enumType =  component.asSubclass(Enum.class);
+    private void initTypeDefinitionRegistry() {
+        for (Class<?> component : components) {
+            if (component.isEnum()) {
+                Class<? extends Enum> enumType = component.asSubclass(Enum.class);
                 typeDefinitionRegistry.add(graphQLEnumTypeFromEnum(enumType).getDefinition());
             } else {
                 typeDefinitionRegistry.add(graphQLObjectTypeFromClass(component).getDefinition());
@@ -49,17 +58,24 @@ public class SchemaGeneratorImpl {
         }
     }
 
-    private RuntimeWiring initRuntimeWiringFromClass(){
+    private RuntimeWiring initRuntimeWiringFromClass() {
         RuntimeWiring.Builder runtimeWiring = RuntimeWiring.newRuntimeWiring();
-        for (Class<?> component: components) {
-            if (component.isEnum()){
+        CustomFetcher customFetcher = new CustomFetcher(new ListDb()); // todo this and derivatives are temporary to test during development
+        for (Class<?> component : components) {
+            if (component.isEnum()) {
                 //todo enum wire
-            } else{
+            } else {
                 runtimeWiring.type(typeRuntimeWiringFromClass(component));
             }
         }
+        runtimeWiring.type("Query", builder -> builder.dataFetcher("allTestClass", customFetcher.testClassFetcher)
+                                                      .dataFetcher("testClassById", customFetcher.testClassByIdFetcher)
+                                                      .dataFetcher("allClients", customFetcher.readerFetcher)
+                                                      .dataFetcher("allBooks", customFetcher.bookFetcher)
+//                                                 .dataFetcher("booksByGenreString", customFetcher.booksByGenreString)
+//                                                 .dataFetcher("booksByGenreEnum", customFetcher.booksByGenreEnum)
+        );
         return runtimeWiring.build();
-
     }
 
     private TypeRuntimeWiring typeRuntimeWiringFromClass(Class<?> classType) {
@@ -190,6 +206,4 @@ public class SchemaGeneratorImpl {
                                                                   FieldCoordinates.coordinates("ObjectType", "foo"),
                                                                   exampleDataFetcher)
                                                           .build();
-
-
 }
