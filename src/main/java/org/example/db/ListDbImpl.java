@@ -18,9 +18,7 @@ public class ListDbImpl implements ListDb{
     private List<Author> authorDB = new ArrayList<>();
     private List<Book> bookDB = new ArrayList<>();
 
-    public List<Reader> allClients() {
-        return readerDB;
-    }
+
 
     public ListDbImpl() {
         initDb();
@@ -34,6 +32,10 @@ public class ListDbImpl implements ListDb{
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
+
+    public List<Reader> allClients() {
+        return readerDB;
+    }
 
     public Reader clientById(long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
