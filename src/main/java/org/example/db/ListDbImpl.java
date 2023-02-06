@@ -6,45 +6,48 @@ import org.example.entity.Book;
 import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
+import org.example.graphQL.annotation.GraphQlIdentifyer;
+import org.example.graphQL.annotation.UseMarker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @Getter
-public class ListDbImpl implements ListDb{
-    private List<TestClass> testClassDB = new ArrayList<>();
-    private List<Reader> readerDB = new ArrayList<>();
-    private List<Author> authorDB = new ArrayList<>();
-    private List<Book> bookDB = new ArrayList<>();
-
-
+public class ListDbImpl implements ListDb {
+    private final List<TestClass> testClassDB = new ArrayList<>();
+    private final List<Reader> readerDB = new ArrayList<>();
+    private final List<Author> authorDB = new ArrayList<>();
+    private final List<Book> bookDB = new ArrayList<>();
 
     public ListDbImpl() {
         initDb();
     }
 
+    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
+    @UseMarker(category = GraphQlIdentifyer.TYPE)
     public TestClass testClassById(long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-
+    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
     public List<Reader> allClients() {
         return readerDB;
     }
 
+    @UseMarker(category = GraphQlIdentifyer.TYPE)
     public Reader clientById(long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
+    @UseMarker(category = GraphQlIdentifyer.TYPE)
     public Book bookById(long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
-
 
     private void initDb() {
         // init 10 testClass
