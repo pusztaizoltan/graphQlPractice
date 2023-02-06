@@ -13,10 +13,11 @@ public enum GenreType {
     GenreType(long id) {
         this.id = id;
     }
-    public static GenreType getById(long id){
+
+    public static GenreType getById(long id) {
         return Arrays.stream(GenreType.values())
-                     .filter((genre)->genre.id == id)
+                     .filter((genre) -> genre.id == id)
                      .findFirst()
-                     .orElseThrow(()-> new IllegalArgumentException(String.format("invalid genre id:%s",id)));
+                     .orElseThrow(() -> new IllegalArgumentException(String.format("invalid genre id:%s", id)));
     }
 }

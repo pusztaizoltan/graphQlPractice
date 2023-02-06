@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 public @interface UseMarker {
     GraphQlIdentifyer category();
+
     ScalarFitter asScalar() default ScalarFitter.DEFAULT;
 }

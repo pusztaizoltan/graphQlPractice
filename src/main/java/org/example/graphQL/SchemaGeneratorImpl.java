@@ -12,13 +12,9 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
-import graphql.schema.TypeResolver;
 import org.example.db.ListDb;
 import org.example.db.ListDbImpl;
-import org.example.entity.Author;
-import org.example.entity.Book;
 import org.example.entity.Reader;
-import org.example.entity.TestClass;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.UseMarker;
 
@@ -40,18 +36,16 @@ public class SchemaGeneratorImpl {
     GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
-    public GraphQL getGraphQL() {
-        GraphQLCodeRegistry r = registry.build();
-
-        GraphQLSchema schema = graphQLSchema.codeRegistry(r).build();
-
-        return GraphQL.newGraphQL(schema).build();
-    }
-
     public SchemaGeneratorImpl(Class<?>... classes) {
         initTypesWith(classes);
         initQueryType(ListDb.class);
         initGraphQLSchema();
+    }
+
+    public GraphQL getGraphQL() {
+        GraphQLCodeRegistry r = registry.build();
+        GraphQLSchema schema = graphQLSchema.codeRegistry(r).build();
+        return GraphQL.newGraphQL(schema).build();
     }
 
     void initQueryType(Class<?> datasourceImplementation) {
@@ -62,13 +56,13 @@ public class SchemaGeneratorImpl {
             // todo only public menthods
             if (Modifier.isPublic(method.getModifiers())) {
                 if (method.getParameters().length == 0) {
-                    String typeName = ((Class<?>)((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
-                    System.out.println("--------typeName "+ typeName);
+                    String typeName = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
+                    System.out.println("--------typeName " + typeName);
                     queryType.field(GraphQLFieldDefinition.newFieldDefinition()
                                                           .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
                                                           .name(method.getName()))
                              .build();
-                    DataFetcher<?> fetcher = (env) -> method.invoke(listDbImpl) ;
+                    DataFetcher<?> fetcher = (env) -> method.invoke(listDbImpl);
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
                 }
 //                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
@@ -79,8 +73,8 @@ public class SchemaGeneratorImpl {
 //                                                          .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
 //                                                          .name("allTestClass"))
 //                             .build();
-                }
             }
+        }
 //        }
         graphQLSchema.query(queryType);
     }
@@ -92,13 +86,13 @@ public class SchemaGeneratorImpl {
             UseMarker fieldAnnotation = field.getAnnotation(UseMarker.class);
             if (fieldAnnotation.category() == GraphQlIdentifyer.TYPE) {
                 String genericTypeName = field.getType().getSimpleName();
-                System.out.println("--------genericTypeName "+ genericTypeName);
+                System.out.println("--------genericTypeName " + genericTypeName);
                 typeBuilder = typeBuilder.field(newFieldDefinition()
                         .name(field.getName())
                         .type(GraphQLTypeReference.typeRef(genericTypeName)));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
-                String genericTypeName = ((Class<?>)((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getSimpleName();
-                System.out.println("--------genericTypeName_Nested "+ genericTypeName);
+                String genericTypeName = ((Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getSimpleName();
+                System.out.println("--------genericTypeName_Nested " + genericTypeName);
                 typeBuilder = typeBuilder.field(newFieldDefinition()
                         .name(field.getName())
                         .type(GraphQLList.list(GraphQLTypeReference.typeRef(genericTypeName))));

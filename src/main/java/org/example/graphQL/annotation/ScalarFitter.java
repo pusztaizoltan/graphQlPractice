@@ -1,11 +1,6 @@
 package org.example.graphQL.annotation;
 
 import graphql.Scalars;
-import graphql.scalar.GraphqlBooleanCoercing;
-import graphql.scalar.GraphqlFloatCoercing;
-import graphql.scalar.GraphqlIDCoercing;
-import graphql.scalar.GraphqlIntCoercing;
-import graphql.scalar.GraphqlStringCoercing;
 import graphql.schema.GraphQLScalarType;
 
 public enum ScalarFitter {

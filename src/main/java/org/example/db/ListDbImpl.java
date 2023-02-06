@@ -1,6 +1,5 @@
 package org.example.db;
 
-import lombok.Getter;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.GenreType;
@@ -14,9 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 //public class ListDbImpl implements ListDb {
-public class ListDbImpl{
+public class ListDbImpl {
     private final List<TestClass> testClassDB = new ArrayList<>();
     private final List<Reader> readerDB = new ArrayList<>();
     private final List<Author> authorDB = new ArrayList<>();
@@ -49,12 +47,10 @@ public class ListDbImpl{
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-
     @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
     public List<Reader> allReader() {
         return readerDB;
     }
-
 
     @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
     public List<Book> allBook() {

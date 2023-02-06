@@ -11,7 +11,6 @@ public interface ListDb {
 
     TestClass testClassById(long id);
 
-
     Reader readerById(long id);
 
     Book bookById(long id);

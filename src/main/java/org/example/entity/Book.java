@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class Book{
+public class Book {
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
     private final long id;
     @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
