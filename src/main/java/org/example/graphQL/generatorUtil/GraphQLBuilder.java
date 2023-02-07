@@ -14,13 +14,20 @@ import java.lang.reflect.Method;
 import java.util.HashSet;
 
 public class GraphQLBuilder {
-    GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
+    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
+    /**
+     * Finalize the building process
+     */
     public GraphQLSchema build() {
         return this.graphQLSchema.codeRegistry(this.registry.build()).build();
     }
 
+    /**
+     * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
+     * and if finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
+     */
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         for (Method method : dataService.getClass().getDeclaredMethods()) {
@@ -42,6 +49,10 @@ public class GraphQLBuilder {
         graphQLSchema.query(queryType);
     }
 
+    /**
+     * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
+     * and to the RegistryBuilder
+     */
     public void addTypesForComponentClasses(HashSet<Class<?>> components) {
         for (Class<?> component : components) {
             if (component.isEnum()) {
