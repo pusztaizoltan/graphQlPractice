@@ -5,9 +5,9 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
+import org.example.graphQL.annotation.ArgWith;
 import org.example.graphQL.annotation.FieldOf;
 import org.example.graphQL.annotation.FieldType;
-import org.example.graphQL.annotation.ArgWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -60,9 +60,7 @@ public class FieldAdapter {
         return objectField(field);
     }
 
-    //--------------
-    //todo public privat
-    public static GraphQLFieldDefinition nestedReturn(Method method) {
+    public static GraphQLFieldDefinition listReturnWithoutArg(Method method) {
         String type = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
@@ -70,16 +68,20 @@ public class FieldAdapter {
                                      .build();
     }
 
-    public static GraphQLFieldDefinition argumentedReturn(Method method) {
+    public static GraphQLFieldDefinition objectReturnByOneArg(Method method) {
         String type = method.getReturnType().getSimpleName();
-        ArgWith marker = method.getParameters()[0].getAnnotation(ArgWith.class);
+        ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
                                      .type(GraphQLTypeReference.typeRef(type))
-                                     .argument(GraphQLArgument.newArgument()
-                                                              .name(marker.name())
-                                                              .type(marker.type().graphQLScalarType)
-                                                              .build())
+                                     .argument(argumentFrom(annotation))
                                      .build();
+    }
+
+    private static GraphQLArgument argumentFrom(ArgWith annotation) {
+        return GraphQLArgument.newArgument()
+                              .name(annotation.name())
+                              .type(annotation.type().graphQLScalarType)
+                              .build();
     }
 }

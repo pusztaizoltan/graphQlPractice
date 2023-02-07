@@ -33,14 +33,14 @@ public class GraphQLBuilder {
             }
             FieldType category = method.getAnnotation(FieldOf.class).type();
             if (method.getParameters().length == 0 && category == FieldType.LIST) {
-                queryType.field(FieldAdapter.nestedReturn(method)); //todo
+                queryType.field(FieldAdapter.listReturnWithoutArg(method));
                 DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
                 registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
             } else if (method.getParameters().length == 1 &&
                        category == FieldType.OBJECT &&
                        method.getParameters()[0].isAnnotationPresent(ArgWith.class)) {
-                // todo rewrite if you can, to not being a hatchetJob
-                GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method); //todo
+                // todo rewrite this hatchetJob in possession of
+                GraphQLFieldDefinition field = FieldAdapter.objectReturnByOneArg(method); //todo
                 ArgWith marker = method.getParameters()[0].getAnnotation(ArgWith.class);
                 queryType.field(field);
                 DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
