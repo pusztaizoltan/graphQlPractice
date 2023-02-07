@@ -32,7 +32,7 @@ public class SchemaGeneratorImpl {
 
     public SchemaGeneratorImpl(Object dataService) {
         this.classParser.parseClassesFromDataService(dataService);
-        this.builder.buildQueryForDataService(dataService);
+        this.builder.addQueryForDataService(dataService);
         {
             System.out.println("----------------------------------------");
             System.out.println("- Extracted components form dataService:\n" + classParser.components);
@@ -46,18 +46,18 @@ public class SchemaGeneratorImpl {
 
     public GraphQL getGraphQL() {
         builder.addTypesForComponentClasses(this.classParser.components);
-        GraphQLCodeRegistry registry = builder.registry.build();
-        GraphQLSchema schema = builder.graphQLSchema.codeRegistry(registry).build();
-        return GraphQL.newGraphQL(schema).build();
+        return GraphQL.newGraphQL(builder.build()).build();
     }
 
-
-
-    private static class GraphQLBuilder{
+    private static class GraphQLBuilder {
         GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
         GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
-        private void buildQueryForDataService(Object dataService) {
+        private GraphQLSchema build() {
+            return this.graphQLSchema.codeRegistry(this.registry.build()).build();
+        }
+
+        private void addQueryForDataService(Object dataService) {
             GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
             Method[] methods = dataService.getClass().getDeclaredMethods();
             for (Method method : methods) {
@@ -84,6 +84,7 @@ public class SchemaGeneratorImpl {
             }
             graphQLSchema.query(queryType);
         }
+
         private void addTypesForComponentClasses(HashSet<Class<?>> components) {
             for (Class<?> component : components) {
                 if (component.isEnum()) {
@@ -103,8 +104,8 @@ public class SchemaGeneratorImpl {
                 }
             }
         }
-
     }
+
     private static class TypeAdapter {
         private static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
             String typeName = enumType.getSimpleName();
