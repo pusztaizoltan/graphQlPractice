@@ -9,7 +9,7 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.example.graphQL.annotation.FieldOf;
 import org.example.graphQL.annotation.FieldType;
-import org.example.graphQL.annotation.UseAsInt;
+import org.example.graphQL.annotation.ArgWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -38,10 +38,10 @@ public class GraphQLBuilder {
                 registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
             } else if (method.getParameters().length == 1 &&
                        category == FieldType.OBJECT &&
-                       method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
+                       method.getParameters()[0].isAnnotationPresent(ArgWith.class)) {
                 // todo rewrite if you can, to not being a hatchetJob
                 GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method); //todo
-                UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+                ArgWith marker = method.getParameters()[0].getAnnotation(ArgWith.class);
                 queryType.field(field);
                 DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
                 registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);

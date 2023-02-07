@@ -1,6 +1,5 @@
 package org.example.graphQL.generatorUtil;
 
-import graphql.Scalars;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
@@ -8,7 +7,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphQL.annotation.FieldOf;
 import org.example.graphQL.annotation.FieldType;
-import org.example.graphQL.annotation.UseAsInt;
+import org.example.graphQL.annotation.ArgWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -73,13 +72,13 @@ public class FieldAdapter {
 
     public static GraphQLFieldDefinition argumentedReturn(Method method) {
         String type = method.getReturnType().getSimpleName();
-        UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+        ArgWith marker = method.getParameters()[0].getAnnotation(ArgWith.class);
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
                                      .type(GraphQLTypeReference.typeRef(type))
                                      .argument(GraphQLArgument.newArgument()
                                                               .name(marker.name())
-                                                              .type(Scalars.GraphQLInt)
+                                                              .type(marker.type().graphQLScalarType)
                                                               .build())
                                      .build();
     }

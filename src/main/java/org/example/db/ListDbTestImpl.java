@@ -5,9 +5,9 @@ import org.example.entity.Book;
 import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
+import org.example.graphQL.annotation.ArgWith;
 import org.example.graphQL.annotation.FieldOf;
 import org.example.graphQL.annotation.FieldType;
-import org.example.graphQL.annotation.UseAsInt;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +29,17 @@ public class ListDbTestImpl implements ListDb {
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public TestClass testClassById(@UseAsInt(name = "id") long id) {
+    public TestClass testClassById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public Reader readerById(@UseAsInt(name = "id") long id) {
+    public Reader readerById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public Book bookById(@UseAsInt(name = "id") long id) {
+    public Book bookById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 

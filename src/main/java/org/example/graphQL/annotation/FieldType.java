@@ -18,8 +18,9 @@ public enum FieldType {
     FieldType(GraphQLScalarType graphQLScalarType) {
         this.graphQLScalarType = graphQLScalarType;
     }
-    public boolean isScalar(){
-        return graphQLScalarType !=null;
+
+    public boolean isScalar() {
+        return graphQLScalarType != null;
     }
 }
 
