@@ -28,7 +28,6 @@ public class SchemaGeneratorImpl {
     Logger logger = Logger.getLogger("SchemaGeneratorImpl");
     Object dataService;
     HashSet<Class<?>> components = new HashSet<>();
-    GraphQLObjectType query;
     GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
@@ -61,7 +60,7 @@ public class SchemaGeneratorImpl {
             if (Modifier.isPublic(method.getModifiers())) {
                 if (method.getParameters().length == 0) {
                     String typeName = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
-                    System.out.println("--------typeName " + typeName);
+
                     queryType.field(GraphQLFieldDefinition.newFieldDefinition()
                                                           .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
                                                           .name(method.getName()))
@@ -133,19 +132,19 @@ public class SchemaGeneratorImpl {
             if (Modifier.isPublic(method.getModifiers())) {
                 if (method.isAnnotationPresent(UseMarker.class)) {
                     GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-                    if (category == GraphQlIdentifyer.TYPE) {
-                        Class<?> type = method.getReturnType();
-                        if (!this.components.contains(type)) {
-                            components.add(type);
-                            addNestedClasses(type);
+                    if (category == GraphQlIdentifyer.NESTED_TYPE || category == GraphQlIdentifyer.TYPE) {
+                        Class<?> type;
+                        if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                            type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                        } else {
+                            type = method.getReturnType();
                         }
-                    } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                        Class<?> type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
                         if (!this.components.contains(type)) {
                             components.add(type);
                             addNestedClasses(type);
                         }
                     }
+
                 }
             }
         }
