@@ -12,6 +12,10 @@ public class ClassParser {
     @Getter
     private final HashSet<Class<?>> components = new HashSet<>();
 
+    /**
+     * Parse arbitrary client defined classes recursively
+     * for all unique composite classes or enums
+     */
     public void parseAdditionalClasses(Class<?>... classes) {
         for (Class<?> classType : classes) {
             parseClassesFromFields(classType);
@@ -19,6 +23,10 @@ public class ClassParser {
         }
     }
 
+    /**
+     * Parse dataService object that actually will be serve as a dataSource
+     * recursively for all unique composite classes or enums
+     */
     public void parseClassesFromDataService(Object dataService) {
         for (Method method : dataService.getClass().getDeclaredMethods()) {
             if (FieldAdapter.isQueryField(method)) {
