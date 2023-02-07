@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TypeAdapter {
+    /**
+     * Utility method to create GraphQLObjectType for provided Class type
+     */
     public static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
         GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
@@ -21,6 +24,9 @@ public class TypeAdapter {
         return objectTypeBuilder.build();
     }
 
+    /**
+     * Utility method to create GraphQLEnumType for provided Enum type
+     */
     public static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
         return GraphQLEnumType.newEnum()
                               .name(enumType.getSimpleName())
