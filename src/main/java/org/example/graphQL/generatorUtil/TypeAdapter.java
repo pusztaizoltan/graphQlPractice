@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TypeAdapter {
-    // todo OK
     public static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
         GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {

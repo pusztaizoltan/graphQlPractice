@@ -5,22 +5,21 @@ import org.example.entity.Book;
 import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
+import org.example.graphQL.annotation.FieldOf;
 import org.example.graphQL.annotation.FieldType;
 import org.example.graphQL.annotation.UseAsInt;
-import org.example.graphQL.annotation.FieldOf;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-//public class ListDbImpl implements ListDb {
-public class ListDbImpl {
+public class ListDbTestImpl implements ListDb {
     private final List<TestClass> testClassDB = new ArrayList<>();
     private final List<Reader> readerDB = new ArrayList<>();
     private final List<Author> authorDB = new ArrayList<>();
     private final List<Book> bookDB = new ArrayList<>();
 
-    public ListDbImpl() {
+    public ListDbTestImpl() {
         initDb();
     }
 
@@ -30,17 +29,17 @@ public class ListDbImpl {
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public TestClass testClassById(@UseAsInt(name="id") long id) {
+    public TestClass testClassById(@UseAsInt(name = "id") long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public Reader readerById(@UseAsInt(name="id") long id) {
+    public Reader readerById(@UseAsInt(name = "id") long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @FieldOf(type = FieldType.OBJECT)
-    public Book bookById(@UseAsInt(name="id") long id) {
+    public Book bookById(@UseAsInt(name = "id") long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 

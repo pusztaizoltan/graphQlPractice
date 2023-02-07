@@ -4,7 +4,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
-import org.example.db.ListDbImpl;
+import org.example.db.ListDbTestImpl;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.Reader;
@@ -20,7 +20,7 @@ public class Main {
     }
 
     static void task() {
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbTestImpl());
         GraphQL build = generator.getGraphQL();
 //        graphQLEnumTypeFromEnum(GenreType.class);
         System.out.println("-------------------------ALL FROM TESTCLASSES----------");

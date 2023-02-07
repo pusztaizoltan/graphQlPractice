@@ -1,20 +1,15 @@
 package org.example.entity;
-//import graphql.annotations.GraphQLField;
-//import graphql.annotations.GraphQLName;
 
 import lombok.Getter;
-import org.example.graphQL.annotation.FieldType;
 import org.example.graphQL.annotation.FieldOf;
+import org.example.graphQL.annotation.FieldType;
 
-//@GraphQLName("TestClass")
 @Getter
 public class TestClass {
-    //    @GraphQLField
     @FieldOf(type = FieldType.SCALAR_INT)
-    private int id;
-    //    @GraphQLField
+    private final int id;
     @FieldOf(type = FieldType.SCALAR_STRING)
-    private String content;
+    private final String content;
 
     public TestClass(int id, String content) {
         this.id = id;

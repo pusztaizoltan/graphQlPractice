@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 
 public class FieldAdapter {
-    // todo OK
     public static GraphQLFieldDefinition graphQLFieldFrom(Field field) {
         if (!field.isAnnotationPresent(FieldOf.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
