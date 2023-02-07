@@ -50,29 +50,29 @@ public class SchemaGeneratorImpl {
         return GraphQL.newGraphQL(schema).build();
     }
 
-    void initQueryType() {
+    private void initQueryType() {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-//        GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
         Method[] methods = dataService.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (Modifier.isPublic(method.getModifiers())) {
-                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-                if (method.getParameters().length == 0 && category == GraphQlIdentifyer.NESTED_TYPE) {
-                    queryType.field(FieldAdapter.nestedReturn(method));
-                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
-                    registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-                } else if (method.getParameters().length == 1 &&
-                           category == GraphQlIdentifyer.TYPE &&
-                           method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
-                    // todo rewrite if you can to not being a hatchetJob
-                    GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
-                    UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
-                    queryType.field(field);
-                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
-                    registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);
-                } else {
-                    throw new UnsupportedOperationException("Not implemented yet");
-                }
+            if (!Modifier.isPublic(method.getModifiers())) {
+                continue;
+            }
+            GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+            if (method.getParameters().length == 0 && category == GraphQlIdentifyer.NESTED_TYPE) {
+                queryType.field(FieldAdapter.nestedReturn(method));
+                DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
+                registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+            } else if (method.getParameters().length == 1 &&
+                       category == GraphQlIdentifyer.TYPE &&
+                       method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
+                // todo rewrite if you can to not being a hatchetJob
+                GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
+                UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+                queryType.field(field);
+                DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
+                registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);
+            } else {
+                throw new UnsupportedOperationException("Not implemented yet");
             }
         }
         graphQLSchema.query(queryType);
@@ -125,21 +125,20 @@ public class SchemaGeneratorImpl {
     private void initTypesFromDataService() {
         Method[] methods = dataService.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (Modifier.isPublic(method.getModifiers())) {
-                if (method.isAnnotationPresent(UseMarker.class)) {
-                    GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-                    if (category == GraphQlIdentifyer.NESTED_TYPE || category == GraphQlIdentifyer.TYPE) {
-                        Class<?> type;
-                        if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                            type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                        } else {
-                            type = method.getReturnType();
-                        }
-                        if (!this.components.contains(type)) {
-                            components.add(type);
-                            addNestedClasses(type);
-                        }
-                    }
+            if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
+                continue;
+            }
+            GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+            if (category == GraphQlIdentifyer.NESTED_TYPE || category == GraphQlIdentifyer.TYPE) {
+                Class<?> type;
+                if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                    type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                } else {
+                    type = method.getReturnType();
+                }
+                if (!this.components.contains(type)) {
+                    components.add(type);
+                    addNestedClasses(type);
                 }
             }
         }
@@ -155,34 +154,35 @@ public class SchemaGeneratorImpl {
 
     private void addNestedClasses(Class<?> cls) {
         for (Field field : cls.getDeclaredFields()) {
-            if (field.isAnnotationPresent(UseMarker.class)) {
-                Class<?> type;
-                switch (field.getAnnotation(UseMarker.class).category()) {
-                    case ENUM -> {
-                        type = field.getType();
-                        if (!this.components.contains(type)) {
-                            components.add(type);
-                        }
+            if (!field.isAnnotationPresent(UseMarker.class)) {
+                continue;
+            }
+            Class<?> type;
+            switch (field.getAnnotation(UseMarker.class).category()) {
+                case ENUM -> {
+                    type = field.getType();
+                    if (!this.components.contains(type)) {
+                        components.add(type);
                     }
-                    case TYPE -> {
-                        type = field.getType();
-                        if (!this.components.contains(type)) {
-                            components.add(type);
-                            addNestedClasses(type);
-                        }
-                    }
-                    case NESTED_TYPE -> {
-                        type = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                        if (!this.components.contains(type)) {
-                            components.add(type);
-                            addNestedClasses(type);
-                        }
-                    }
-                    case SCALAR -> {
-                    }
-                    default ->
-                            throw new IllegalStateException("Unexpected: " + field.getAnnotation(UseMarker.class).category());
                 }
+                case TYPE -> {
+                    type = field.getType();
+                    if (!this.components.contains(type)) {
+                        components.add(type);
+                        addNestedClasses(type);
+                    }
+                }
+                case NESTED_TYPE -> {
+                    type = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    if (!this.components.contains(type)) {
+                        components.add(type);
+                        addNestedClasses(type);
+                    }
+                }
+                case SCALAR -> {
+                }
+                default ->
+                        throw new IllegalStateException("Unexpected: " + field.getAnnotation(UseMarker.class).category());
             }
         }
     }
@@ -245,7 +245,6 @@ public class SchemaGeneratorImpl {
                                                                   .type(Scalars.GraphQLInt)
                                                                   .build())
                                          .build();
-//            return null;
         }
     }
 }
