@@ -4,30 +4,49 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.TypeResolver;
-import org.example.db.CustomFetcher;
 import org.example.db.ListDbImpl;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
 import org.example.graphQL.SchemaGeneratorImpl;
-import org.example.graphQL.SchemaLoader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 
 public class Main {
-    static ListDbImpl db;
-    static SchemaLoader source = new SchemaLoader("schema.graphqls");
-    static CustomFetcher customFetcher;
-
     public static void main(String[] args) {
-//        Schemable.graphQLObjectTypeFromClass(Book.class);
-//        task1();
-//        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
-        taskPartial();
-//        methodReflectionExperiments(new ListDbImpl());
+        task();
+    }
+
+    static void task() {
+        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
+        GraphQL build = generator.getGraphQL();
+//        graphQLEnumTypeFromEnum(GenreType.class);
+        System.out.println("-------------------------ALL FROM TESTCLASSES----------");
+        ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
+        er2.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
+        System.out.println("-------------------------TESTcLASS BY ID-----------");
+        ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
+        er1.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{testClassById(id: 1){id, content}}").getData().toString());
+        System.out.println("-------------------------ALL FROM Readers----------");
+        ExecutionResult er3 = build.execute("{allReader {id, fullName, email}}");
+        er3.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allReader {id, fullName, email}}").getData().toString());
+        System.out.println("-------------------------Reader BY ID----------");
+        ExecutionResult er4 = build.execute("{readerById(id: 1) {id, fullName, email}}");
+        er4.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{readerById(id: 1) {id, fullName, email}}").getData().toString());
+        System.out.println("-------------------------ALL FROM Books----------");
+        ExecutionResult er5 = build.execute("{allBook {id, title, genreAsEnum}}");
+        er5.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allBook {id, title, genreAsEnum}}").getData().toString());
+        System.out.println("-------------------------Books BY ID----------");
+        ExecutionResult er6 = build.execute("{bookById(id: 2) {id, title, genreAsEnum, author{name,isAlive}}}");
+        er6.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{bookById(id: 2) {id, title, genreAsEnum, author{name,isAlive}}}").getData().toString());
     }
 
     static void methodReflectionExperiments(Object datasource) {
@@ -48,52 +67,6 @@ public class Main {
                 }
             }
         }
-    }
-
-    static void taskPartial() {
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
-        GraphQL build = generator.getGraphQL();
-//        graphQLEnumTypeFromEnum(GenreType.class);
-        System.out.println("-------------------------ALL FROM TESTCLASSES----------");
-        ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
-        er2.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
-        System.out.println("-------------------------TESTcLASS BY ID-----------");
-        ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
-        er1.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{testClassById(id: 1){id, content}}").getData().toString());
-        System.out.println("-------------------------ALL FROM Readers----------");
-        ExecutionResult er3 = build.execute("{allReader {id, fullName, email}}");
-        er3.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{allReader {id, fullName, email}}").getData().toString());
-        System.out.println("-------------------------Reader BY ID----------");
-        ExecutionResult er4 = build.execute("{readerById(id: 1) {id, fullName, email}}");
-        er4.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{readerById(id: 1) {id, fullName, email}}").getData().toString());
-    }
-
-    static void task1() {
-        db = new ListDbImpl();
-        customFetcher = new CustomFetcher(db);
-        SchemaGeneratorImpl schemaGenerator = new SchemaGeneratorImpl(new ListDbImpl());
-        GraphQL build = schemaGenerator.getGraphQL();
-//        TypeDefinitionRegistry fromFile = source.getSchemaFromFile();
-////        RuntimeWiring runtimeWiring = getRuntimeWiring();
-//        SchemaGenerator schemaGenerator = new SchemaGenerator();
-//        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(fromFile, runtimeWiring);
-//        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
-        System.out.println("-------------------------ALL FROM TESTCLASSES----------");
-        ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
-        er2.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
-        System.out.println("-------------------------BOOK BY STRING GENRE BOOTH IN SCHEMA AND IN OBJECT ----------");
-        ExecutionResult er3 = build.execute("{booksByGenreString(genreAsString: \"SCIENCE\") {id, title, author, genreAsString, genreAsEnum}}");
-        er3.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{booksByGenreString(genreAsString: \"SCIENCE\") {id, title, author, genreAsString, genreAsEnum}}").getData().toString());
-        System.out.println("-------------------------BOOK BY ENUM GENRE BOOTH IN SCHEMA AND IN OBJECT ----------");
-        ExecutionResult er4 = build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}");
-        er4.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{booksByGenreEnum(genreAsEnum: SCIENCE) {id, title, author, genreAsString, genreAsEnum}}").getData().toString());
     }
 
     static TypeResolver getTypeResolver() {

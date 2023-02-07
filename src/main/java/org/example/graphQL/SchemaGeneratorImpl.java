@@ -40,7 +40,11 @@ public class SchemaGeneratorImpl {
         this.dataService = dataService;
         initTypesFromDataService();
         initQueryType();
-        System.out.println(components);
+        {
+            System.out.println("----------------------------------------");
+            System.out.println("- Extracted components form dataService:\n" + components);
+            System.out.println();
+        }
     }
 
     public GraphQL getGraphQL() {
@@ -54,7 +58,7 @@ public class SchemaGeneratorImpl {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         Method[] methods = dataService.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (!Modifier.isPublic(method.getModifiers())) {
+            if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
                 continue;
             }
             GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
@@ -65,7 +69,7 @@ public class SchemaGeneratorImpl {
             } else if (method.getParameters().length == 1 &&
                        category == GraphQlIdentifyer.TYPE &&
                        method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
-                // todo rewrite if you can to not being a hatchetJob
+                // todo rewrite if you can, to not being a hatchetJob
                 GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
                 UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
                 queryType.field(field);
@@ -88,11 +92,8 @@ public class SchemaGeneratorImpl {
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
                 typeBuilder.field(FieldAdapter.nestedField(field));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM) {
-                // todo to test if typeReference works with enums
-//                String enumTypeName = field.getType().getTypeName();
-//                typeBuilder = typeBuilder.field(newFieldDefinition()
-//                        .name(field.getName())
-//                        .type(GraphQLTypeReference.typeRef(enumTypeName)));
+                // experimental result: todo  yes typeReference works with enums
+                typeBuilder.field(FieldAdapter.typeField(field));
             } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
                 typeBuilder.field(FieldAdapter.scalarField(field));
             }
@@ -103,11 +104,9 @@ public class SchemaGeneratorImpl {
     private void initGraphQLSchema() {
         for (Class<?> component : components) {
             if (component.isEnum()) {
-                // todo does it need registry?
+                // experimental result: todo seems like enum in this development phase doesn't need registry?
                 GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
-//                DataFetcher<?> fetcher = (env) -> env.e enumType. .cast(field.get(component.cast(env.)));
                 graphQLSchema.additionalType(enumType);
-//                registry.dataFetchers()
             } else {
                 GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
                 graphQLSchema.additionalType(objectType);
