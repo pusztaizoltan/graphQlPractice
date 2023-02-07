@@ -1,22 +1,21 @@
 package org.example.entity;
 
 import lombok.Getter;
-import org.example.graphQL.annotation.GraphQlIdentifyer;
-import org.example.graphQL.annotation.ScalarFitter;
-import org.example.graphQL.annotation.UseMarker;
+import org.example.graphQL.annotation.FieldType;
+import org.example.graphQL.annotation.FieldOf;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 public class Reader {
-    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
+    @FieldOf(type = FieldType.SCALAR_INT)
     private final long id;
-    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
+    @FieldOf(type = FieldType.SCALAR_STRING)
     private final String fullName;
-    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
+    @FieldOf(type = FieldType.SCALAR_STRING)
     private final String email;
-    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    @FieldOf(type = FieldType.LIST)
     private final List<Book> books = new ArrayList<>();
 
     public Reader(long id, String fullName, String email) {

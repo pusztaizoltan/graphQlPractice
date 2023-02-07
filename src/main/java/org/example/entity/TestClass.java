@@ -3,18 +3,17 @@ package org.example.entity;
 //import graphql.annotations.GraphQLName;
 
 import lombok.Getter;
-import org.example.graphQL.annotation.GraphQlIdentifyer;
-import org.example.graphQL.annotation.ScalarFitter;
-import org.example.graphQL.annotation.UseMarker;
+import org.example.graphQL.annotation.FieldType;
+import org.example.graphQL.annotation.FieldOf;
 
 //@GraphQLName("TestClass")
 @Getter
 public class TestClass {
     //    @GraphQLField
-    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT)
+    @FieldOf(type = FieldType.SCALAR_INT)
     private int id;
     //    @GraphQLField
-    @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.STRING)
+    @FieldOf(type = FieldType.SCALAR_STRING)
     private String content;
 
     public TestClass(int id, String content) {

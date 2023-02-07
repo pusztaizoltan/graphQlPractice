@@ -5,10 +5,9 @@ import org.example.entity.Book;
 import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
-import org.example.graphQL.annotation.GraphQlIdentifyer;
-import org.example.graphQL.annotation.ScalarFitter;
+import org.example.graphQL.annotation.FieldType;
 import org.example.graphQL.annotation.UseAsInt;
-import org.example.graphQL.annotation.UseMarker;
+import org.example.graphQL.annotation.FieldOf;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,32 +24,32 @@ public class ListDbImpl {
         initDb();
     }
 
-    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    @FieldOf(type = FieldType.LIST)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
-    @UseMarker(category = GraphQlIdentifyer.TYPE)
+    @FieldOf(type = FieldType.OBJECT)
     public TestClass testClassById(@UseAsInt(name="id") long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-    @UseMarker(category = GraphQlIdentifyer.TYPE)
+    @FieldOf(type = FieldType.OBJECT)
     public Reader readerById(@UseAsInt(name="id") long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-    @UseMarker(category = GraphQlIdentifyer.TYPE)
+    @FieldOf(type = FieldType.OBJECT)
     public Book bookById(@UseAsInt(name="id") long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
-    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    @FieldOf(type = FieldType.LIST)
     public List<Reader> allReader() {
         return readerDB;
     }
 
-    @UseMarker(category = GraphQlIdentifyer.NESTED_TYPE)
+    @FieldOf(type = FieldType.LIST)
     public List<Book> allBook() {
         return bookDB;
     }

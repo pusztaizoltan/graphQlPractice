@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
-public @interface UseMarker {
-    GraphQlIdentifyer category();
+public @interface FieldOf {
+    FieldType type();
 
-    ScalarFitter asScalar() default ScalarFitter.DEFAULT;
+
 }
