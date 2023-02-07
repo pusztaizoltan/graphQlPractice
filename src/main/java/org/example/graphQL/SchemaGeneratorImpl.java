@@ -16,6 +16,7 @@ public class SchemaGeneratorImpl {
         this.classParser.parseClassesFromDataService(dataService);
         this.builder.addQueryForDataService(dataService);
     }
+
     /**
      * Method to provide optional Type patterns for SchemaBuilding
      */
