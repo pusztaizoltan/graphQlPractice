@@ -8,11 +8,9 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.example.graphQL.annotation.ArgWith;
 import org.example.graphQL.annotation.FieldOf;
-import org.example.graphQL.annotation.FieldType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashSet;
 
 public class GraphQLBuilder {
@@ -26,12 +24,12 @@ public class GraphQLBuilder {
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         for (Method method : dataService.getClass().getDeclaredMethods()) {
-            if (isQueryField(method)) {
-                if (hasListReturnWithoutArg(method)) {
+            if (FieldAdapter.isQueryField(method)) {
+                if (FieldAdapter.hasListReturnWithoutArg(method)) {
                     queryType.field(FieldAdapter.listReturnWithoutArg(method));
                     DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-                } else if (hasObjectReturnByOneArg(method)) {
+                } else if (FieldAdapter.hasObjectReturnByOneArg(method)) {
                     queryType.field(FieldAdapter.objectReturnByOneArg(method));
                     String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
                     DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(argName));
@@ -42,20 +40,6 @@ public class GraphQLBuilder {
             }
         }
         graphQLSchema.query(queryType);
-    }
-
-    private boolean isQueryField(Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(FieldOf.class);
-    }
-
-    private boolean hasListReturnWithoutArg(Method method) {
-        return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
-    }
-
-    private boolean hasObjectReturnByOneArg(Method method) {
-        return method.getParameters().length == 1 &&
-               method.getAnnotation(FieldOf.class).type() == FieldType.OBJECT &&
-               method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
     public void addTypesForComponentClasses(HashSet<Class<?>> components) {
