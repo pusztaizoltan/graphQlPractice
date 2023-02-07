@@ -82,33 +82,14 @@ public class SchemaGeneratorImpl {
         graphQLSchema.query(queryType);
     }
 
-    private GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
-        GraphQLObjectType.Builder typeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
-        Field[] fields = classType.getDeclaredFields();
-        for (Field field : fields) {
-            UseMarker fieldAnnotation = field.getAnnotation(UseMarker.class);
-            if (fieldAnnotation.category() == GraphQlIdentifyer.TYPE) {
-                typeBuilder.field(FieldAdapter.typeField(field));
-            } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
-                typeBuilder.field(FieldAdapter.nestedField(field));
-            } else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM) {
-                // experimental result: todo  yes typeReference works with enums
-                typeBuilder.field(FieldAdapter.typeField(field));
-            } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
-                typeBuilder.field(FieldAdapter.scalarField(field));
-            }
-        }
-        return typeBuilder.build();
-    }
-
     private void initGraphQLSchema() {
         for (Class<?> component : classParser.components) {
             if (component.isEnum()) {
                 // experimental result: todo seems like enum in this development phase doesn't need registry?
-                GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
+                GraphQLEnumType enumType = TypeAdapter.graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
                 graphQLSchema.additionalType(enumType);
             } else {
-                GraphQLObjectType objectType = graphQLObjectTypeFromClass(component);
+                GraphQLObjectType objectType = TypeAdapter.graphQLObjectTypeFromClass(component);
                 graphQLSchema.additionalType(objectType);
                 Field[] fields = component.getDeclaredFields();
                 for (Field field : fields) {
@@ -121,18 +102,39 @@ public class SchemaGeneratorImpl {
         }
     }
 
-    private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
-        String typeName = enumType.getSimpleName();
-        return GraphQLEnumType.newEnum()
-                              .name(typeName)
-                              .values(Arrays.stream(enumType.getEnumConstants())
-                                            .map((eConst) -> GraphQLEnumValueDefinition
-                                                    .newEnumValueDefinition()
-                                                    .value(eConst.name())
-                                                    .name(eConst.name())
-                                                    .build())
-                                            .collect(Collectors.toList()))
-                              .build();
+    private static class TypeAdapter {
+        private static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
+            String typeName = enumType.getSimpleName();
+            return GraphQLEnumType.newEnum()
+                                  .name(typeName)
+                                  .values(Arrays.stream(enumType.getEnumConstants())
+                                                .map((eConst) -> GraphQLEnumValueDefinition
+                                                        .newEnumValueDefinition()
+                                                        .value(eConst.name())
+                                                        .name(eConst.name())
+                                                        .build())
+                                                .collect(Collectors.toList()))
+                                  .build();
+        }
+
+        private static GraphQLObjectType graphQLObjectTypeFromClass(Class<?> classType) {
+            GraphQLObjectType.Builder typeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
+            Field[] fields = classType.getDeclaredFields();
+            for (Field field : fields) {
+                UseMarker fieldAnnotation = field.getAnnotation(UseMarker.class);
+                if (fieldAnnotation.category() == GraphQlIdentifyer.TYPE) {
+                    typeBuilder.field(FieldAdapter.typeField(field));
+                } else if (fieldAnnotation.category() == GraphQlIdentifyer.NESTED_TYPE) {
+                    typeBuilder.field(FieldAdapter.nestedField(field));
+                } else if (fieldAnnotation.category() == GraphQlIdentifyer.ENUM) {
+                    // experimental result: todo  yes typeReference works with enums
+                    typeBuilder.field(FieldAdapter.typeField(field));
+                } else if (fieldAnnotation.category() == GraphQlIdentifyer.SCALAR) {
+                    typeBuilder.field(FieldAdapter.scalarField(field));
+                }
+            }
+            return typeBuilder.build();
+        }
     }
 
     private static class ClassParser {
