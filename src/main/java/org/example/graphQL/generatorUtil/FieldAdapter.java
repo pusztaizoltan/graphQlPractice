@@ -15,6 +15,10 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 
 public class FieldAdapter {
+    /**
+     * Generate GraphQLFieldDefinition based on field and the required
+     * FieldOf annotation on it
+     */
     public static GraphQLFieldDefinition graphQLFieldFrom(Field field) {
         if (!field.isAnnotationPresent(FieldOf.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
@@ -61,20 +65,32 @@ public class FieldAdapter {
         return objectField(field);
     }
 
+    /**
+     * Test if method is candidate as a field of GraphQl Query type
+     */
     public static boolean isQueryField(Method method) {
         return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(FieldOf.class);
     }
 
+    /**
+     * Test for potential signature specifications of GraphQl Query field
+     */
     public static boolean hasListReturnWithoutArg(Method method) {
         return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
     }
 
+    /**
+     * Test for potential signature specifications of GraphQl Query field
+     */
     public static boolean hasObjectReturnByOneArg(Method method) {
         return method.getParameters().length == 1 &&
                method.getAnnotation(FieldOf.class).type() == FieldType.OBJECT &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
+    /**
+     * Generate GraphQLFieldDefinition for a specific type of dataSource method
+     */
     public static GraphQLFieldDefinition listReturnWithoutArg(Method method) {
         String typeName = genericTypeOf(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
@@ -83,6 +99,9 @@ public class FieldAdapter {
                                      .build();
     }
 
+    /**
+     * Generate GraphQLFieldDefinition for a specific type of dataSource method
+     */
     public static GraphQLFieldDefinition objectReturnByOneArg(Method method) {
         String type = method.getReturnType().getSimpleName();
         ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
@@ -100,10 +119,16 @@ public class FieldAdapter {
                               .build();
     }
 
+    /**
+     * Determine the Generic Type of the return of a method
+     */
     public static Class<?> genericTypeOf(Method method) {
         return (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
     }
 
+    /**
+     * Determine the Generic Type of afield
+     */
     public static Class<?> genericTypeOf(Field field) {
         return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
     }
