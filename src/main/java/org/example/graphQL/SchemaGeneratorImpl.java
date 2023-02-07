@@ -28,23 +28,23 @@ import java.util.stream.Collectors;
 
 public class SchemaGeneratorImpl {
     Object dataService;
-    HashSet<Class<?>> components = new HashSet<>();
+    ClassParser classParser = new ClassParser();
     GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
-    public void withClasses(Class<?>... classes) {
-        initTypesWith(classes);
-    }
-
     public SchemaGeneratorImpl(Object dataService) {
         this.dataService = dataService;
-        initTypesFromDataService();
+        this.classParser.parseDataService(dataService);
         initQueryType();
         {
             System.out.println("----------------------------------------");
-            System.out.println("- Extracted components form dataService:\n" + components);
+            System.out.println("- Extracted components form dataService:\n" + classParser.components);
             System.out.println();
         }
+    }
+
+    public void withAdditionalClasses(Class<?>... classes) {
+        this.classParser.parseAdditionalClasses(classes);
     }
 
     public GraphQL getGraphQL() {
@@ -102,7 +102,7 @@ public class SchemaGeneratorImpl {
     }
 
     private void initGraphQLSchema() {
-        for (Class<?> component : components) {
+        for (Class<?> component : classParser.components) {
             if (component.isEnum()) {
                 // experimental result: todo seems like enum in this development phase doesn't need registry?
                 GraphQLEnumType enumType = graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
@@ -121,71 +121,6 @@ public class SchemaGeneratorImpl {
         }
     }
 
-    private void initTypesFromDataService() {
-        Method[] methods = dataService.getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
-                continue;
-            }
-            GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-            if (category == GraphQlIdentifyer.NESTED_TYPE || category == GraphQlIdentifyer.TYPE) {
-                Class<?> type;
-                if (category == GraphQlIdentifyer.NESTED_TYPE) {
-                    type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
-                } else {
-                    type = method.getReturnType();
-                }
-                if (!this.components.contains(type)) {
-                    components.add(type);
-                    addNestedClasses(type);
-                }
-            }
-        }
-    }
-
-    private void initTypesWith(Class<?>... classes) {
-        for (Class<?> cls : classes) {
-            addNestedClasses(cls);
-            components.add(cls);
-        }
-        System.out.println(this.components);
-    }
-
-    private void addNestedClasses(Class<?> cls) {
-        for (Field field : cls.getDeclaredFields()) {
-            if (!field.isAnnotationPresent(UseMarker.class)) {
-                continue;
-            }
-            Class<?> type;
-            switch (field.getAnnotation(UseMarker.class).category()) {
-                case ENUM -> {
-                    type = field.getType();
-                    if (!this.components.contains(type)) {
-                        components.add(type);
-                    }
-                }
-                case TYPE -> {
-                    type = field.getType();
-                    if (!this.components.contains(type)) {
-                        components.add(type);
-                        addNestedClasses(type);
-                    }
-                }
-                case NESTED_TYPE -> {
-                    type = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    if (!this.components.contains(type)) {
-                        components.add(type);
-                        addNestedClasses(type);
-                    }
-                }
-                case SCALAR -> {
-                }
-                default ->
-                        throw new IllegalStateException("Unexpected: " + field.getAnnotation(UseMarker.class).category());
-            }
-        }
-    }
-
     private GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
         String typeName = enumType.getSimpleName();
         return GraphQLEnumType.newEnum()
@@ -198,6 +133,72 @@ public class SchemaGeneratorImpl {
                                                     .build())
                                             .collect(Collectors.toList()))
                               .build();
+    }
+
+    private static class ClassParser {
+        private final HashSet<Class<?>> components = new HashSet<>();
+
+        private void parseAdditionalClasses(Class<?>... classes) {
+            for (Class<?> cls : classes) {
+                addNestedClasses(cls);
+                components.add(cls);
+            }
+        }
+
+        private void parseDataService(Object dataService) {
+            Method[] methods = dataService.getClass().getDeclaredMethods();
+            for (Method method : methods) {
+                if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
+                    continue;
+                }
+                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+                if (category == GraphQlIdentifyer.NESTED_TYPE || category == GraphQlIdentifyer.TYPE) {
+                    Class<?> type;
+                    if (category == GraphQlIdentifyer.NESTED_TYPE) {
+                        type = (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+                    } else {
+                        type = method.getReturnType();
+                    }
+                    if (!components.contains(type)) {
+                        components.add(type);
+                        addNestedClasses(type);
+                    }
+                }
+            }
+        }
+
+        private void addNestedClasses(Class<?> cls) {
+            for (Field field : cls.getDeclaredFields()) {
+                if (!field.isAnnotationPresent(UseMarker.class)) {
+                    continue;
+                }
+                Class<?> type;
+                switch (field.getAnnotation(UseMarker.class).category()) {
+                    case ENUM -> {
+                        type = field.getType();
+                        components.add(type);
+                    }
+                    case TYPE -> {
+                        type = field.getType();
+                        if (!components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    }
+                    case NESTED_TYPE -> {
+                        type = (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        if (!components.contains(type)) {
+                            components.add(type);
+                            addNestedClasses(type);
+                        }
+                    }
+                    case SCALAR -> {
+                    }
+                    default ->
+                            throw new IllegalStateException("Unexpected: " + field.getAnnotation(UseMarker.class).category());
+                }
+            }
+        }
     }
 
     private static class FieldAdapter {
