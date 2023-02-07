@@ -1,8 +1,10 @@
 package org.example.graphQL;
 
 import graphql.GraphQL;
+import graphql.Scalars;
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
+import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLEnumValueDefinition;
@@ -13,6 +15,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
+import org.example.graphQL.annotation.UseAsInt;
 import org.example.graphQL.annotation.UseMarker;
 
 import java.lang.reflect.Field;
@@ -21,23 +24,19 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class SchemaGeneratorImpl {
-    Logger logger = Logger.getLogger("SchemaGeneratorImpl");
     Object dataService;
     HashSet<Class<?>> components = new HashSet<>();
     GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
 
     public void withClasses(Class<?>... classes) {
-        logger.info("Instantiate SchemaGeneratorImpl");
         initTypesWith(classes);
     }
 
     public SchemaGeneratorImpl(Object dataService) {
-        logger.info("Instantiate SchemaGeneratorImpl");
         this.dataService = dataService;
         initTypesFromDataService();
         initQueryType();
@@ -46,8 +45,8 @@ public class SchemaGeneratorImpl {
 
     public GraphQL getGraphQL() {
         initGraphQLSchema();
-        GraphQLCodeRegistry r = registry.build();
-        GraphQLSchema schema = graphQLSchema.codeRegistry(r).build();
+        GraphQLCodeRegistry reg = registry.build();
+        GraphQLSchema schema = graphQLSchema.codeRegistry(reg).build();
         return GraphQL.newGraphQL(schema).build();
     }
 
@@ -56,29 +55,26 @@ public class SchemaGeneratorImpl {
 //        GraphQlIdentifyer category = field.getAnnotation(UseMarker.class).category();
         Method[] methods = dataService.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            // todo only public menthods
             if (Modifier.isPublic(method.getModifiers())) {
-                if (method.getParameters().length == 0) {
-                    String typeName = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
-
-                    queryType.field(GraphQLFieldDefinition.newFieldDefinition()
-                                                          .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
-                                                          .name(method.getName()))
-                             .build();
+                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+                if (method.getParameters().length == 0 && category == GraphQlIdentifyer.NESTED_TYPE) {
+                    queryType.field(FieldAdapter.nestedReturn(method));
                     DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+                } else if (method.getParameters().length == 1 &&
+                           category == GraphQlIdentifyer.TYPE &&
+                           method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
+                    // todo rewrite if you can to not being a hatchetJob
+                    GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
+                    UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+                    queryType.field(field);
+                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
+                    registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);
+                } else {
+                    throw new UnsupportedOperationException("Not implemented yet");
                 }
-//                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-//                if (category == GraphQlIdentifyer.TYPE) {
-//                String genericTypeName = method;
-//                } else if (category == GraphQlIdentifyer.NESTED_TYPE) {
-//                    queryType.field(GraphQLFieldDefinition.newFieldDefinition()
-//                                                          .type(GraphQLList.list(GraphQLTypeReference.typeRef("TestClass")))
-//                                                          .name("allTestClass"))
-//                             .build();
             }
         }
-//        }
         graphQLSchema.query(queryType);
     }
 
@@ -144,7 +140,6 @@ public class SchemaGeneratorImpl {
                             addNestedClasses(type);
                         }
                     }
-
                 }
             }
         }
@@ -223,12 +218,34 @@ public class SchemaGeneratorImpl {
                                          .build();
         }
 
+        private static GraphQLFieldDefinition nestedReturn(Method method) {
+            String type = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
+            return GraphQLFieldDefinition.newFieldDefinition()
+                                         .name(method.getName())
+                                         .type(GraphQLList.list(GraphQLTypeReference.typeRef(type)))
+                                         .build();
+        }
+
         private static GraphQLFieldDefinition typeField(Field field) {
             String type = field.getType().getSimpleName();
             return GraphQLFieldDefinition.newFieldDefinition()
                                          .name(field.getName())
                                          .type(GraphQLTypeReference.typeRef(type))
                                          .build();
+        }
+
+        private static GraphQLFieldDefinition argumentedReturn(Method method) {
+            String type = method.getReturnType().getSimpleName();
+            UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+            return GraphQLFieldDefinition.newFieldDefinition()
+                                         .name(method.getName())
+                                         .type(GraphQLTypeReference.typeRef(type))
+                                         .argument(GraphQLArgument.newArgument()
+                                                                  .name(marker.name())
+                                                                  .type(Scalars.GraphQLInt)
+                                                                  .build())
+                                         .build();
+//            return null;
         }
     }
 }

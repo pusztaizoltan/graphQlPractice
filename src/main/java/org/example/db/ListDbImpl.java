@@ -7,6 +7,7 @@ import org.example.entity.Reader;
 import org.example.entity.TestClass;
 import org.example.graphQL.annotation.GraphQlIdentifyer;
 import org.example.graphQL.annotation.ScalarFitter;
+import org.example.graphQL.annotation.UseAsInt;
 import org.example.graphQL.annotation.UseMarker;
 
 import java.util.ArrayList;
@@ -30,20 +31,17 @@ public class ListDbImpl {
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public TestClass testClassById(
-            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
+    public TestClass testClassById(@UseAsInt(name="id") long id) {
         return testClassDB.stream().filter((item) -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public Reader readerById(
-            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
+    public Reader readerById(@UseAsInt(name="id") long id) {
         return readerDB.stream().filter((reader) -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 
     @UseMarker(category = GraphQlIdentifyer.TYPE)
-    public Book bookById(
-            @UseMarker(category = GraphQlIdentifyer.SCALAR, asScalar = ScalarFitter.INT) long id) {
+    public Book bookById(@UseAsInt(name="id") long id) {
         return bookDB.stream().filter((book) -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException("invalid id"));
     }
 

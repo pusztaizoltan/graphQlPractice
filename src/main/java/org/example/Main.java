@@ -25,20 +25,23 @@ public class Main {
     public static void main(String[] args) {
 //        Schemable.graphQLObjectTypeFromClass(Book.class);
 //        task1();
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
-//        taskPartial();
+//        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbImpl());
+        taskPartial();
+//        methodReflectionExperiments(new ListDbImpl());
     }
 
-    static void methodReflectionExperiments(Class<?> datasource) {
-        Method[] methods = datasource.getDeclaredMethods();
+    static void methodReflectionExperiments(Object datasource) {
+        Method[] methods = datasource.getClass().getDeclaredMethods();
         for (Method method : methods) {
             if (Modifier.isPublic(method.getModifiers())) {
-                if (method.getParameters().length == 0) {
+                if (method.getParameters().length == 1) {
+                    System.out.println("" + method.getName());
+//                    System.out.println("" + method.getParameters()[0].getAnnotations().length >=1);
 ////                    System.out.println(method);
-                    var aa = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
-                    System.out.println("" + method.getName() + " " + ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]);
-                    System.out.println("- " + aa);
-                    System.out.println("- " + method.getReturnType().getSimpleName());
+//                    var aa = ((Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]).getSimpleName();
+//                    System.out.println("" + method.getName() + " " + ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0]);
+//                    System.out.println("- " + aa);
+//                    System.out.println("- " + method.getReturnType().getSimpleName());
                     //                    System.out.println("- "+method.getModifiers());
 //                    System.out.println("- "+(method.getAnnotatedReturnType().getType().getTypeName()));
 //                String genericTypeName = ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0].getClass().getSimpleName();
@@ -55,10 +58,18 @@ public class Main {
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
+        System.out.println("-------------------------TESTcLASS BY ID-----------");
+        ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
+        er1.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{testClassById(id: 1){id, content}}").getData().toString());
         System.out.println("-------------------------ALL FROM Readers----------");
-        ExecutionResult er3 = build.execute("{allReader {id}}");
-        er2.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{allReader {id}}").getData().toString());
+        ExecutionResult er3 = build.execute("{allReader {id, fullName, email}}");
+        er3.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{allReader {id, fullName, email}}").getData().toString());
+        System.out.println("-------------------------Reader BY ID----------");
+        ExecutionResult er4 = build.execute("{readerById(id: 1) {id, fullName, email}}");
+        er4.getErrors().forEach(System.out::println);
+        System.out.println(build.execute("{readerById(id: 1) {id, fullName, email}}").getData().toString());
     }
 
     static void task1() {
@@ -71,10 +82,6 @@ public class Main {
 //        SchemaGenerator schemaGenerator = new SchemaGenerator();
 //        GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(fromFile, runtimeWiring);
 //        GraphQL build = GraphQL.newGraphQL(graphQLSchema).build();
-        System.out.println("-------------------------TESTcLASS BY ID-----------");
-        ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
-        er1.getErrors().forEach(System.out::println);
-        System.out.println(build.execute("{testClassById(id: 1){id, content}}").getData().toString());
         System.out.println("-------------------------ALL FROM TESTCLASSES----------");
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
