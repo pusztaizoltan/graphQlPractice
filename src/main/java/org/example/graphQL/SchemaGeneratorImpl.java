@@ -27,15 +27,12 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class SchemaGeneratorImpl {
-    Object dataService;
     ClassParser classParser = new ClassParser();
-    GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
+    GraphQLBuilder builder = new GraphQLBuilder();
 
     public SchemaGeneratorImpl(Object dataService) {
-        this.dataService = dataService;
-        this.classParser.parseDataService(dataService);
-        initQueryType();
+        this.classParser.parseClassesFromDataService(dataService);
+        this.builder.buildQueryForDataService(dataService);
         {
             System.out.println("----------------------------------------");
             System.out.println("- Extracted components form dataService:\n" + classParser.components);
@@ -48,60 +45,66 @@ public class SchemaGeneratorImpl {
     }
 
     public GraphQL getGraphQL() {
-        initGraphQLSchema();
-        GraphQLCodeRegistry reg = registry.build();
-        GraphQLSchema schema = graphQLSchema.codeRegistry(reg).build();
+        builder.addTypesForComponentClasses(this.classParser.components);
+        GraphQLCodeRegistry registry = builder.registry.build();
+        GraphQLSchema schema = builder.graphQLSchema.codeRegistry(registry).build();
         return GraphQL.newGraphQL(schema).build();
     }
 
-    private void initQueryType() {
-        GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-        Method[] methods = dataService.getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
-                continue;
-            }
-            GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
-            if (method.getParameters().length == 0 && category == GraphQlIdentifyer.NESTED_TYPE) {
-                queryType.field(FieldAdapter.nestedReturn(method));
-                DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
-                registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-            } else if (method.getParameters().length == 1 &&
-                       category == GraphQlIdentifyer.TYPE &&
-                       method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
-                // todo rewrite if you can, to not being a hatchetJob
-                GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
-                UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
-                queryType.field(field);
-                DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
-                registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);
-            } else {
-                throw new UnsupportedOperationException("Not implemented yet");
-            }
-        }
-        graphQLSchema.query(queryType);
-    }
 
-    private void initGraphQLSchema() {
-        for (Class<?> component : classParser.components) {
-            if (component.isEnum()) {
-                // experimental result: todo seems like enum in this development phase doesn't need registry?
-                GraphQLEnumType enumType = TypeAdapter.graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
-                graphQLSchema.additionalType(enumType);
-            } else {
-                GraphQLObjectType objectType = TypeAdapter.graphQLObjectTypeFromClass(component);
-                graphQLSchema.additionalType(objectType);
-                Field[] fields = component.getDeclaredFields();
-                for (Field field : fields) {
-                    Class<?> fieldType = field.getType();
-                    String fieldName = field.getType().getSimpleName();
-                    DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
-                    registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+
+    private static class GraphQLBuilder{
+        GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+        GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
+
+        private void buildQueryForDataService(Object dataService) {
+            GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
+            Method[] methods = dataService.getClass().getDeclaredMethods();
+            for (Method method : methods) {
+                if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
+                    continue;
+                }
+                GraphQlIdentifyer category = method.getAnnotation(UseMarker.class).category();
+                if (method.getParameters().length == 0 && category == GraphQlIdentifyer.NESTED_TYPE) {
+                    queryType.field(FieldAdapter.nestedReturn(method));
+                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
+                    registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+                } else if (method.getParameters().length == 1 &&
+                           category == GraphQlIdentifyer.TYPE &&
+                           method.getParameters()[0].isAnnotationPresent(UseAsInt.class)) {
+                    // todo rewrite if you can, to not being a hatchetJob
+                    GraphQLFieldDefinition field = FieldAdapter.argumentedReturn(method);
+                    UseAsInt marker = method.getParameters()[0].getAnnotation(UseAsInt.class);
+                    queryType.field(field);
+                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(marker.name()));
+                    registry.dataFetcher(FieldCoordinates.coordinates("Query", field.getName()), fetcher);
+                } else {
+                    throw new UnsupportedOperationException("Not implemented yet");
+                }
+            }
+            graphQLSchema.query(queryType);
+        }
+        private void addTypesForComponentClasses(HashSet<Class<?>> components) {
+            for (Class<?> component : components) {
+                if (component.isEnum()) {
+                    // experimental result: todo seems like enum in this development phase doesn't need registry?
+                    GraphQLEnumType enumType = TypeAdapter.graphQLEnumTypeFromEnum((Class<? extends Enum<?>>) component);
+                    graphQLSchema.additionalType(enumType);
+                } else {
+                    GraphQLObjectType objectType = TypeAdapter.graphQLObjectTypeFromClass(component);
+                    graphQLSchema.additionalType(objectType);
+                    Field[] fields = component.getDeclaredFields();
+                    for (Field field : fields) {
+                        Class<?> fieldType = field.getType();
+                        String fieldName = field.getType().getSimpleName();
+                        DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
+                        registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+                    }
                 }
             }
         }
-    }
 
+    }
     private static class TypeAdapter {
         private static GraphQLEnumType graphQLEnumTypeFromEnum(Class<? extends Enum<?>> enumType) {
             String typeName = enumType.getSimpleName();
@@ -147,7 +150,7 @@ public class SchemaGeneratorImpl {
             }
         }
 
-        private void parseDataService(Object dataService) {
+        private void parseClassesFromDataService(Object dataService) {
             Method[] methods = dataService.getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (!Modifier.isPublic(method.getModifiers()) || !method.isAnnotationPresent(UseMarker.class)) {
