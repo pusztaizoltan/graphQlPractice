@@ -1,4 +1,4 @@
-package org.example.graphql.generatorutil;
+package org.example.graphql.generator_util;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;

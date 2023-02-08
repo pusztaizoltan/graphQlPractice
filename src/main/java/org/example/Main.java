@@ -13,11 +13,11 @@ public class Main {
     static void testTasks() {
         SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbTestImpl());
         GraphQL build = generator.getGraphQL();
-        System.out.println("-------------------------ALL FROM TESTCLASSES----------");
+        System.out.println("-------------------------ALL FROM TEST-CLASSES----------");
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{allTestClass {id, content}}").getData().toString());
-        System.out.println("-------------------------TESTCLASS BY ID-----------");
+        System.out.println("-------------------------TEST-CLASS BY ID-----------");
         ExecutionResult er1 = build.execute("{testClassById(id: 1){id, content}}");
         er1.getErrors().forEach(System.out::println);
         System.out.println(build.execute("{testClassById(id: 1){id, content}}").getData().toString());

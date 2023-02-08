@@ -8,7 +8,7 @@ public enum GenreType {
     FICTION(2),
     FANTASY(3),
     ;
-    long id;
+    final long id;
 
     GenreType(long id) {
         this.id = id;

@@ -1,4 +1,4 @@
-package org.example.graphql.generatorutil;
+package org.example.graphql.generator_util;
 
 import lombok.Getter;
 import org.example.graphql.annotation.FieldOf;
@@ -24,7 +24,7 @@ public class ClassParser {
     }
 
     /**
-     * Parse dataService object that actually will be serve as a dataSource
+     * Parse dataService object that actually will serve as a dataSource
      * recursively for all unique composite classes or enums
      */
     public void parseClassesFromDataService(Object dataService) {

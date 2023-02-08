@@ -1,4 +1,4 @@
-package org.example.graphql.generatorutil;
+package org.example.graphql.generator_util;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
@@ -25,7 +25,7 @@ public class GraphQLBuilder {
 
     /**
      * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
-     * and if finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
+     * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
