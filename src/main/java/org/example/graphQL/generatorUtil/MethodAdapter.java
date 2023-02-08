@@ -11,12 +11,19 @@ import org.example.graphQL.annotation.FieldType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 
 public class MethodAdapter {
     /**
-     * Test if method is candidate as a field of GraphQl Query type
+     * Select methods of dataService instance that qualify as GraphQL Query field
      */
-    public static boolean isQueryField(Method method) {
+    public static Method[] queryMethodsOf(Object dataService) {
+        return Arrays.stream(dataService.getClass().getDeclaredMethods())
+                     .filter(MethodAdapter::isQueryField)
+                     .toArray(Method[]::new);
+    }
+
+    private static boolean isQueryField(Method method) {
         return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(FieldOf.class);
     }
 

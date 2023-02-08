@@ -9,8 +9,18 @@ import org.example.graphQL.annotation.FieldType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.util.Arrays;
 
 public class FieldAdapter {
+    /**
+     * Select fields of a Class that qualify as GraphQL Type field
+     */
+    public static Field[] typeFieldsOf(Class<?> classType) {
+        return Arrays.stream(classType.getDeclaredFields())
+                     .filter((field) -> field.isAnnotationPresent(FieldOf.class))
+                     .toArray(Field[]::new);
+    }
+
     /**
      * Generate GraphQLFieldDefinition based on field and the required
      * FieldOf annotation on it

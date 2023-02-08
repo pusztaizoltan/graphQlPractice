@@ -7,7 +7,6 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.example.graphQL.annotation.ArgWith;
-import org.example.graphQL.annotation.FieldOf;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,21 +29,19 @@ public class GraphQLBuilder {
      */
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-        for (Method method : dataService.getClass().getDeclaredMethods()) {
-            if (MethodAdapter.isQueryField(method)) {
-                if (MethodAdapter.hasListReturnWithoutArg(method)) {
-                    queryType.field(MethodAdapter.listReturnWithoutArg(method));
-                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
-                    registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-                } else if (MethodAdapter.hasObjectReturnByOneArg(method)) {
-                    queryType.field(MethodAdapter.objectReturnByOneArg(method));
-                    String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
-                    DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(argName));
-                    registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-                } else {
-                    throw new RuntimeException("Not implemented type of Query field");
-                }
+        for (Method method : MethodAdapter.queryMethodsOf(dataService)) {
+            DataFetcher<?> fetcher;
+            if (MethodAdapter.hasListReturnWithoutArg(method)) {
+                queryType.field(MethodAdapter.listReturnWithoutArg(method));
+                fetcher = (env) -> method.invoke(dataService);
+            } else if (MethodAdapter.hasObjectReturnByOneArg(method)) {
+                queryType.field(MethodAdapter.objectReturnByOneArg(method));
+                String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
+                fetcher = (env) -> method.invoke(dataService, env.getArguments().get(argName));
+            } else {
+                throw new RuntimeException("Not implemented type of Query field");
             }
+            registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
         graphQLSchema.query(queryType);
     }
@@ -71,13 +68,11 @@ public class GraphQLBuilder {
     private void addObjectType(Class<?> component) {
         GraphQLObjectType objectType = TypeAdapter.graphQLObjectTypeFromClass(component);
         graphQLSchema.additionalType(objectType);
-        for (Field field : component.getDeclaredFields()) {
-            if (field.isAnnotationPresent(FieldOf.class)) {
-                Class<?> fieldType = field.getType();
-                String fieldName = field.getType().getSimpleName();
-                DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
-                registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
-            }
+        for (Field field : FieldAdapter.typeFieldsOf(component)) {
+            Class<?> fieldType = field.getType();
+            String fieldName = field.getType().getSimpleName();
+            DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
+            registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
         }
     }
 }
