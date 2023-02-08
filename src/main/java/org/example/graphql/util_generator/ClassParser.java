@@ -24,7 +24,7 @@ public class ClassParser {
     public void parseAdditionalClasses(Class<?>... classes) {
         for (Class<?> classType : classes) {
             parseClassesFromFields(classType);
-            components.add(classType);
+            this.components.add(classType);
         }
     }
 
@@ -63,8 +63,8 @@ public class ClassParser {
     }
 
     private void recursiveUpdateBy(Class<?> classType) {
-        if (!components.contains(classType)) {
-            components.add(classType);
+        if (!this.components.contains(classType)) {
+            this.components.add(classType);
             parseClassesFromFields(classType);
         }
     }

@@ -45,9 +45,9 @@ public class GraphQLBuilder {
             } else {
                 throw new RuntimeException("Not implemented type of Query field for " + method);
             }
-            registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+            this.registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
-        graphQLSchema.query(queryType);
+        this.graphQLSchema.query(queryType);
     }
 
     /**
@@ -65,7 +65,7 @@ public class GraphQLBuilder {
     }
 
     private void addEnumType(Class<? extends Enum<?>> component) {
-        graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
+        this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }
 
     private void addObjectType(Class<?> component) {
@@ -74,8 +74,8 @@ public class GraphQLBuilder {
             Class<?> fieldType = field.getType();
             String fieldName = fieldType.getSimpleName();
             DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
-            registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
+            this.registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
         }
-        graphQLSchema.additionalType(graphQLObjectTypeFromClass(component));
+        this.graphQLSchema.additionalType(graphQLObjectTypeFromClass(component));
     }
 }

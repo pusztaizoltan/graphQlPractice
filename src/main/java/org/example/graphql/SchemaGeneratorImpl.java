@@ -28,7 +28,7 @@ public class SchemaGeneratorImpl {
      * Build method of SchemaGeneratorImpl
      */
     public GraphQL getGraphQL() {
-        builder.addTypesForComponentClasses(this.classParser.getComponents());
-        return GraphQL.newGraphQL(builder.build()).build();
+        this.builder.addTypesForComponentClasses(this.classParser.getComponents());
+        return GraphQL.newGraphQL(this.builder.build()).build();
     }
 }
