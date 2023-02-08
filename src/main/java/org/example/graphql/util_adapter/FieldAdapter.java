@@ -4,6 +4,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
+import lombok.NonNull;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.FieldType;
 
@@ -14,7 +15,8 @@ public class FieldAdapter {
      * Generate GraphQLFieldDefinition based on field and the required
      * FieldOf annotation on it
      */
-    public static GraphQLFieldDefinition graphQLFieldFrom(Field field) {
+    @NonNull
+    public static GraphQLFieldDefinition graphQLFieldFrom(@NonNull Field field) {
         if (!field.isAnnotationPresent(FieldOf.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
@@ -32,7 +34,8 @@ public class FieldAdapter {
         }
     }
 
-    private static GraphQLFieldDefinition scalarField(Field field) {
+    @NonNull
+    private static GraphQLFieldDefinition scalarField(@NonNull Field field) {
         GraphQLScalarType scalar = field.getAnnotation(FieldOf.class).type().graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -40,7 +43,8 @@ public class FieldAdapter {
                                      .build();
     }
 
-    private static GraphQLFieldDefinition listField(Field field) {
+    @NonNull
+    private static GraphQLFieldDefinition listField(@NonNull Field field) {
         String typeName = ReflectionUtil.genericTypeOfField(field).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -48,7 +52,8 @@ public class FieldAdapter {
                                      .build();
     }
 
-    private static GraphQLFieldDefinition objectField(Field field) {
+    @NonNull
+    private static GraphQLFieldDefinition objectField(@NonNull Field field) {
         String type = field.getType().getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -56,7 +61,8 @@ public class FieldAdapter {
                                      .build();
     }
 
-    private static GraphQLFieldDefinition enumField(Field field) {
+    @NonNull
+    private static GraphQLFieldDefinition enumField(@NonNull Field field) {
         return objectField(field);
     }
 }
