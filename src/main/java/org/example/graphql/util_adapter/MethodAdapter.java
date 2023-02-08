@@ -4,6 +4,7 @@ import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLTypeReference;
+import lombok.NonNull;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.FieldType;
@@ -14,14 +15,14 @@ public class MethodAdapter {
     /**
      * Test for potential signature specifications of GraphQl Query field
      */
-    public static boolean hasListReturnWithoutArg(Method method) {
+    public static boolean hasListReturnWithoutArg(@NonNull Method method) {
         return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
     }
 
     /**
      * Test for potential signature specifications of GraphQl Query field
      */
-    public static boolean hasObjectReturnByOneArg(Method method) {
+    public static boolean hasObjectReturnByOneArg(@NonNull Method method) {
         return method.getParameters().length == 1 &&
                method.getAnnotation(FieldOf.class).type() == FieldType.OBJECT &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
@@ -30,7 +31,8 @@ public class MethodAdapter {
     /**
      * Generate GraphQLFieldDefinition for a specific type of dataSource method
      */
-    public static GraphQLFieldDefinition listReturnWithoutArg(Method method) {
+    @NonNull
+    public static GraphQLFieldDefinition listReturnWithoutArg(@NonNull Method method) {
         String typeName = ReflectionUtil.genericTypeOfMethod(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
@@ -41,7 +43,8 @@ public class MethodAdapter {
     /**
      * Generate GraphQLFieldDefinition for a specific type of dataSource method
      */
-    public static GraphQLFieldDefinition objectReturnByOneArg(Method method) {
+    @NonNull
+    public static GraphQLFieldDefinition objectReturnByOneArg(@NonNull Method method) {
         String type = method.getReturnType().getSimpleName();
         ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
         return GraphQLFieldDefinition.newFieldDefinition()
@@ -50,8 +53,8 @@ public class MethodAdapter {
                                      .argument(argumentFrom(annotation))
                                      .build();
     }
-
-    private static GraphQLArgument argumentFrom(ArgWith annotation) {
+    @NonNull
+    private static GraphQLArgument argumentFrom(@NonNull ArgWith annotation) {
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
                               .type(annotation.type().graphQLScalarType)
