@@ -31,13 +31,13 @@ public class GraphQLBuilder {
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         for (Method method : dataService.getClass().getDeclaredMethods()) {
-            if (FieldAdapter.isQueryField(method)) {
-                if (FieldAdapter.hasListReturnWithoutArg(method)) {
-                    queryType.field(FieldAdapter.listReturnWithoutArg(method));
+            if (MethodAdapter.isQueryField(method)) {
+                if (MethodAdapter.hasListReturnWithoutArg(method)) {
+                    queryType.field(MethodAdapter.listReturnWithoutArg(method));
                     DataFetcher<?> fetcher = (env) -> method.invoke(dataService);
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-                } else if (FieldAdapter.hasObjectReturnByOneArg(method)) {
-                    queryType.field(FieldAdapter.objectReturnByOneArg(method));
+                } else if (MethodAdapter.hasObjectReturnByOneArg(method)) {
+                    queryType.field(MethodAdapter.objectReturnByOneArg(method));
                     String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
                     DataFetcher<?> fetcher = (env) -> method.invoke(dataService, env.getArguments().get(argName));
                     registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);

@@ -29,12 +29,12 @@ public class ClassParser {
      */
     public void parseClassesFromDataService(Object dataService) {
         for (Method method : dataService.getClass().getDeclaredMethods()) {
-            if (FieldAdapter.isQueryField(method)) {
+            if (MethodAdapter.isQueryField(method)) {
                 FieldType GQLType = method.getAnnotation(FieldOf.class).type();
                 if (GQLType == FieldType.OBJECT) {
                     recursiveUpdateBy(method.getReturnType());
                 } else if (GQLType == FieldType.LIST) {
-                    recursiveUpdateBy(FieldAdapter.genericTypeOf(method));
+                    recursiveUpdateBy(MethodAdapter.genericTypeOf(method));
                 } else {
                     throw new RuntimeException("Unimplemented queryParser for " + method);
                 }
