@@ -1,4 +1,4 @@
-package org.example.graphql.generator_util;
+package org.example.graphql.util_generator;
 
 import lombok.Getter;
 import org.example.graphql.annotation.FieldOf;
@@ -7,6 +7,11 @@ import org.example.graphql.annotation.FieldType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+
+import static org.example.graphql.util_adapter.FieldAdapter.genericTypeOfField;
+import static org.example.graphql.util_adapter.FieldAdapter.typeFieldsOf;
+import static org.example.graphql.util_adapter.MethodAdapter.genericTypeOfMethod;
+import static org.example.graphql.util_adapter.MethodAdapter.queryMethodsOf;
 
 public class ClassParser {
     @Getter
@@ -28,12 +33,12 @@ public class ClassParser {
      * recursively for all unique composite classes or enums
      */
     public void parseClassesFromDataService(Object dataService) {
-        for (Method method : MethodAdapter.queryMethodsOf(dataService)) {
+        for (Method method : queryMethodsOf(dataService)) {
             FieldType GQLType = method.getAnnotation(FieldOf.class).type();
             if (GQLType == FieldType.OBJECT) {
                 recursiveUpdateBy(method.getReturnType());
             } else if (GQLType == FieldType.LIST) {
-                recursiveUpdateBy(MethodAdapter.genericTypeOf(method));
+                recursiveUpdateBy(genericTypeOfMethod(method));
             } else {
                 throw new RuntimeException("Unimplemented queryParser for " + method);
             }
@@ -41,7 +46,7 @@ public class ClassParser {
     }
 
     private void parseClassesFromFields(Class<?> classType) {
-        for (Field field : FieldAdapter.typeFieldsOf(classType)) {
+        for (Field field : typeFieldsOf(classType)) {
             FieldType GQLType = field.getAnnotation(FieldOf.class).type();
             if (!GQLType.isScalar()) {
                 if (GQLType == FieldType.ENUM) {
@@ -49,7 +54,7 @@ public class ClassParser {
                 } else if (GQLType == FieldType.OBJECT) {
                     recursiveUpdateBy(field.getType());
                 } else if (GQLType == FieldType.LIST) {
-                    recursiveUpdateBy(FieldAdapter.genericTypeOf(field));
+                    recursiveUpdateBy(genericTypeOfField(field));
                 } else {
                     throw new RuntimeException("Unimplemented fieldParser for " + GQLType);
                 }

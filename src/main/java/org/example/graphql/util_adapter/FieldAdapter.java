@@ -1,4 +1,4 @@
-package org.example.graphql.generator_util;
+package org.example.graphql.util_adapter;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
@@ -52,7 +52,7 @@ public class FieldAdapter {
     }
 
     private static GraphQLFieldDefinition listField(Field field) {
-        String typeName = genericTypeOf(field).getSimpleName();
+        String typeName = genericTypeOfField(field).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
@@ -74,7 +74,7 @@ public class FieldAdapter {
     /**
      * Determine the Generic Type of afield
      */
-    public static Class<?> genericTypeOf(Field field) {
+    public static Class<?> genericTypeOfField(Field field) {
         return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
     }
 }

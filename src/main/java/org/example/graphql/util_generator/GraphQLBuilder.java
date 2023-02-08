@@ -1,4 +1,4 @@
-package org.example.graphql.generator_util;
+package org.example.graphql.util_generator;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
@@ -10,6 +10,11 @@ import org.example.graphql.annotation.ArgWith;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
+
+import static org.example.graphql.util_adapter.FieldAdapter.typeFieldsOf;
+import static org.example.graphql.util_adapter.MethodAdapter.*;
+import static org.example.graphql.util_adapter.TypeAdapter.graphQLEnumTypeFromEnum;
+import static org.example.graphql.util_adapter.TypeAdapter.graphQLObjectTypeFromClass;
 
 public class GraphQLBuilder {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
@@ -28,13 +33,13 @@ public class GraphQLBuilder {
      */
     public void addQueryForDataService(Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-        for (Method method : MethodAdapter.queryMethodsOf(dataService)) {
+        for (Method method : queryMethodsOf(dataService)) {
             DataFetcher<?> fetcher;
-            if (MethodAdapter.hasListReturnWithoutArg(method)) {
-                queryType.field(MethodAdapter.listReturnWithoutArg(method));
+            if (hasListReturnWithoutArg(method)) {
+                queryType.field(listReturnWithoutArg(method));
                 fetcher = env -> method.invoke(dataService);
-            } else if (MethodAdapter.hasObjectReturnByOneArg(method)) {
-                queryType.field(MethodAdapter.objectReturnByOneArg(method));
+            } else if (hasObjectReturnByOneArg(method)) {
+                queryType.field(objectReturnByOneArg(method));
                 String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
                 fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
             } else {
@@ -60,17 +65,17 @@ public class GraphQLBuilder {
     }
 
     private void addEnumType(Class<? extends Enum<?>> component) {
-        graphQLSchema.additionalType(TypeAdapter.graphQLEnumTypeFromEnum(component));
+        graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }
 
     private void addObjectType(Class<?> component) {
         String typeName = component.getSimpleName();
-        for (Field field : FieldAdapter.typeFieldsOf(component)) {
+        for (Field field : typeFieldsOf(component)) {
             Class<?> fieldType = field.getType();
             String fieldName = fieldType.getSimpleName();
             DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
             registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
         }
-        graphQLSchema.additionalType(TypeAdapter.graphQLObjectTypeFromClass(component));
+        graphQLSchema.additionalType(graphQLObjectTypeFromClass(component));
     }
 }

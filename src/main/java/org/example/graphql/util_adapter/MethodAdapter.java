@@ -1,4 +1,4 @@
-package org.example.graphql.generator_util;
+package org.example.graphql.util_adapter;
 
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
@@ -47,7 +47,7 @@ public class MethodAdapter {
      * Generate GraphQLFieldDefinition for a specific type of dataSource method
      */
     public static GraphQLFieldDefinition listReturnWithoutArg(Method method) {
-        String typeName = genericTypeOf(method).getSimpleName();
+        String typeName = genericTypeOfMethod(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
                                      .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
@@ -77,7 +77,7 @@ public class MethodAdapter {
     /**
      * Determine the Generic Type of the return of a method
      */
-    public static Class<?> genericTypeOf(Method method) {
+    public static Class<?> genericTypeOfMethod(Method method) {
         return (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
     }
 }

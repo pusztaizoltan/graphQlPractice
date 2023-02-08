@@ -15,7 +15,6 @@ import java.util.Random;
 
 public class ListDbTestImpl implements ListDb {
     private static final String EXCEPTION_MESSAGE = "invalid id";
-
     private final List<TestClass> testClassDB = new ArrayList<>();
     private final List<Reader> readerDB = new ArrayList<>();
     private final List<Author> authorDB = new ArrayList<>();
