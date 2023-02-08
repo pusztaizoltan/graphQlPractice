@@ -6,6 +6,7 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.example.graphql.annotation.ArgWith;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -24,7 +25,7 @@ public class GraphQLBuilder {
     /**
      * Finalize the building process
      */
-    public GraphQLSchema build() {
+    public @NotNull GraphQLSchema build() {
         return this.graphQLSchema.codeRegistry(this.registry.build()).build();
     }
 
@@ -32,7 +33,7 @@ public class GraphQLBuilder {
      * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
      * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
-    public void addQueryForDataService(Object dataService) {
+    public void addQueryForDataService(@NotNull Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         for (Method method : queryMethodsOf(dataService)) {
             DataFetcher<?> fetcher;
@@ -55,7 +56,7 @@ public class GraphQLBuilder {
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder
      */
-    public void addTypesForComponentClasses(Set<Class<?>> components) {
+    public void addTypesForComponentClasses(@NotNull Set<Class<?>> components) {
         for (Class<?> component : components) {
             if (component.isEnum()) {
                 addEnumType((Class<? extends Enum<?>>) component);
@@ -65,11 +66,11 @@ public class GraphQLBuilder {
         }
     }
 
-    private void addEnumType(Class<? extends Enum<?>> component) {
+    private void addEnumType(@NotNull Class<? extends Enum<?>> component) {
         this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }
 
-    private void addObjectType(Class<?> component) {
+    private void addObjectType(@NotNull Class<?> component) {
         String typeName = component.getSimpleName();
         for (Field field : typeFieldsOf(component)) {
             Class<?> fieldType = field.getType();
