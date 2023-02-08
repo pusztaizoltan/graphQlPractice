@@ -1,9 +1,9 @@
-package org.example.graphQL.generatorUtil;
+package org.example.graphql.generatorutil;
 
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLObjectType;
-import org.example.graphQL.annotation.FieldOf;
+import org.example.graphql.annotation.FieldOf;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;

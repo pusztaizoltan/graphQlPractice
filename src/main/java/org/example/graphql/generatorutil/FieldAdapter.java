@@ -1,11 +1,11 @@
-package org.example.graphQL.generatorUtil;
+package org.example.graphql.generatorutil;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
-import org.example.graphQL.annotation.FieldOf;
-import org.example.graphQL.annotation.FieldType;
+import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.FieldType;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

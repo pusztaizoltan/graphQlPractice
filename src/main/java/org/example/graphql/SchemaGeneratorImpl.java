@@ -1,8 +1,8 @@
-package org.example.graphQL;
+package org.example.graphql;
 
 import graphql.GraphQL;
-import org.example.graphQL.generatorUtil.ClassParser;
-import org.example.graphQL.generatorUtil.GraphQLBuilder;
+import org.example.graphql.generatorutil.ClassParser;
+import org.example.graphql.generatorutil.GraphQLBuilder;
 
 public class SchemaGeneratorImpl {
     private final ClassParser classParser = new ClassParser();

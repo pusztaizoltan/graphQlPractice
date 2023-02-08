@@ -1,8 +1,8 @@
 package org.example.entity;
 
 import lombok.Getter;
-import org.example.graphQL.annotation.FieldOf;
-import org.example.graphQL.annotation.FieldType;
+import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.FieldType;
 
 import java.util.ArrayList;
 import java.util.List;

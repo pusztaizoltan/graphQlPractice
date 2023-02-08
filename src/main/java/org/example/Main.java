@@ -3,7 +3,7 @@ package org.example;
 import graphql.ExecutionResult;
 import graphql.GraphQL;
 import org.example.db.ListDbTestImpl;
-import org.example.graphQL.SchemaGeneratorImpl;
+import org.example.graphql.SchemaGeneratorImpl;
 
 public class Main {
     public static void main(String[] args) {

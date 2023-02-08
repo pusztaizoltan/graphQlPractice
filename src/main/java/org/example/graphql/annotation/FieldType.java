@@ -1,4 +1,4 @@
-package org.example.graphQL.annotation;
+package org.example.graphql.annotation;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;

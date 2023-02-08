@@ -1,4 +1,4 @@
-package org.example.graphQL.annotation;
+package org.example.graphql.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

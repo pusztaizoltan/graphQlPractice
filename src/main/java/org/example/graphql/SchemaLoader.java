@@ -1,4 +1,4 @@
-package org.example.graphQL;
+package org.example.graphql;
 
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;

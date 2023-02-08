@@ -1,4 +1,4 @@
-package org.example.graphQL.generatorUtil;
+package org.example.graphql.generatorutil;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
@@ -6,11 +6,11 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphQL.annotation.ArgWith;
+import org.example.graphql.annotation.ArgWith;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashSet;
+import java.util.Set;
 
 public class GraphQLBuilder {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
@@ -33,13 +33,13 @@ public class GraphQLBuilder {
             DataFetcher<?> fetcher;
             if (MethodAdapter.hasListReturnWithoutArg(method)) {
                 queryType.field(MethodAdapter.listReturnWithoutArg(method));
-                fetcher = (env) -> method.invoke(dataService);
+                fetcher = env -> method.invoke(dataService);
             } else if (MethodAdapter.hasObjectReturnByOneArg(method)) {
                 queryType.field(MethodAdapter.objectReturnByOneArg(method));
                 String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
-                fetcher = (env) -> method.invoke(dataService, env.getArguments().get(argName));
+                fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
             } else {
-                throw new RuntimeException("Not implemented type of Query field");
+                throw new RuntimeException("Not implemented type of Query field for " + method);
             }
             registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
@@ -50,7 +50,7 @@ public class GraphQLBuilder {
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder
      */
-    public void addTypesForComponentClasses(HashSet<Class<?>> components) {
+    public void addTypesForComponentClasses(Set<Class<?>> components) {
         for (Class<?> component : components) {
             if (component.isEnum()) {
                 addEnumType((Class<? extends Enum<?>>) component);
@@ -71,7 +71,7 @@ public class GraphQLBuilder {
         for (Field field : FieldAdapter.typeFieldsOf(component)) {
             Class<?> fieldType = field.getType();
             String fieldName = field.getType().getSimpleName();
-            DataFetcher<?> fetcher = (env) -> fieldType.cast(field.get(component.cast(env.getSource())));
+            DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
             registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
         }
     }
