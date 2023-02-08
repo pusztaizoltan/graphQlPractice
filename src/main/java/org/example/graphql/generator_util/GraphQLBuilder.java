@@ -3,7 +3,6 @@ package org.example.graphql.generator_util;
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
-import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import org.example.graphql.annotation.ArgWith;
@@ -61,18 +60,17 @@ public class GraphQLBuilder {
     }
 
     private void addEnumType(Class<? extends Enum<?>> component) {
-        GraphQLEnumType enumType = TypeAdapter.graphQLEnumTypeFromEnum(component);
-        graphQLSchema.additionalType(enumType);
+        graphQLSchema.additionalType(TypeAdapter.graphQLEnumTypeFromEnum(component));
     }
 
     private void addObjectType(Class<?> component) {
-        GraphQLObjectType objectType = TypeAdapter.graphQLObjectTypeFromClass(component);
-        graphQLSchema.additionalType(objectType);
+        String typeName = component.getSimpleName();
         for (Field field : FieldAdapter.typeFieldsOf(component)) {
             Class<?> fieldType = field.getType();
-            String fieldName = field.getType().getSimpleName();
+            String fieldName = fieldType.getSimpleName();
             DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
-            registry.dataFetcher(FieldCoordinates.coordinates(objectType.getName(), fieldName), fetcher);
+            registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
         }
+        graphQLSchema.additionalType(TypeAdapter.graphQLObjectTypeFromClass(component));
     }
 }
