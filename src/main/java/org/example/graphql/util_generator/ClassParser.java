@@ -8,10 +8,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 
-import static org.example.graphql.util_adapter.FieldAdapter.genericTypeOfField;
-import static org.example.graphql.util_adapter.FieldAdapter.typeFieldsOf;
-import static org.example.graphql.util_adapter.MethodAdapter.genericTypeOfMethod;
-import static org.example.graphql.util_adapter.MethodAdapter.queryMethodsOf;
+import static org.example.graphql.util_adapter.ReflectionUtil.*;
 
 public class ClassParser {
     @Getter

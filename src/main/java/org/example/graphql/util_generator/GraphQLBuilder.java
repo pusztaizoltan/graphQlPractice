@@ -11,8 +11,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static org.example.graphql.util_adapter.FieldAdapter.typeFieldsOf;
 import static org.example.graphql.util_adapter.MethodAdapter.*;
+import static org.example.graphql.util_adapter.ReflectionUtil.queryMethodsOf;
+import static org.example.graphql.util_adapter.ReflectionUtil.typeFieldsOf;
 import static org.example.graphql.util_adapter.TypeAdapter.graphQLEnumTypeFromEnum;
 import static org.example.graphql.util_adapter.TypeAdapter.graphQLObjectTypeFromClass;
 
