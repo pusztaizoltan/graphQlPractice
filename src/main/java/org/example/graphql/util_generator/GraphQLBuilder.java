@@ -55,15 +55,17 @@ public class GraphQLBuilder {
         this.graphQLSchema.query(queryType);
     }
 
-    DataFetcher<?> createFetcherFor(Method method, Object dataService){
+    DataFetcher<?> createFetcherFor(Method method, Object dataService) {
         Parameter arg = method.getParameters()[0];
         Class<?> argType = arg.getType();
         String argName = arg.getAnnotation(ArgWith.class).name();
         // arg boolean expect Boolean envArg
         // arg String expect String envArg
         // arg Enum expect String envArg
-        System.out.println("-argType: "+argType);
-        if(argType.isPrimitive()) {
+        System.out.println("-argType: " + argType);
+        if (argType.equals(boolean.class)) {
+            return (env) -> method.invoke(dataService, ((Boolean) env.getArguments().get(argName)).booleanValue());
+        } else if (argType.isPrimitive()) {
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
         } else if (argType.isEnum()) {
             Class<Enum> enumType = ((Class<Enum>) argType);
@@ -72,8 +74,8 @@ public class GraphQLBuilder {
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
         }
         return null;
-
     }
+
     /**
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder

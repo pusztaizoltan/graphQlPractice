@@ -55,7 +55,7 @@ public class MethodAdapter {
         String typeName = ReflectionUtil.genericTypeOfMethod(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
-                                     .type(GraphQLTypeReference.typeRef(typeName))
+                                     .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
                                      .argument(argumentFrom(method))
                                      .build();
     }

@@ -44,17 +44,17 @@ public class Main {
         System.out.println(er6.getData().toString());
         System.out.println();
         System.out.println("-------------------------Author BY isAlive----------");
-        ExecutionResult er7 = build.execute("{authorByIsAlive(isAlive: true) {id, name, isAlive}}");
+        ExecutionResult er7 = build.execute("{authorByIsAlive(isAlive: true) {name, isAlive}}");
         er7.getErrors().forEach(System.out::println);
         System.out.println(er7.getData().toString());
         System.out.println();
         System.out.println("-------------------------Books BY titleContent----------");
-        ExecutionResult er8 = build.execute("{bookByTitleContent (titleContent: \"2\") {id, title}}");
+        ExecutionResult er8 = build.execute("{bookByTitleContent (titleContent: \"Title_2\") {id, title}}");
         er8.getErrors().forEach(System.out::println);
         System.out.println(er8.getData().toString());
         System.out.println();
         System.out.println("-------------------------Books BY GenreEnum----------");
-        ExecutionResult er9 = build.execute("{bookByGenre(genre: FICTION) {id, title, genre, author{name}}}");
+        ExecutionResult er9 = build.execute("{bookByGenre(genre: FICTION) {title, genre}}");
         er9.getErrors().forEach(System.out::println);
         System.out.println(er9.getData().toString());
     }
