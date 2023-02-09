@@ -43,14 +43,10 @@ public class GraphQLBuilder {
                 fetcher = env -> method.invoke(dataService);
             } else if (hasObjectReturnByOneArg(method)) {
                 queryType.field(objectReturnByOneArg(method));
-                String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
-                fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
+                fetcher = createFetcherFor(method, dataService);
             } else if (hasListReturnByOneArg(method)) {
                 queryType.field(listReturnByOneArg(method));
-                Parameter arg = method.getParameters()[0];
-                Class<?> argType = arg.getType();
-                String argName = arg.getAnnotation(ArgWith.class).name();
-                fetcher = env -> method.invoke(dataService, argType.cast(env.getArguments().get(argName)));
+                fetcher = createFetcherFor(method, dataService);
             } else {
                 throw new RuntimeException("Not implemented type of Query field for " + method);
             }
@@ -59,6 +55,25 @@ public class GraphQLBuilder {
         this.graphQLSchema.query(queryType);
     }
 
+    DataFetcher<?> createFetcherFor(Method method, Object dataService){
+        Parameter arg = method.getParameters()[0];
+        Class<?> argType = arg.getType();
+        String argName = arg.getAnnotation(ArgWith.class).name();
+        // arg boolean expect Boolean envArg
+        // arg String expect String envArg
+        // arg Enum expect String envArg
+        System.out.println("-argType: "+argType);
+        if(argType.isPrimitive()) {
+            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
+        } else if (argType.isEnum()) {
+            Class<Enum> enumType = ((Class<Enum>) argType);
+            return (env) -> method.invoke(dataService, Enum.valueOf(enumType, (String) env.getArguments().get(argName)));
+        } else if (argType == String.class) {
+            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
+        }
+        return null;
+
+    }
     /**
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder
