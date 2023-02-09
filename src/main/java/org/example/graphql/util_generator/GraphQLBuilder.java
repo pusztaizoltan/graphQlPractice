@@ -5,15 +5,14 @@ import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphql.annotation.ArgWith;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.Set;
 
-import static org.example.graphql.util_adapter.MethodAdapter.*;
+import static org.example.graphql.util_adapter.MethodAdapter.createFetcherFor;
+import static org.example.graphql.util_adapter.MethodAdapter.createQueryFieldFor;
 import static org.example.graphql.util_adapter.ReflectionUtil.queryMethodsOf;
 import static org.example.graphql.util_adapter.ReflectionUtil.typeFieldsOf;
 import static org.example.graphql.util_adapter.TypeAdapter.graphQLEnumTypeFromEnum;
@@ -37,43 +36,11 @@ public class GraphQLBuilder {
     public void addQueryForDataService(@NotNull Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
         for (Method method : queryMethodsOf(dataService)) {
-            DataFetcher<?> fetcher;
-            if (hasListReturnWithoutArg(method)) {
-                queryType.field(listReturnWithoutArg(method));
-                fetcher = env -> method.invoke(dataService);
-            } else if (hasObjectReturnByOneArg(method)) {
-                queryType.field(objectReturnByOneArg(method));
-                fetcher = createFetcherFor(method, dataService);
-            } else if (hasListReturnByOneArg(method)) {
-                queryType.field(listReturnByOneArg(method));
-                fetcher = createFetcherFor(method, dataService);
-            } else {
-                throw new RuntimeException("Not implemented type of Query field for " + method);
-            }
+            queryType.field(createQueryFieldFor(method));
+            DataFetcher<?> fetcher = createFetcherFor(method, dataService);
             this.registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
         this.graphQLSchema.query(queryType);
-    }
-
-    DataFetcher<?> createFetcherFor(Method method, Object dataService) {
-        Parameter arg = method.getParameters()[0];
-        Class<?> argType = arg.getType();
-        String argName = arg.getAnnotation(ArgWith.class).name();
-        // arg boolean expect Boolean envArg
-        // arg String expect String envArg
-        // arg Enum expect String envArg
-        System.out.println("-argType: " + argType);
-        if (argType.equals(boolean.class)) {
-            return (env) -> method.invoke(dataService, ((Boolean) env.getArguments().get(argName)).booleanValue());
-        } else if (argType.isPrimitive()) {
-            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
-        } else if (argType.isEnum()) {
-            Class<Enum> enumType = ((Class<Enum>) argType);
-            return (env) -> method.invoke(dataService, Enum.valueOf(enumType, (String) env.getArguments().get(argName)));
-        } else if (argType == String.class) {
-            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
-        }
-        return null;
     }
 
     /**

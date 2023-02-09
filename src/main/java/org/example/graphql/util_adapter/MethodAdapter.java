@@ -1,5 +1,6 @@
 package org.example.graphql.util_adapter;
 
+import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
@@ -10,37 +11,63 @@ import org.example.graphql.annotation.FieldType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class MethodAdapter {
     /**
-     * Test for potential signature specifications of GraphQl Query field
+     * Generate GraphQLFieldDefinition for a dataSource method based on the detected method signature
      */
-    public static boolean hasListReturnWithoutArg(@NotNull Method method) {
-        return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
+    public static @NotNull GraphQLFieldDefinition createQueryFieldFor(@NotNull Method method) {
+        if (hasListReturnWithoutArg(method)) {
+            return listReturnWithoutArg(method);
+        } else if (hasObjectReturnByOneArg(method)) {
+            return objectReturnByOneArg(method);
+        } else if (hasListReturnByOneArg(method)) {
+            return listReturnByOneArg(method);
+        } else {
+            throw new RuntimeException("Not implemented type of Query field for " + method);
+        }
     }
 
     /**
-     * Test for potential signature specifications of GraphQl Query field
+     * Provide DataFetcher for a dataSource method based on the detected method signature
      */
-    public static boolean hasObjectReturnByOneArg(@NotNull Method method) {
+    public static @NotNull DataFetcher<?> createFetcherFor(@NotNull Method method, @NotNull Object dataService) {
+        Parameter[] parameters = method.getParameters();
+        if (parameters.length == 0) {
+            return (env) -> method.invoke(dataService);
+        }
+        Class<?> argType = parameters[0].getType();
+        String argName = parameters[0].getAnnotation(ArgWith.class).name();
+        if (argType.isPrimitive()) {
+            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
+        }
+        if (argType.isEnum()) {
+            return (env) -> method.invoke(dataService, Enum.valueOf((Class<Enum>) argType, (String) env.getArguments().get(argName)));
+        }
+        if (argType.equals(String.class)) {
+            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
+        }
+        throw new RuntimeException("Unimplemented fetcher for " + method);
+    }
+
+    private static boolean hasListReturnWithoutArg(@NotNull Method method) {
+        return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
+    }
+
+    private static boolean hasObjectReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
                method.getAnnotation(FieldOf.class).type() == FieldType.OBJECT &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
-    /**
-     * Test for potential signature specifications of GraphQl Query field
-     */
-    public static boolean hasListReturnByOneArg(@NotNull Method method) {
+    private static boolean hasListReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
                method.getAnnotation(FieldOf.class).type() == FieldType.LIST &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
-    /**
-     * Generate GraphQLFieldDefinition for a specific type of dataSource method
-     */
-    public static @NotNull GraphQLFieldDefinition listReturnWithoutArg(@NotNull Method method) {
+    private static @NotNull GraphQLFieldDefinition listReturnWithoutArg(@NotNull Method method) {
         String typeName = ReflectionUtil.genericTypeOfMethod(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
@@ -48,10 +75,7 @@ public class MethodAdapter {
                                      .build();
     }
 
-    /**
-     * Generate GraphQLFieldDefinition for a specific type of dataSource method
-     */
-    public static @NotNull GraphQLFieldDefinition listReturnByOneArg(@NotNull Method method) {
+    private static @NotNull GraphQLFieldDefinition listReturnByOneArg(@NotNull Method method) {
         String typeName = ReflectionUtil.genericTypeOfMethod(method).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
@@ -60,10 +84,7 @@ public class MethodAdapter {
                                      .build();
     }
 
-    /**
-     * Generate GraphQLFieldDefinition for a specific type of dataSource method
-     */
-    public static @NotNull GraphQLFieldDefinition objectReturnByOneArg(@NotNull Method method) {
+    private static @NotNull GraphQLFieldDefinition objectReturnByOneArg(@NotNull Method method) {
         String typeName = method.getReturnType().getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
