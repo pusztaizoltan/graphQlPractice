@@ -12,6 +12,7 @@ import org.example.graphql.annotation.FieldType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ListDbTestImpl implements ListDb {
     private static final String EXCEPTION_MESSAGE = "invalid id";
@@ -24,34 +25,46 @@ public class ListDbTestImpl implements ListDb {
         initDb();
     }
 
+    @Override
     @FieldOf(type = FieldType.LIST)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
+    @Override
     @FieldOf(type = FieldType.OBJECT)
     public TestClass testClassById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
+    @Override
     @FieldOf(type = FieldType.OBJECT)
     public Reader readerById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
+    @Override
     @FieldOf(type = FieldType.OBJECT)
     public Book bookById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
+    @Override
     @FieldOf(type = FieldType.LIST)
     public List<Reader> allReader() {
         return readerDB;
     }
 
+    @Override
     @FieldOf(type = FieldType.LIST)
     public List<Book> allBook() {
         return bookDB;
+    }
+
+    @Override
+    @FieldOf(type = FieldType.LIST)
+    public List<Book> bookByGenre(@ArgWith(name = "genre", type = FieldType.ENUM) GenreType genre) {
+        return bookDB.stream().filter(book -> book.getGenreAsEnum() == genre).collect(Collectors.toList());
     }
 
     private void initDb() {

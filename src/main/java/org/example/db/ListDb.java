@@ -1,6 +1,7 @@
 package org.example.db;
 
 import org.example.entity.Book;
+import org.example.entity.GenreType;
 import org.example.entity.Reader;
 import org.example.entity.TestClass;
 
@@ -18,4 +19,6 @@ public interface ListDb {
     List<Reader> allReader();
 
     List<Book> allBook();
+
+    List<Book> bookByGenre(GenreType genre);
 }
