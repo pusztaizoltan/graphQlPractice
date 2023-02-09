@@ -64,7 +64,19 @@ public class ListDbTestImpl implements ListDb {
     @Override
     @FieldOf(type = FieldType.LIST)
     public List<Book> bookByGenre(@ArgWith(name = "genre", type = FieldType.ENUM) GenreType genre) {
-        return bookDB.stream().filter(book -> book.getGenreAsEnum() == genre).collect(Collectors.toList());
+        return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
+    }
+
+    @Override
+    @FieldOf(type = FieldType.LIST)
+    public List<Author> authorByIsAlive(@ArgWith(name = "isAlive", type = FieldType.SCALAR_BOOLEAN) boolean isAlive) {
+        return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
+    }
+
+    @Override
+    @FieldOf(type = FieldType.LIST)
+    public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = FieldType.SCALAR_STRING) String titleContent) {
+        return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
     private void initDb() {

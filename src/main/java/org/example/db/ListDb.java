@@ -1,5 +1,6 @@
 package org.example.db;
 
+import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.GenreType;
 import org.example.entity.Reader;
@@ -21,4 +22,8 @@ public interface ListDb {
     List<Book> allBook();
 
     List<Book> bookByGenre(GenreType genre);
+
+    List<Author> authorByIsAlive(boolean isAlive);
+
+    List<Book> bookByTitleContent(String titleContent);
 }

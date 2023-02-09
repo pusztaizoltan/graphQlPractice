@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Set;
 
 import static org.example.graphql.util_adapter.MethodAdapter.*;
@@ -46,8 +47,10 @@ public class GraphQLBuilder {
                 fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
             } else if (hasListReturnByOneArg(method)) {
                 queryType.field(listReturnByOneArg(method));
-                String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
-                fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
+                Parameter arg = method.getParameters()[0];
+                Class<?> argType = arg.getType();
+                String argName = arg.getAnnotation(ArgWith.class).name();
+                fetcher = env -> method.invoke(dataService, argType.cast(env.getArguments().get(argName)));
             } else {
                 throw new RuntimeException("Not implemented type of Query field for " + method);
             }
