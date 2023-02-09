@@ -44,6 +44,10 @@ public class GraphQLBuilder {
                 queryType.field(objectReturnByOneArg(method));
                 String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
                 fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
+            } else if (hasListReturnByOneArg(method)) {
+                queryType.field(listReturnByOneArg(method));
+                String argName = method.getParameters()[0].getAnnotation(ArgWith.class).name();
+                fetcher = env -> method.invoke(dataService, env.getArguments().get(argName));
             } else {
                 throw new RuntimeException("Not implemented type of Query field for " + method);
             }
