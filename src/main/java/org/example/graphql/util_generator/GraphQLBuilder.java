@@ -43,6 +43,10 @@ public class GraphQLBuilder {
         this.graphQLSchema.query(queryType);
     }
 
+    /**
+     * Scans the dataService instance for methods that can be paired with GraphQl Mutation fields,
+     * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
+     */
     public void addMutationForDataService(@NotNull Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Mutation");
         for (Method method : mutationMethodsOf(dataService)) {
