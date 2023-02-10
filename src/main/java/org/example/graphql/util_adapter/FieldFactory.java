@@ -1,6 +1,7 @@
 package org.example.graphql.util_adapter;
 
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
@@ -33,6 +34,28 @@ public class FieldFactory {
         }
     }
 
+    /**
+     * Generate GraphQLInputObjectField based on field and the required
+     * FieldOf annotation on it
+     */
+    public static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
+        if (!field.isAnnotationPresent(FieldOf.class)) {
+            throw new RuntimeException("Parsing attempt of unannotated field:" + field);
+        }
+        FieldOf fieldOf = field.getAnnotation(FieldOf.class);
+        if (fieldOf.type().isScalar()) {
+            return scalarInputField(field);
+        } else if (fieldOf.type() == GQLType.OBJECT) {
+            return objectInputField(field);
+        } else if (fieldOf.type() == GQLType.LIST) {
+            return listInputField(field);
+        } else if (fieldOf.type() == GQLType.ENUM) {
+            return enumInputField(field);
+        } else {
+            throw new RuntimeException("Unimplemented fieldAdapter for " + fieldOf);
+        }
+    }
+
     private static @NotNull GraphQLFieldDefinition scalarObjectField(@NotNull Field field) {
         GraphQLScalarType scalar = field.getAnnotation(FieldOf.class).type().graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
@@ -59,5 +82,33 @@ public class FieldFactory {
 
     private static @NotNull GraphQLFieldDefinition enumObjectField(@NotNull Field field) {
         return objectObjectField(field);
+    }
+
+    private static @NotNull GraphQLInputObjectField scalarInputField(@NotNull Field field) {
+        GraphQLScalarType scalar = field.getAnnotation(FieldOf.class).type().graphQLScalarType;
+        return GraphQLInputObjectField.newInputObjectField()
+                                      .name(field.getName())
+                                      .type(scalar)
+                                      .build();
+    }
+
+    private static @NotNull GraphQLInputObjectField listInputField(@NotNull Field field) {
+        String typeName = ReflectionUtil.genericTypeOfField(field).getSimpleName();
+        return GraphQLInputObjectField.newInputObjectField()
+                                      .name(field.getName())
+                                      .type(GraphQLList.list(GraphQLTypeReference.typeRef(typeName)))
+                                      .build();
+    }
+
+    private static @NotNull GraphQLInputObjectField objectInputField(@NotNull Field field) {
+        String type = field.getType().getSimpleName();
+        return GraphQLInputObjectField.newInputObjectField()
+                                      .name(field.getName())
+                                      .type(GraphQLTypeReference.typeRef(type))
+                                      .build();
+    }
+
+    private static @NotNull GraphQLInputObjectField enumInputField(@NotNull Field field) {
+        return objectInputField(field);
     }
 }

@@ -15,8 +15,8 @@ import static org.example.graphql.util_adapter.MethodAdapter.createFetcherFor;
 import static org.example.graphql.util_adapter.MethodAdapter.createQueryFieldFor;
 import static org.example.graphql.util_adapter.ReflectionUtil.queryMethodsOf;
 import static org.example.graphql.util_adapter.ReflectionUtil.typeFieldsOf;
-import static org.example.graphql.util_adapter.TypeAdapter.graphQLEnumTypeFromEnum;
-import static org.example.graphql.util_adapter.TypeAdapter.graphQLObjectTypeFromClass;
+import static org.example.graphql.util_adapter.TypeFactory.graphQLEnumTypeFromEnum;
+import static org.example.graphql.util_adapter.TypeFactory.graphQLObjectTypeFromClass;
 
 public class GraphQLBuilder {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
