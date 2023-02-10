@@ -48,7 +48,7 @@ public class ClassParser {
     public void parseInputObjectsFromDataService(@NotNull Object dataService) {
         for (Method method : mutationMethodsOf(dataService)) {
             for(Parameter parameter: imputeObjectsOf(method)){
-                GQLType argType = method.getAnnotation(ArgWith.class).type();
+                GQLType argType = parameter.getAnnotation(ArgWith.class).type();
                 if (argType == GQLType.OBJECT) {
                     recursiveUpdateBy(parameter.getType());
                 } else if (argType == GQLType.LIST) {
