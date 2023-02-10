@@ -1,5 +1,6 @@
 package org.example.db;
 
+import org.example.dto.ReaderDTO;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.GenreType;
@@ -77,6 +78,12 @@ public class ListDbTestImpl implements ListDb {
     @FieldOf(type = FieldType.LIST)
     public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = FieldType.SCALAR_STRING) String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
+    }
+    // todo mutation marker annotation
+    public long newReader(ReaderDTO readerDTO){
+        long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
+        this.readerDB.add(readerDTO.toReaderOfId(newId));
+        return newId;
     }
 
     private void initDb() {
