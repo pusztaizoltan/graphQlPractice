@@ -46,12 +46,11 @@ public class GraphQLBuilder {
     public void addMutationForDataService(@NotNull Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Mutation");
         for (Method method : mutationMethodsOf(dataService)) {
-            System.out.println("- mutation: "+ method.getName());
             queryType.field(createFieldFromMethod(method)); //
             DataFetcher<?> fetcher = createFetcherFor(method, dataService);
             this.registry.dataFetcher(FieldCoordinates.coordinates("Mutation", method.getName()), fetcher);
         }
-        this.graphQLSchema.query(queryType);
+        this.graphQLSchema.mutation(queryType);
     }
 
     /**
