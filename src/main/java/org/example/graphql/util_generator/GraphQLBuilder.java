@@ -50,14 +50,14 @@ public class GraphQLBuilder {
     public void addTypesForComponentClasses(@NotNull Set<Class<?>> components) {
         for (Class<?> component : components) {
             if (component.isEnum()) {
-                addEnumType((Class<? extends Enum<?>>) component);
+                addEnumType((Class<Enum<?>>) component);
             } else {
                 addObjectType(component);
             }
         }
     }
 
-    private void addEnumType(@NotNull Class<? extends Enum<?>> component) {
+    private void addEnumType(@NotNull Class<Enum<?>> component) {
         this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }
 

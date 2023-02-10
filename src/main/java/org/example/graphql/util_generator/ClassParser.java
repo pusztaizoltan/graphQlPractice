@@ -1,12 +1,14 @@
 package org.example.graphql.util_generator;
 
 import lombok.Getter;
+import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.FieldType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashSet;
 
 import static org.example.graphql.util_adapter.ReflectionUtil.*;
@@ -40,6 +42,23 @@ public class ClassParser {
             } else {
                 throw new RuntimeException("Unimplemented queryParser for " + method);
             }
+        }
+    }
+
+    public void parseInputObjectsFromDataService(@NotNull Object dataService) {
+        for (Method method : mutationMethodsOf(dataService)) {
+            for(Parameter parameter: imputeObjectsOf(method)){
+                FieldType argType = method.getAnnotation(ArgWith.class).type();
+                if (argType == FieldType.OBJECT) {
+                    recursiveUpdateBy(parameter.getType());
+                } else if (argType == FieldType.LIST) {
+                    recursiveUpdateBy(genericTypeOfParameter(parameter));
+                } else {
+                    throw new RuntimeException("Unimplemented queryParser for " + method);
+                }
+            }
+
+
         }
     }
 

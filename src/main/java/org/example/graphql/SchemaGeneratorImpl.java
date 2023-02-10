@@ -15,6 +15,7 @@ public class SchemaGeneratorImpl {
      */
     public SchemaGeneratorImpl(@NotNull Object dataService) {
         this.classParser.parseClassesFromDataService(dataService);
+        this.classParser.parseInputObjectsFromDataService(dataService);
         this.builder.addQueryForDataService(dataService);
     }
 

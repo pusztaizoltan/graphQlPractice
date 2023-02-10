@@ -1,5 +1,6 @@
 package org.example.db;
 
+import org.example.dto.ReaderDTO;
 import org.example.entity.Author;
 import org.example.entity.Book;
 import org.example.entity.GenreType;
@@ -26,4 +27,6 @@ public interface ListDb {
     List<Author> authorByIsAlive(boolean isAlive);
 
     List<Book> bookByTitleContent(String titleContent);
+
+    long newReader(ReaderDTO readerDTO);
 }

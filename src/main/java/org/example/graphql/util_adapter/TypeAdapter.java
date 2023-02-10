@@ -28,14 +28,14 @@ public class TypeAdapter {
     /**
      * Utility method to create GraphQLEnumType for provided Enum type
      */
-    public static @NotNull GraphQLEnumType graphQLEnumTypeFromEnum(@NotNull Class<? extends Enum<?>> enumType) {
+    public static @NotNull GraphQLEnumType graphQLEnumTypeFromEnum(@NotNull Class<Enum<?>> enumType) {
         return GraphQLEnumType.newEnum()
                               .name(enumType.getSimpleName())
                               .values(graphQLEnumValues(enumType))
                               .build();
     }
 
-    private static @NotNull List<GraphQLEnumValueDefinition> graphQLEnumValues(@NotNull Class<? extends Enum<?>> enumType) {
+    private static @NotNull List<GraphQLEnumValueDefinition> graphQLEnumValues(@NotNull Class<Enum<?>> enumType) {
         return Arrays.stream(enumType.getEnumConstants())
                      .map(TypeAdapter::graphQLEnumValueFrom)
                      .collect(Collectors.toList());
