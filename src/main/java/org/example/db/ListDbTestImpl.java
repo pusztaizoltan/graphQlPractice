@@ -93,7 +93,7 @@ public class ListDbTestImpl implements ListDb {
 
     @Override
     @Mutate(type = GQLType.SCALAR_INT)
-    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
+    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.INPUT) @NotNull ReaderDTO readerDTO) {
         if(readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
             this.readerDB.add(readerDTO.toReaderOfId(newId));

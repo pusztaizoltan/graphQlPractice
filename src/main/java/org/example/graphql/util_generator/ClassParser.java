@@ -34,10 +34,10 @@ public class ClassParser {
      */
     public void parseClassesFromDataService(@NotNull Object dataService) {
         for (Method method : queryMethodsOf(dataService)) {
-            GQLType GQLType = method.getAnnotation(FieldOf.class).type();
-            if (GQLType == org.example.graphql.annotation.GQLType.OBJECT) {
+            GQLType gqlType = method.getAnnotation(FieldOf.class).type();
+            if (gqlType == GQLType.OBJECT || gqlType == GQLType.INPUT) {
                 recursiveUpdateBy(method.getReturnType());
-            } else if (GQLType == org.example.graphql.annotation.GQLType.LIST) {
+            } else if (gqlType == GQLType.LIST) {
                 recursiveUpdateBy(genericTypeOfMethod(method));
             } else {
                 throw new RuntimeException("Unimplemented queryParser for " + method);
@@ -50,10 +50,10 @@ public class ClassParser {
     public void parseInputObjectsFromDataService(@NotNull Object dataService) {
         for (Method method : mutationMethodsOf(dataService)) {
             for (Parameter parameter : imputeObjectsOf(method)) {
-                GQLType argType = parameter.getAnnotation(ArgWith.class).type();
-                if (argType == GQLType.OBJECT) {
+                GQLType gqlType = parameter.getAnnotation(ArgWith.class).type();
+                if (gqlType == GQLType.OBJECT || gqlType == GQLType.INPUT) {
                     recursiveUpdateBy(parameter.getType());
-                } else if (argType == GQLType.LIST) {
+                } else if (gqlType == GQLType.LIST) {
                     recursiveUpdateBy(genericTypeOfParameter(parameter));
                 } else {
                     throw new RuntimeException("Unimplemented queryParser for " + method);
@@ -64,16 +64,16 @@ public class ClassParser {
 
     private void parseClassesFromFields(@NotNull Class<?> classType) {
         for (Field field : typeFieldsOf(classType)) {
-            GQLType GQLType = field.getAnnotation(FieldOf.class).type();
-            if (!GQLType.isScalar()) {
-                if (GQLType == org.example.graphql.annotation.GQLType.ENUM) {
+            GQLType gqlType = field.getAnnotation(FieldOf.class).type();
+            if (!gqlType.isScalar()) {
+                if (gqlType == GQLType.ENUM) {
                     recursiveUpdateBy(field.getType());
-                } else if (GQLType == org.example.graphql.annotation.GQLType.OBJECT) {
+                } else if (gqlType == GQLType.OBJECT || gqlType == GQLType.INPUT) {
                     recursiveUpdateBy(field.getType());
-                } else if (GQLType == org.example.graphql.annotation.GQLType.LIST) {
+                } else if (gqlType == GQLType.LIST) {
                     recursiveUpdateBy(genericTypeOfField(field));
                 } else {
-                    throw new RuntimeException("Unimplemented fieldParser for " + GQLType);
+                    throw new RuntimeException("Unimplemented fieldParser for " + gqlType);
                 }
             }
         }

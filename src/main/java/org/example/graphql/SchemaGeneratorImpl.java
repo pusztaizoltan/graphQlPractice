@@ -17,6 +17,7 @@ public class SchemaGeneratorImpl {
         this.classParser.parseClassesFromDataService(dataService);
         this.classParser.parseInputObjectsFromDataService(dataService);
         this.builder.addQueryForDataService(dataService);
+        this.builder.addMutationForDataService(dataService);
     }
 
     /**

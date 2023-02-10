@@ -12,9 +12,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class TypeFactory {
-    GraphQLInputObjectType graphQLInputObjectTypeFromClass(@NotNull Class<?> classType) {
+    /**
+     * Utility method to create GraphQLInputObjectType for provided Class type
+     */
+    public static @NotNull GraphQLInputObjectType graphQLInputObjectTypeFromClass(@NotNull Class<?> classType) {
         GraphQLInputObjectType.Builder inputObjectTypeBuilder = GraphQLInputObjectType.newInputObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(FieldOf.class)) {
@@ -23,6 +25,7 @@ public class TypeFactory {
         }
         return inputObjectTypeBuilder.build();
     }
+
     /**
      * Utility method to create GraphQLObjectType for provided Class type
      */

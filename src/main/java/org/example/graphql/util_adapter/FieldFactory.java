@@ -21,6 +21,7 @@ public class FieldFactory {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
         FieldOf fieldOf = field.getAnnotation(FieldOf.class);
+
         if (fieldOf.type().isScalar()) {
             return scalarObjectField(field);
         } else if (fieldOf.type() == GQLType.OBJECT) {
