@@ -5,7 +5,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.FieldType;
+import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -22,11 +22,11 @@ public class FieldAdapter {
         FieldOf fieldOf = field.getAnnotation(FieldOf.class);
         if (fieldOf.type().isScalar()) {
             return scalarField(field);
-        } else if (fieldOf.type() == FieldType.OBJECT) {
+        } else if (fieldOf.type() == GQLType.OBJECT) {
             return objectField(field);
-        } else if (fieldOf.type() == FieldType.LIST) {
+        } else if (fieldOf.type() == GQLType.LIST) {
             return listField(field);
-        } else if (fieldOf.type() == FieldType.ENUM) {
+        } else if (fieldOf.type() == GQLType.ENUM) {
             return enumField(field);
         } else {
             throw new RuntimeException("Unimplemented fieldAdapter for " + fieldOf);

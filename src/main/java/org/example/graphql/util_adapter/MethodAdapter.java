@@ -7,7 +7,7 @@ import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.FieldType;
+import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
@@ -52,18 +52,18 @@ public class MethodAdapter {
     }
 
     private static boolean hasListReturnWithoutArg(@NotNull Method method) {
-        return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;
+        return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == GQLType.LIST;
     }
 
     private static boolean hasObjectReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
-               method.getAnnotation(FieldOf.class).type() == FieldType.OBJECT &&
+               method.getAnnotation(FieldOf.class).type() == GQLType.OBJECT &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
     private static boolean hasListReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
-               method.getAnnotation(FieldOf.class).type() == FieldType.LIST &&
+               method.getAnnotation(FieldOf.class).type() == GQLType.LIST &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 

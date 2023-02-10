@@ -2,20 +2,22 @@ package org.example.entity;
 
 import lombok.Getter;
 import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.FieldType;
+import org.example.graphql.annotation.GQLType;
+import org.example.graphql.annotation.TypeOf;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@TypeOf(type = GQLType.OBJECT)
 public class Reader {
-    @FieldOf(type = FieldType.SCALAR_INT)
+    @FieldOf(type = GQLType.SCALAR_INT)
     private final long id;
-    @FieldOf(type = FieldType.SCALAR_STRING)
+    @FieldOf(type = GQLType.SCALAR_STRING)
     private final String fullName;
-    @FieldOf(type = FieldType.SCALAR_STRING)
+    @FieldOf(type = GQLType.SCALAR_STRING)
     private final String email;
-    @FieldOf(type = FieldType.LIST)
+    @FieldOf(type = GQLType.LIST)
     private final List<Book> books = new ArrayList<>();
 
     public Reader(long id, String fullName, String email) {

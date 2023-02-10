@@ -3,10 +3,11 @@ package org.example.graphql.annotation;
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
 
-public enum FieldType {
+public enum GQLType {
     ENUM(null),
     OBJECT(null),
     LIST(null),
+    INPUT(null),
     SCALAR_INT(Scalars.GraphQLInt),
     SCALAR_FLOAT(Scalars.GraphQLFloat),
     SCALAR_STRING(Scalars.GraphQLString),
@@ -15,7 +16,7 @@ public enum FieldType {
     ;
     public final GraphQLScalarType graphQLScalarType;
 
-    FieldType(GraphQLScalarType graphQLScalarType) {
+    GQLType(GraphQLScalarType graphQLScalarType) {
         this.graphQLScalarType = graphQLScalarType;
     }
 

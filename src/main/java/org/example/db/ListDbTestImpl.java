@@ -8,7 +8,7 @@ import org.example.entity.Reader;
 import org.example.entity.TestClass;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.FieldType;
+import org.example.graphql.annotation.GQLType;
 import org.example.graphql.annotation.Mutate;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,70 +30,70 @@ public class ListDbTestImpl implements ListDb {
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
+    @FieldOf(type = GQLType.LIST)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.OBJECT)
-    public TestClass testClassById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
+    @FieldOf(type = GQLType.OBJECT)
+    public TestClass testClassById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.OBJECT)
-    public Reader readerById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
+    @FieldOf(type = GQLType.OBJECT)
+    public Reader readerById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.OBJECT)
-    public Book bookById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
+    @FieldOf(type = GQLType.OBJECT)
+    public Book bookById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
+    @FieldOf(type = GQLType.LIST)
     public List<Reader> allReader() {
         return readerDB;
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
+    @FieldOf(type = GQLType.LIST)
     public List<Book> allBook() {
         return bookDB;
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
-    public List<Book> bookByGenre(@ArgWith(name = "genre", type = FieldType.ENUM) GenreType genre) {
+    @FieldOf(type = GQLType.LIST)
+    public List<Book> bookByGenre(@ArgWith(name = "genre", type = GQLType.ENUM) GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
-    public List<Author> authorByIsAlive(@ArgWith(name = "isAlive", type = FieldType.SCALAR_BOOLEAN) boolean isAlive) {
+    @FieldOf(type = GQLType.LIST)
+    public List<Author> authorByIsAlive(@ArgWith(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
     @NotNull
     @Override
-    @FieldOf(type = FieldType.LIST)
-    public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = FieldType.SCALAR_STRING) String titleContent) {
+    @FieldOf(type = GQLType.LIST)
+    public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
     @Override
-    @Mutate(type = FieldType.SCALAR_INT)
-    public long newReader(@ArgWith(name = "readerDTO", type = FieldType.OBJECT) @NotNull ReaderDTO readerDTO) {
+    @Mutate(type = GQLType.SCALAR_INT)
+    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
         long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
         this.readerDB.add(readerDTO.toReaderOfId(newId));
         return newId;

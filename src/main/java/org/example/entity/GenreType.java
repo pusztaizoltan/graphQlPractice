@@ -1,7 +1,11 @@
 package org.example.entity;
 
+import org.example.graphql.annotation.GQLType;
+import org.example.graphql.annotation.TypeOf;
+
 import java.util.Arrays;
 
+@TypeOf(type = GQLType.ENUM)
 public enum GenreType {
     SCIENCE(0),
     ROMANTIC(1),
