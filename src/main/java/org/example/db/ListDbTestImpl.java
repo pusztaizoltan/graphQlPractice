@@ -94,9 +94,18 @@ public class ListDbTestImpl implements ListDb {
     @Override
     @Mutate(type = GQLType.SCALAR_INT)
     public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
-        long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
-        this.readerDB.add(readerDTO.toReaderOfId(newId));
-        return newId;
+        if(readerDTO.getId() == null) {
+            long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
+            this.readerDB.add(readerDTO.toReaderOfId(newId));
+            return newId;
+        } else {
+            if(this.readerDB.stream().anyMatch(reader-> reader.getId() == readerDTO.getId().longValue())){
+                throw new IllegalArgumentException(EXCEPTION_MESSAGE);
+            }
+            this.readerDB.add(readerDTO.toReaderOfId());
+            return readerDTO.getId().longValue();
+
+        }
     }
 
     private void initDb() {

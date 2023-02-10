@@ -45,9 +45,11 @@ public class ClassParser {
         }
     }
 
+    // todo consider consolidate it into parseClassesFromDataService to
+    // parse not only Mutate methods but Query methods too for argument classes
     public void parseInputObjectsFromDataService(@NotNull Object dataService) {
         for (Method method : mutationMethodsOf(dataService)) {
-            for(Parameter parameter: imputeObjectsOf(method)){
+            for (Parameter parameter : imputeObjectsOf(method)) {
                 GQLType argType = parameter.getAnnotation(ArgWith.class).type();
                 if (argType == GQLType.OBJECT) {
                     recursiveUpdateBy(parameter.getType());
@@ -57,8 +59,6 @@ public class ClassParser {
                     throw new RuntimeException("Unimplemented queryParser for " + method);
                 }
             }
-
-
         }
     }
 

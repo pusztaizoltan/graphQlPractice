@@ -11,12 +11,19 @@ import org.example.graphql.annotation.TypeOf;
 @AllArgsConstructor
 @TypeOf(type = GQLType.INPUT)
 public class ReaderDTO {
+    // todo see if not primitive id can cause problem
+    @FieldOf(type = GQLType.SCALAR_INT)
+    private final Long id;
     @FieldOf(type = GQLType.SCALAR_STRING)
     private final String fullName;
     @FieldOf(type = GQLType.SCALAR_STRING)
     private final String email;
 
     public Reader toReaderOfId(long id) {
+        return new Reader(id, fullName, email);
+    }
+
+    public Reader toReaderOfId() {
         return new Reader(id, fullName, email);
     }
 }
