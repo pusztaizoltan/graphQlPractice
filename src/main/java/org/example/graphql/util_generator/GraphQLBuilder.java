@@ -35,11 +35,13 @@ public class GraphQLBuilder {
      */
     public void addQueryForDataService(@NotNull Object dataService) {
         GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
+        GraphQLCodeRegistry.Builder registryPart = GraphQLCodeRegistry.newCodeRegistry();
         for (Method method : queryMethodsOf(dataService)) {
             queryType.field(createFieldFromMethod(method));
             DataFetcher<?> fetcher = createFetcherFor(method, dataService);
-            this.registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+            registryPart.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
+        this.registry.dataFetchers(registryPart.build());
         this.graphQLSchema.query(queryType);
     }
 
