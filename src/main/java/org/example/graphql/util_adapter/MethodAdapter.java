@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MethodAdapter {
     /**
@@ -67,29 +68,34 @@ public class MethodAdapter {
             return (env) -> {
                 System.out.println("------------------------");
                 var argObject = argType.getDeclaredConstructor().newInstance();
-//                System.out.println(aa);
-                System.out.println(argName);
-                var envArg = env.getArguments().get(argName);
-                System.out.println("- envArg: " + envArg);
-                var argT = envArg.getClass();
-                System.out.println(argT);
-                LinkedHashMap args = (LinkedHashMap) envArg;
-                System.out.println(args);
-                for (Field field : argType.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(FieldOf.class)) {
-                        System.out.println(field.getName());
-                        boolean accessible = field.isAccessible();
-                        field.setAccessible(true);
-                        var fieldValue = args.get(field.getName());
-                        System.out.println(fieldValue.getClass());
-
-                        field.set(argObject, args.get(field.getName()));
-                        field.setAccessible(accessible);
+                try {
+                    Method fromMap = argType.getMethod("fromMap", Map.class);
+                    argObject = fromMap.invoke(argObject, (Map) env.getArguments().get(argName));
+                    System.out.println(argObject.getClass());
+                    return method.invoke(dataService, argObject);
+                } catch (NoSuchMethodException e) {
+                    System.out.println(argName);
+                    var envArg = env.getArguments().get(argName);
+                    System.out.println("- envArg: " + envArg);
+                    var argT = envArg.getClass();
+                    System.out.println(argT);
+                    LinkedHashMap args = (LinkedHashMap) envArg;
+                    System.out.println(args);
+                    for (Field field : argType.getDeclaredFields()) {
+                        if (field.isAnnotationPresent(FieldOf.class)) {
+                            System.out.println(field.getName());
+                            boolean accessible = field.isAccessible();
+                            field.setAccessible(true);
+                            var fieldValue = args.get(field.getName());
+                            System.out.println(fieldValue.getClass());
+                            field.set(argObject, args.get(field.getName()));
+                            field.setAccessible(accessible);
+                        }
                     }
+                    System.out.println(argObject);
+                    System.out.println("------------------------");
+                    return method.invoke(dataService, argObject);
                 }
-                System.out.println(argObject);
-                System.out.println("------------------------");
-                return method.invoke(dataService, argObject);
             };
         }
         throw new RuntimeException("Unimplemented fetcher for " + method);
