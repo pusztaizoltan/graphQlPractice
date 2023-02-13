@@ -41,6 +41,7 @@ public class GraphQLBuilder {
             DataFetcher<?> fetcher = createFetcherFor(method, dataService);
             registryPart.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
+        // todo consider segmented registry approach
         this.registry.dataFetchers(registryPart.build());
         this.graphQLSchema.query(queryType);
     }
