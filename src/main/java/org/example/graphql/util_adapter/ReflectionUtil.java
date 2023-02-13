@@ -1,5 +1,6 @@
 package org.example.graphql.util_adapter;
 
+import org.example.db.ListDbTestImpl;
 import org.example.graphql.annotation.FieldOf;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +22,10 @@ public class ReflectionUtil {
 
     /**
      * Select methods of dataService instance that qualify as GraphQL Query field
+     * // TODO: the reflection util by design deals with metadata level objects such as Classes, Methods, Fields,
+     * // so this method also should accept a class
+     * // TODO: the name also is bad, the 'methodsOf' would be enough or by the classic naming 'getMethods'
+     * // TODO: also see the objections against the streams: {@link ListDbTestImpl#testClassById(long)}
      */
     public static Method @NotNull [] queryMethodsOf(@NotNull Object dataService) {
         return Arrays.stream(dataService.getClass().getDeclaredMethods())

@@ -6,6 +6,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.FieldType;
+// it is preferred for the nullity annotations to use the javax.annotation, os I added the respective lib to the gradle.build
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;

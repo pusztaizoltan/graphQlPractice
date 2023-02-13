@@ -11,6 +11,10 @@ import java.util.HashSet;
 
 import static org.example.graphql.util_adapter.ReflectionUtil.*;
 
+// TODO: I think the 'parse' term is misleading, because in this case you build a model
+// from an already parsed class. The class is parsed by the Java compiler
+// TODO: as I see the purpose of this class is more like a 'model class holder' because it's only functionality to
+// collect the types from methods returns and store in a HashMap
 public class ClassParser {
     @Getter
     private final HashSet<Class<?>> components = new HashSet<>();

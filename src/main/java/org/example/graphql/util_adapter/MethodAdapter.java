@@ -11,9 +11,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
+// TODO: missing class level javadoc
 public class MethodAdapter {
     /**
      * Test for potential signature specifications of GraphQl Query field
+     * // TODO: the method level javadocs are more helpful if they describe the intention in the first place,
+     * // then the implementation details. In this case I could imagine something like
+     * // "Checks if the method should be included into the schema as a list field"
+     * // then the rules also can be detailed
      */
     public static boolean hasListReturnWithoutArg(@NotNull Method method) {
         return method.getParameters().length == 0 && method.getAnnotation(FieldOf.class).type() == FieldType.LIST;

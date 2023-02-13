@@ -6,6 +6,7 @@ import org.example.entity.TestClass;
 
 import java.util.List;
 
+// TODO: missing JavaDocs & nullity annotations; please apply for all classes
 public interface ListDb {
     List<TestClass> allTestClass();
 

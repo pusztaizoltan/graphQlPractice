@@ -31,6 +31,11 @@ public class ListDbTestImpl implements ListDb {
 
     @FieldOf(type = FieldType.OBJECT)
     public TestClass testClassById(@ArgWith(name = "id", type = FieldType.SCALAR_INT) long id) {
+        // TODO: within our project we ar not using streams because of the side effects produced by them:
+        // - lots of unwanted small objects are created which in a big scale (millions of occurrences)
+        //   may cause server garbage collection breakdown
+        // TODO 2: using lists for lookup has not the best efficiency considering a possible larger
+        // set of data, the code will iterate through the whole set. For such cases we are using HashMaps
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
@@ -44,6 +49,7 @@ public class ListDbTestImpl implements ListDb {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
+    // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
     @FieldOf(type = FieldType.LIST)
     public List<Reader> allReader() {
         return readerDB;
