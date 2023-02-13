@@ -6,13 +6,22 @@ import org.example.db.ListDbTestImpl;
 import org.example.graphql.SchemaGeneratorImpl;
 
 public class Main {
+    public static GraphQL build = new SchemaGeneratorImpl(new ListDbTestImpl()).getGraphQL();
     public static void main(String[] args) {
-        testTasks();
+        testQueryTasks();
+        testMutationTasks();
     }
 
-    static void testTasks() {
-        SchemaGeneratorImpl generator = new SchemaGeneratorImpl(new ListDbTestImpl());
-        GraphQL build = generator.getGraphQL();
+    static void testMutationTasks() {
+        System.out.println("-------------------------Add newReader----------");
+        ExecutionResult er1 = build.execute("{newReader(readerDTO:) {id, content}}");
+        er1.getErrors().forEach(System.out::println);
+        System.out.println(er1.getData().toString());
+        System.out.println();
+
+
+    }
+    static void testQueryTasks() {
         System.out.println("-------------------------ALL FROM TEST-CLASSES----------");
         ExecutionResult er2 = build.execute("{allTestClass {id, content}}");
         er2.getErrors().forEach(System.out::println);
