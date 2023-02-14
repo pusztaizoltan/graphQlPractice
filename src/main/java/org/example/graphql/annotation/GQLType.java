@@ -3,6 +3,10 @@ package org.example.graphql.annotation;
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+
 public enum GQLType {
     ENUM(null),
     OBJECT(null),
@@ -21,6 +25,22 @@ public enum GQLType {
 
     public boolean isScalar() {
         return graphQLScalarType != null;
+    }
+
+    public static GQLType ofMethod(Method method) {
+        if (method.isAnnotationPresent(Query.class)) {
+            return method.getAnnotation(Query.class).type();
+        } else {
+            return method.getAnnotation(Mutation.class).type();
+        }
+    }
+
+    public static GQLType ofParameter(Parameter parameter) {
+        return parameter.getAnnotation(ArgWith.class).type();
+    }
+
+    public static GQLType ofField(Field field) {
+        return field.getAnnotation(FieldOf.class).type();
     }
 }
 
