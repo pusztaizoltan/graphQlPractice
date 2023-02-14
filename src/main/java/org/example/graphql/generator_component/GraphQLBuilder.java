@@ -1,4 +1,4 @@
-package org.example.graphql.util_generator;
+package org.example.graphql.generator_component;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
@@ -13,10 +13,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static org.example.graphql.util_adapter.MethodAdapter.createFetcherFor;
-import static org.example.graphql.util_adapter.MethodAdapter.createFieldFromMethod;
-import static org.example.graphql.util_adapter.ReflectionUtil.*;
-import static org.example.graphql.util_adapter.TypeFactory.*;
+import static org.example.graphql.generator_component.factory_access.FetcherFactory.createFetcherFor;
+import static org.example.graphql.generator_component.factory_access.MethodAdapter.createFieldFromMethod;
+import static org.example.graphql.generator_component.util.ReflectionUtil.*;
+import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
 
 public class GraphQLBuilder {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();

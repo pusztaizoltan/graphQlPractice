@@ -1,4 +1,4 @@
-package org.example.graphql.util_adapter;
+package org.example.graphql.generator_component.factory_type;
 
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLEnumValueDefinition;

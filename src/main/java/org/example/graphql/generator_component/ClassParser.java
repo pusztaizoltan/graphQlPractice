@@ -1,4 +1,4 @@
-package org.example.graphql.util_generator;
+package org.example.graphql.generator_component;
 
 import lombok.Getter;
 import org.example.graphql.annotation.ArgWith;
@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
 
-import static org.example.graphql.util_adapter.ReflectionUtil.*;
+import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 
 public class ClassParser {
     @Getter

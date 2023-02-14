@@ -1,4 +1,4 @@
-package org.example.graphql.util_adapter;
+package org.example.graphql.generator_component.factory_type;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
@@ -7,21 +7,26 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 
-public class FieldFactory {
+/**
+ * Used to create {@link GraphQLFieldDefinition} and {@link GraphQLInputObjectField),
+ * only should be used in {@link TypeFactory } so its visibility shold be minimized
+ * according to that, to package-private.
+ */
+class FieldFactory {
     /**
      * Generate GraphQLFieldDefinition based on field and the required
      * FieldOf annotation on it
      */
-    public static @NotNull GraphQLFieldDefinition GQLObjectFieldFrom(@NotNull Field field) {
+    static @NotNull GraphQLFieldDefinition GQLObjectFieldFrom(@NotNull Field field) {
         if (!field.isAnnotationPresent(FieldOf.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
         FieldOf fieldOf = field.getAnnotation(FieldOf.class);
-
         if (fieldOf.type().isScalar()) {
             return scalarObjectField(field);
         } else if (fieldOf.type() == GQLType.OBJECT) {
@@ -39,7 +44,7 @@ public class FieldFactory {
      * Generate GraphQLInputObjectField based on field and the required
      * FieldOf annotation on it
      */
-    public static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
+    static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
         if (!field.isAnnotationPresent(FieldOf.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }

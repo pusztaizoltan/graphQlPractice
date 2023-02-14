@@ -1,8 +1,8 @@
 package org.example.graphql;
 
 import graphql.GraphQL;
-import org.example.graphql.util_generator.ClassParser;
-import org.example.graphql.util_generator.GraphQLBuilder;
+import org.example.graphql.generator_component.ClassParser;
+import org.example.graphql.generator_component.GraphQLBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public class SchemaGeneratorImpl {

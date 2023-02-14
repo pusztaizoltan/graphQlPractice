@@ -1,4 +1,4 @@
-package org.example.graphql.util_adapter;
+package org.example.graphql.generator_component.util;
 
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
