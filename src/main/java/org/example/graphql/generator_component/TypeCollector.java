@@ -2,7 +2,7 @@ package org.example.graphql.generator_component;
 
 import lombok.Getter;
 import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.QGLField;
 import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class TypeCollector {
      * Parse arbitrary client defined classes recursively
      * for all unique composite classes or enums
      */
-    public void parseAdditionalClasses(Class<?> @NotNull ... classes) {
+    public void collectAdditionalTypesFromClasses(Class<?> @NotNull ... classes) {
         for (Class<?> classType : classes) {
             collectTypesFromClassFields(classType);
             this.components.add(classType);
@@ -36,19 +36,23 @@ public class TypeCollector {
     }
 
     public void collectTypesFromServiceMethodArguments(@NotNull Method method) {
-        for (Parameter parameter : imputeObjectsOf(method)) {
-            GQLType argumentType = GQLType.ofParameter(parameter);
-            if (!argumentType.isScalar()) {
-                recursiveUpdateBy(getClassFromArgument(parameter, argumentType));
+        for (Parameter parameter : method.getParameters()) {
+            if (parameter.isAnnotationPresent(ArgWith.class)) {
+                GQLType argumentType = GQLType.ofParameter(parameter);
+                if (!argumentType.isScalar()) {
+                    recursiveUpdateBy(getClassFromArgument(parameter, argumentType));
+                }
             }
         }
     }
 
     private void collectTypesFromClassFields(@NotNull Class<?> classType) {
-        for (Field field : typeFieldsOf(classType)) {
-            GQLType fieldType = GQLType.ofField(field);
-            if (!fieldType.isScalar()) {
-                recursiveUpdateBy(getClassFromField(field, fieldType));
+        for (Field field : classType.getDeclaredFields()) {
+            if (field.isAnnotationPresent(QGLField.class)) {
+                GQLType fieldType = GQLType.ofField(field);
+                if (!fieldType.isScalar()) {
+                    recursiveUpdateBy(getClassFromField(field, fieldType));
+                }
             }
         }
     }
@@ -66,7 +70,7 @@ public class TypeCollector {
         } else if (returnType == GQLType.LIST) {
             return genericTypeOfMethod(method);
         } else {
-            throw new RuntimeException("Unimplemented queryParser for " + method);
+            throw new RuntimeException("Unimplemented queryParser for " + method.getReturnType());
         }
     }
 

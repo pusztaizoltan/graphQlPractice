@@ -5,7 +5,7 @@ import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
-import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.QGLField;
 import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -23,20 +23,20 @@ class FieldFactory {
      * FieldOf annotation on it
      */
     static @NotNull GraphQLFieldDefinition GQLObjectFieldFrom(@NotNull Field field) {
-        if (!field.isAnnotationPresent(FieldOf.class)) {
+        if (!field.isAnnotationPresent(QGLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
-        FieldOf fieldOf = field.getAnnotation(FieldOf.class);
-        if (fieldOf.type().isScalar()) {
+        QGLField QGLField = field.getAnnotation(QGLField.class);
+        if (QGLField.type().isScalar()) {
             return scalarObjectField(field);
-        } else if (fieldOf.type() == GQLType.OBJECT) {
+        } else if (QGLField.type() == GQLType.OBJECT) {
             return objectObjectField(field);
-        } else if (fieldOf.type() == GQLType.LIST) {
+        } else if (QGLField.type() == GQLType.LIST) {
             return listObjectField(field);
-        } else if (fieldOf.type() == GQLType.ENUM) {
+        } else if (QGLField.type() == GQLType.ENUM) {
             return enumObjectField(field);
         } else {
-            throw new RuntimeException("Unimplemented fieldAdapter for " + fieldOf);
+            throw new RuntimeException("Unimplemented fieldAdapter for " + QGLField);
         }
     }
 
@@ -45,25 +45,25 @@ class FieldFactory {
      * FieldOf annotation on it
      */
     static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
-        if (!field.isAnnotationPresent(FieldOf.class)) {
+        if (!field.isAnnotationPresent(QGLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
-        FieldOf fieldOf = field.getAnnotation(FieldOf.class);
-        if (fieldOf.type().isScalar()) {
+        QGLField QGLField = field.getAnnotation(QGLField.class);
+        if (QGLField.type().isScalar()) {
             return scalarInputField(field);
-        } else if (fieldOf.type() == GQLType.OBJECT) {
+        } else if (QGLField.type() == GQLType.OBJECT) {
             return objectInputField(field);
-        } else if (fieldOf.type() == GQLType.LIST) {
+        } else if (QGLField.type() == GQLType.LIST) {
             return listInputField(field);
-        } else if (fieldOf.type() == GQLType.ENUM) {
+        } else if (QGLField.type() == GQLType.ENUM) {
             return enumInputField(field);
         } else {
-            throw new RuntimeException("Unimplemented fieldAdapter for " + fieldOf);
+            throw new RuntimeException("Unimplemented fieldAdapter for " + QGLField);
         }
     }
 
     private static @NotNull GraphQLFieldDefinition scalarObjectField(@NotNull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(FieldOf.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = field.getAnnotation(QGLField.class).type().graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type(scalar)
@@ -91,7 +91,7 @@ class FieldFactory {
     }
 
     private static @NotNull GraphQLInputObjectField scalarInputField(@NotNull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(FieldOf.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = field.getAnnotation(QGLField.class).type().graphQLScalarType;
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
                                       .type(scalar)

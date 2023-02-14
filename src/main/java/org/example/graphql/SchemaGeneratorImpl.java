@@ -22,6 +22,7 @@ public class SchemaGeneratorImpl {
             if(isQueryOrMutation(method)){
                 this.typeCollector.collectTypesFromServiceMethodReturn(method);
                 this.typeCollector.collectTypesFromServiceMethodArguments(method);
+
             }
 
         }
@@ -35,7 +36,7 @@ public class SchemaGeneratorImpl {
      * Method to provide optional Type patterns for SchemaBuilding
      */
     public void withAdditionalClasses(Class<?> @NotNull ... classes) {
-        this.typeCollector.parseAdditionalClasses(classes);
+        this.typeCollector.collectAdditionalTypesFromClasses(classes);
     }
 
     /**

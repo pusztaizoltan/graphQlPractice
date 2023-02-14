@@ -1,13 +1,12 @@
 package org.example.graphql.generator_component.factory_access;
 
-import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.QGLField;
 import org.example.graphql.annotation.GQLType;
-import org.example.graphql.annotation.Mutation;
+import org.example.graphql.annotation.QGLMutation;
 import org.example.graphql.generator_component.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,21 +35,21 @@ public class MethodAdapter {
 
     private static boolean hasListReturnWithoutArg(@NotNull Method method) {
         return method.getParameters().length == 0 &&
-               method.isAnnotationPresent(FieldOf.class) &&
-               method.getAnnotation(FieldOf.class).type() == GQLType.LIST;
+               method.isAnnotationPresent(QGLField.class) &&
+               method.getAnnotation(QGLField.class).type() == GQLType.LIST;
     }
 
     private static boolean hasObjectReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
-               method.isAnnotationPresent(FieldOf.class) &&
-               method.getAnnotation(FieldOf.class).type() == GQLType.OBJECT &&
+               method.isAnnotationPresent(QGLField.class) &&
+               method.getAnnotation(QGLField.class).type() == GQLType.OBJECT &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
     private static boolean hasListReturnByOneArg(@NotNull Method method) {
         return method.getParameters().length == 1 &&
-               method.isAnnotationPresent(FieldOf.class) &&
-               method.getAnnotation(FieldOf.class).type() == GQLType.LIST &&
+               method.isAnnotationPresent(QGLField.class) &&
+               method.getAnnotation(QGLField.class).type() == GQLType.LIST &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class);
     }
 
@@ -82,14 +81,14 @@ public class MethodAdapter {
 
     private static boolean hasScalarReturnByOneObject(@NotNull Method method) {
         return method.getParameters().length == 1 &&
-               method.isAnnotationPresent(Mutation.class) &&
-               method.getAnnotation(Mutation.class).type().isScalar() &&
+               method.isAnnotationPresent(QGLMutation.class) &&
+               method.getAnnotation(QGLMutation.class).type().isScalar() &&
                method.getParameters()[0].isAnnotationPresent(ArgWith.class) &&
                method.getParameters()[0].getAnnotation(ArgWith.class).type() == GQLType.OBJECT;
     }
 
     private static @NotNull GraphQLFieldDefinition scalarReturnByOneObject(@NotNull Method method) {
-        GQLType gqlType = method.getAnnotation(Mutation.class).type();
+        GQLType gqlType = method.getAnnotation(QGLMutation.class).type();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(method.getName())
                                      .type(gqlType.graphQLScalarType)

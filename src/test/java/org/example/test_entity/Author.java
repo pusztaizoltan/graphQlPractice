@@ -1,7 +1,7 @@
 package org.example.test_entity;
 
 import lombok.Getter;
-import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.QGLField;
 import org.example.graphql.annotation.GQLType;
 import org.example.graphql.annotation.TypeOf;
 
@@ -11,13 +11,13 @@ import java.util.List;
 @Getter
 @TypeOf(type = GQLType.OBJECT)
 public class Author {
-    @FieldOf(type = GQLType.SCALAR_INT)
+    @QGLField(type = GQLType.SCALAR_INT)
     private final long id;
-    @FieldOf(type = GQLType.SCALAR_STRING)
+    @QGLField(type = GQLType.SCALAR_STRING)
     private final String name;
-    @FieldOf(type = GQLType.SCALAR_BOOLEAN)
+    @QGLField(type = GQLType.SCALAR_BOOLEAN)
     private final boolean isAlive;
-    @FieldOf(type = GQLType.LIST)
+    @QGLField(type = GQLType.LIST)
     private final List<org.example.test_entity.Book> books = new ArrayList<>();
 
     public Author(long id, String name, boolean isAlive) {

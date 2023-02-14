@@ -5,8 +5,7 @@ import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphql.annotation.GQLType;
-import org.example.graphql.annotation.TypeOf;
+import org.example.graphql.annotation.QGLField;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -15,35 +14,38 @@ import java.util.Set;
 
 import static org.example.graphql.generator_component.factory_access.FetcherFactory.createFetcherFor;
 import static org.example.graphql.generator_component.factory_access.MethodAdapter.createFieldFromMethod;
-import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
+import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 
 public class GraphQLBuilder {
-    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+
     private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
+    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
+    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name("Mutation");
 
     /**
      * Finalize the building process
      */
     public @NotNull GraphQLSchema build() {
-        return this.graphQLSchema.codeRegistry(this.registry.build()).build();
+        this.graphQLSchema.query(queryType.build());
+        this.graphQLSchema.mutation(mutationType.build());
+        this.graphQLSchema.codeRegistry(registry.build());
+        return this.graphQLSchema.build();
     }
+
 
     /**
      * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
      * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
     public void addQueryForDataService(@NotNull Object dataService) {
-        GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-        GraphQLCodeRegistry.Builder registryPart = GraphQLCodeRegistry.newCodeRegistry();
         for (Method method : queryMethodsOf(dataService)) {
             queryType.field(createFieldFromMethod(method));
             DataFetcher<?> fetcher = createFetcherFor(method, dataService);
-            registryPart.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
+            this.registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
         }
-        // todo consider segmented registry approach
-        this.registry.dataFetchers(registryPart.build());
-        this.graphQLSchema.query(queryType);
+
     }
 
     /**
@@ -51,13 +53,12 @@ public class GraphQLBuilder {
      * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
     public void addMutationForDataService(@NotNull Object dataService) {
-        GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Mutation");
         for (Method method : mutationMethodsOf(dataService)) {
-            queryType.field(createFieldFromMethod(method)); //
+            mutationType.field(createFieldFromMethod(method));
             DataFetcher<?> fetcher = createFetcherFor(method, dataService);
             this.registry.dataFetcher(FieldCoordinates.coordinates("Mutation", method.getName()), fetcher);
         }
-        this.graphQLSchema.mutation(queryType);
+
     }
 
     /**
@@ -86,11 +87,13 @@ public class GraphQLBuilder {
 
     private void addObjectType(@NotNull Class<?> component) {
         String typeName = component.getSimpleName();
-        for (Field field : typeFieldsOf(component)) {
-            Class<?> fieldType = field.getType();
-            String fieldName = fieldType.getSimpleName();
-            DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
-            this.registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
+        for (Field field : component.getDeclaredFields()) {
+            if (field.isAnnotationPresent(QGLField.class)) {
+                Class<?> fieldType = field.getType();
+                String fieldName = fieldType.getSimpleName();
+                DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
+                this.registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
+            }
         }
         this.graphQLSchema.additionalType(graphQLObjectTypeFromClass(component));
     }

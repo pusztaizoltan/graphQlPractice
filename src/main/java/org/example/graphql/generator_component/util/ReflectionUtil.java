@@ -1,9 +1,9 @@
 package org.example.graphql.generator_component.util;
 
 import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.Mutation;
-import org.example.graphql.annotation.Query;
+import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.QGLMutation;
+import org.example.graphql.annotation.GQLQuery;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -14,21 +14,6 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
 public class ReflectionUtil {
-    public static boolean isQueryOrMutation(Method method) {
-        return Modifier.isPublic(method.getModifiers()) &&
-               (method.isAnnotationPresent(Mutation.class) ||
-                method.isAnnotationPresent(Query.class));
-    }
-
-    /**
-     * Select fields of a Class that qualify as GraphQL Type field
-     */
-    public static Field @NotNull [] typeFieldsOf(@NotNull Class<?> classType) {
-        return Arrays.stream(classType.getDeclaredFields())
-                     .filter((field) -> field.isAnnotationPresent(FieldOf.class))
-                     .toArray(Field[]::new);
-    }
-
     /**
      * Select methods of dataService instance that qualify as GraphQL Query field
      */
@@ -36,10 +21,6 @@ public class ReflectionUtil {
         return Arrays.stream(dataService.getClass().getDeclaredMethods())
                      .filter(ReflectionUtil::isQueryField)
                      .toArray(Method[]::new);
-    }
-
-    private static boolean isQueryField(@NotNull Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(FieldOf.class);
     }
 
     /**
@@ -51,15 +32,22 @@ public class ReflectionUtil {
                      .toArray(Method[]::new);
     }
 
-    private static boolean isMutationField(@NotNull Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(Mutation.class);
+
+    public static boolean isQueryOrMutation(Method method) {
+        return Modifier.isPublic(method.getModifiers()) &&
+               (method.isAnnotationPresent(QGLMutation.class) ||
+                method.isAnnotationPresent(GQLQuery.class));
     }
 
-    public static Parameter @NotNull [] imputeObjectsOf(@NotNull Method method) {
-        return Arrays.stream(method.getParameters())
-                     .filter(ReflectionUtil::isImputeObjects)
-                     .toArray(Parameter[]::new);
+
+    private static boolean isQueryField(@NotNull Method method) {
+        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(QGLField.class);
     }
+
+    private static boolean isMutationField(@NotNull Method method) {
+        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(QGLMutation.class);
+    }
+
 
     private static boolean isImputeObjects(@NotNull Parameter parameter) {
         return parameter.isAnnotationPresent(ArgWith.class) &&

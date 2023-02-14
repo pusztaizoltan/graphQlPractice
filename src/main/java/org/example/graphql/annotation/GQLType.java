@@ -28,10 +28,10 @@ public enum GQLType {
     }
 
     public static GQLType ofMethod(Method method) {
-        if (method.isAnnotationPresent(Query.class)) {
-            return method.getAnnotation(Query.class).type();
+        if (method.isAnnotationPresent(GQLQuery.class)) {
+            return method.getAnnotation(GQLQuery.class).type();
         } else {
-            return method.getAnnotation(Mutation.class).type();
+            return method.getAnnotation(QGLMutation.class).type();
         }
     }
 
@@ -40,7 +40,7 @@ public enum GQLType {
     }
 
     public static GQLType ofField(Field field) {
-        return field.getAnnotation(FieldOf.class).type();
+        return field.getAnnotation(QGLField.class).type();
     }
 }
 
