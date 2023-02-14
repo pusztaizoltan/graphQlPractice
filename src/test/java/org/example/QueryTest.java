@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class QueryTest {
-    public static GraphQL build = new SchemaGeneratorImpl(new ListDbTestImpl()).getGraphQL();
+    public static final GraphQL build = new SchemaGeneratorImpl(new ListDbTestImpl()).getGraphQL();
 
     @Test
     void queryAllTestClass_ShouldReturnAllTenTestObject() {

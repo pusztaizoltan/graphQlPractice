@@ -1,8 +1,8 @@
 package org.example.graphql.generator_component;
 
 import lombok.Getter;
-import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.GGLField;
+import org.example.graphql.annotation.GQLArg;
+import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +37,7 @@ public class TypeCollector {
 
     public void collectTypesFromServiceMethodArguments(@NotNull Method method) {
         for (Parameter parameter : method.getParameters()) {
-            if (parameter.isAnnotationPresent(ArgWith.class)) {
+            if (parameter.isAnnotationPresent(GQLArg.class)) {
                 GQLType argumentType = GQLType.ofParameter(parameter);
                 if (!argumentType.isScalar()) {
                     recursiveUpdateBy(getClassFromArgument(parameter, argumentType));
@@ -48,7 +48,7 @@ public class TypeCollector {
 
     private void collectTypesFromClassFields(@NotNull Class<?> classType) {
         for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GGLField.class)) {
+            if (field.isAnnotationPresent(GQLField.class)) {
                 GQLType fieldType = GQLType.ofField(field);
                 if (!fieldType.isScalar()) {
                     recursiveUpdateBy(getClassFromField(field, fieldType));

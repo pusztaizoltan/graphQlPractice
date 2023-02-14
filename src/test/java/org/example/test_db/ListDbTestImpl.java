@@ -1,20 +1,19 @@
 package org.example.test_db;
 
+import org.example.graphql.annotation.GQLArg;
+import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.annotation.GQLQuery;
+import org.example.graphql.annotation.GQLType;
 import org.example.test_dto.ReaderDTO;
 import org.example.test_entity.Author;
 import org.example.test_entity.Book;
 import org.example.test_entity.GenreType;
 import org.example.test_entity.Reader;
 import org.example.test_entity.TestClass;
-import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.GQLType;
-import org.example.graphql.annotation.GQLMutation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.stream.Collectors;
 
 public class ListDbTestImpl {
@@ -36,19 +35,19 @@ public class ListDbTestImpl {
 
     @NotNull
     @GQLQuery(type = GQLType.OBJECT)
-    public TestClass testClassById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public TestClass testClassById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
     @GQLQuery(type = GQLType.OBJECT)
-    public Reader readerById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public Reader readerById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
     @GQLQuery(type = GQLType.OBJECT)
-    public Book bookById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public Book bookById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
@@ -66,36 +65,35 @@ public class ListDbTestImpl {
 
     @NotNull
     @GQLQuery(type = GQLType.LIST)
-    public List<Book> bookByGenre(@ArgWith(name = "genre", type = GQLType.ENUM) GenreType genre) {
+    public List<Book> bookByGenre(@GQLArg(name = "genre", type = GQLType.ENUM) GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
     @NotNull
     @GQLQuery(type = GQLType.LIST)
-    public List<Author> authorByIsAlive(@ArgWith(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
+    public List<Author> authorByIsAlive(@GQLArg(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
     @NotNull
     @GQLQuery(type = GQLType.LIST)
-    public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
+    public List<Book> bookByTitleContent(@GQLArg(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
+    public long newReader(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
         System.out.println("- ListDbTestImpl");
-        if(readerDTO.getId() == null) {
+        if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
             this.readerDB.add(readerDTO.toReaderOfId(newId));
             return newId;
         } else {
-            if(this.readerDB.stream().anyMatch(reader-> reader.getId() == readerDTO.getId().longValue())){
+            if (this.readerDB.stream().anyMatch(reader -> reader.getId() == readerDTO.getId().longValue())) {
                 throw new IllegalArgumentException(EXCEPTION_MESSAGE);
             }
             this.readerDB.add(readerDTO.toReaderOfId());
             return readerDTO.getId().longValue();
-
         }
     }
 
@@ -119,7 +117,7 @@ public class ListDbTestImpl {
         for (int i = 0; i < 20; i++) {
             Reader reader = new Reader(i, String.format("ReaderName_%s", i), String.format("ReaderMail_%s", i));
             for (int j = 0; j < 5; j++) {
-                Book book = bookDB.get((i*5)+j);
+                Book book = bookDB.get((i * 5) + j);
                 reader.addBook(book);
                 book.addReader(reader);
             }

@@ -6,7 +6,8 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphql.annotation.GGLField;
+import org.example.graphql.annotation.GQLField;
+import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLQuery;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,12 +15,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static org.example.graphql.generator_component.factory_access.DataAccessFieldFactory.createDataAccessForMethod;
+import static org.example.graphql.generator_component.factory_access.DataAccessFactory.createDataAccessFor;
 import static org.example.graphql.generator_component.factory_access.FetcherFactory.createFetcherFor;
-//import static org.example.graphql.generator_component.factory_access.DataAccessFieldFactory.createFieldFromMethod;
 import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
-import static org.example.graphql.generator_component.util.ReflectionUtil.mutationMethodsOf;
-import static org.example.graphql.generator_component.util.ReflectionUtil.queryMethodsOf;
 
 public class GraphQLBuilder {
     private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
@@ -38,7 +36,7 @@ public class GraphQLBuilder {
     }
 
     public void addDataAccessFieldForMethod(Method method, Object dataService) {
-        GraphQLFieldDefinition accessField = createDataAccessForMethod(method);
+        GraphQLFieldDefinition accessField = createDataAccessFor(method);
         DataFetcher<?> fetcher = createFetcherFor(method, dataService);
         String typeCoordinate;
         if (method.isAnnotationPresent(GQLQuery.class)) {
@@ -50,33 +48,14 @@ public class GraphQLBuilder {
         }
         this.registry.dataFetcher(FieldCoordinates.coordinates(typeCoordinate, method.getName()), fetcher);
     }
-
-
-
     /**
      * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
      * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
-//    public void addQueryForDataService(@NotNull Object dataService) {
-//        for (Method method : queryMethodsOf(dataService)) {
-//            queryType.field(createFieldFromMethod(method));
-//            DataFetcher<?> fetcher = createFetcherFor(method, dataService);
-//            this.registry.dataFetcher(FieldCoordinates.coordinates("Query", method.getName()), fetcher);
-//        }
-//    }
-
     /**
      * Scans the dataService instance for methods that can be paired with GraphQl Mutation fields,
      * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
      */
-//    public void addMutationForDataService(@NotNull Object dataService) {
-//        for (Method method : mutationMethodsOf(dataService)) {
-//            mutationType.field(createFieldFromMethod(method));
-//            DataFetcher<?> fetcher = createFetcherFor(method, dataService);
-//            this.registry.dataFetcher(FieldCoordinates.coordinates("Mutation", method.getName()), fetcher);
-//        }
-//    }
-
     /**
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder
@@ -86,13 +65,15 @@ public class GraphQLBuilder {
         for (Class<?> component : components) {
             if (component.isEnum()) {
                 addEnumType((Class<Enum<?>>) component);
+            } else if (component.isAnnotationPresent(GQLInput.class)) {
+                addInputType(component);
             } else {
                 addObjectType(component);
             }
         }
     }
 
-    private void addOInputType(@NotNull Class<?> component) {
+    private void addInputType(@NotNull Class<?> component) {
         //todo use this way now, we will see if fetcher is needed;
         this.graphQLSchema.additionalType(graphQLInputObjectTypeFromClass(component));
     }
@@ -104,7 +85,7 @@ public class GraphQLBuilder {
     private void addObjectType(@NotNull Class<?> component) {
         String typeName = component.getSimpleName();
         for (Field field : component.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GGLField.class)) {
+            if (field.isAnnotationPresent(GQLField.class)) {
                 Class<?> fieldType = field.getType();
                 String fieldName = fieldType.getSimpleName();
                 DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));

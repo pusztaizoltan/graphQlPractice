@@ -23,10 +23,6 @@ public enum GQLType {
         this.graphQLScalarType = graphQLScalarType;
     }
 
-    public boolean isScalar() {
-        return graphQLScalarType != null;
-    }
-
     public static GQLType ofMethod(Method method) {
         if (method.isAnnotationPresent(GQLQuery.class)) {
             return method.getAnnotation(GQLQuery.class).type();
@@ -36,11 +32,15 @@ public enum GQLType {
     }
 
     public static GQLType ofParameter(Parameter parameter) {
-        return parameter.getAnnotation(ArgWith.class).type();
+        return parameter.getAnnotation(GQLArg.class).type();
     }
 
     public static GQLType ofField(Field field) {
-        return field.getAnnotation(GGLField.class).type();
+        return field.getAnnotation(GQLField.class).type();
+    }
+
+    public boolean isScalar() {
+        return graphQLScalarType != null;
     }
 }
 

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER})
-public @interface ArgWith {
+public @interface GQLArg {
     String name();
 
     GQLType type();

@@ -1,8 +1,8 @@
 package org.example.graphql.generator_component.factory_access;
 
 import graphql.schema.DataFetcher;
-import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.GGLField;
+import org.example.graphql.annotation.GQLArg;
+import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,8 +22,8 @@ public class FetcherFactory {
             return (env) -> method.invoke(dataService);
         }
         Class<?> argType = parameters[0].getType();
-        ArgWith argWith = parameters[0].getAnnotation(ArgWith.class);
-        String argName = argWith.name();
+        GQLArg GQLArg = parameters[0].getAnnotation(GQLArg.class);
+        String argName = GQLArg.name();
         if (argType.isPrimitive()) {
             System.out.println("- " + method.getName() + " isPrimitive");
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
@@ -37,12 +37,8 @@ public class FetcherFactory {
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
         }
         // todo test if good
-        if (argWith.type() == GQLType.OBJECT) {
+        if (GQLArg.type() == GQLType.OBJECT) {
             System.out.println("- " + method.getName() + " isObject");
-//            DataFetcher aa = (env) -> {
-//                Type typeenv.getArguments().get(argName).getClass());
-//                return method.invoke(dataService, env.getArguments().get(argName));
-//            };
             return (env) -> {
                 System.out.println("------------------------");
                 var argObject = argType.getDeclaredConstructor().newInstance();
@@ -60,7 +56,7 @@ public class FetcherFactory {
                     LinkedHashMap args = (LinkedHashMap) envArg;
                     System.out.println(args);
                     for (Field field : argType.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(GGLField.class)) {
+                        if (field.isAnnotationPresent(GQLField.class)) {
                             System.out.println(field.getName());
                             boolean accessible = field.isAccessible();
                             field.setAccessible(true);
