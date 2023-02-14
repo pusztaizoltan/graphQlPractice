@@ -13,7 +13,6 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@TypeOf(type = GQLType.INPUT)
 public class ReaderDTO {
     // todo see if not primitive id can cause problem
     @FieldOf(type = GQLType.SCALAR_INT)

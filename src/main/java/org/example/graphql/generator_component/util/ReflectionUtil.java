@@ -2,7 +2,8 @@ package org.example.graphql.generator_component.util;
 
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
-import org.example.graphql.annotation.Mutate;
+import org.example.graphql.annotation.Mutation;
+import org.example.graphql.annotation.Query;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -13,6 +14,12 @@ import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 
 public class ReflectionUtil {
+    public static boolean isQueryOrMutation(Method method) {
+        return Modifier.isPublic(method.getModifiers()) &&
+               (method.isAnnotationPresent(Mutation.class) ||
+                method.isAnnotationPresent(Query.class));
+    }
+
     /**
      * Select fields of a Class that qualify as GraphQL Type field
      */
@@ -45,7 +52,7 @@ public class ReflectionUtil {
     }
 
     private static boolean isMutationField(@NotNull Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(Mutate.class);
+        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(Mutation.class);
     }
 
     public static Parameter @NotNull [] imputeObjectsOf(@NotNull Method method) {

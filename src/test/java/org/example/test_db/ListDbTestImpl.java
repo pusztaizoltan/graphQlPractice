@@ -1,5 +1,6 @@
 package org.example.test_db;
 
+import org.example.graphql.annotation.Query;
 import org.example.test_dto.ReaderDTO;
 import org.example.test_entity.Author;
 import org.example.test_entity.Book;
@@ -9,7 +10,7 @@ import org.example.test_entity.TestClass;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
 import org.example.graphql.annotation.GQLType;
-import org.example.graphql.annotation.Mutate;
+import org.example.graphql.annotation.Mutation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -29,61 +30,61 @@ public class ListDbTestImpl {
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
     @NotNull
-    @FieldOf(type = GQLType.OBJECT)
+    @Query(type = GQLType.OBJECT)
     public TestClass testClassById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
-    @FieldOf(type = GQLType.OBJECT)
+    @Query(type = GQLType.OBJECT)
     public Reader readerById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
-    @FieldOf(type = GQLType.OBJECT)
+    @Query(type = GQLType.OBJECT)
     public Book bookById(@ArgWith(name = "id", type = GQLType.SCALAR_INT) long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<Reader> allReader() {
         return readerDB;
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<Book> allBook() {
         return bookDB;
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<Book> bookByGenre(@ArgWith(name = "genre", type = GQLType.ENUM) GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<Author> authorByIsAlive(@ArgWith(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
     @NotNull
-    @FieldOf(type = GQLType.LIST)
+    @Query(type = GQLType.LIST)
     public List<Book> bookByTitleContent(@ArgWith(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
-    @Mutate(type = GQLType.SCALAR_INT)
-    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.INPUT) @NotNull ReaderDTO readerDTO) {
+    @Mutation(type = GQLType.SCALAR_INT)
+    public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
         System.out.println("- ListDbTestImpl");
         if(readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);

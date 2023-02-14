@@ -7,7 +7,6 @@ public enum GQLType {
     ENUM(null),
     OBJECT(null),
     LIST(null),
-    INPUT(null),
     SCALAR_INT(Scalars.GraphQLInt),
     SCALAR_FLOAT(Scalars.GraphQLFloat),
     SCALAR_STRING(Scalars.GraphQLString),

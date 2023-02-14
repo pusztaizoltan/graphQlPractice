@@ -3,6 +3,7 @@ package org.example.graphql.generator_component.factory_access;
 import graphql.schema.DataFetcher;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.FieldOf;
+import org.example.graphql.annotation.GQLType;
 import org.example.graphql.annotation.TypeOf;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,8 @@ public class FetcherFactory {
             return (env) -> method.invoke(dataService);
         }
         Class<?> argType = parameters[0].getType();
-        String argName = parameters[0].getAnnotation(ArgWith.class).name();
+        ArgWith argWith = parameters[0].getAnnotation(ArgWith.class);
+        String argName = argWith.name();
         if (argType.isPrimitive()) {
             System.out.println("- " + method.getName() + " isPrimitive");
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
@@ -36,7 +38,7 @@ public class FetcherFactory {
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
         }
         // todo test if good
-        if (argType.isAnnotationPresent(TypeOf.class)) {
+        if (argWith.type() == GQLType.OBJECT) {
             System.out.println("- " + method.getName() + " isObject");
 //            DataFetcher aa = (env) -> {
 //                Type typeenv.getArguments().get(argName).getClass());
