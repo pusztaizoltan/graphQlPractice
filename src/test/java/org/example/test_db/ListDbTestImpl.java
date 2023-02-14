@@ -9,7 +9,7 @@ import org.example.test_entity.Reader;
 import org.example.test_entity.TestClass;
 import org.example.graphql.annotation.ArgWith;
 import org.example.graphql.annotation.GQLType;
-import org.example.graphql.annotation.QGLMutation;
+import org.example.graphql.annotation.GQLMutation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -82,7 +82,7 @@ public class ListDbTestImpl {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
-    @QGLMutation(type = GQLType.SCALAR_INT)
+    @GQLMutation(type = GQLType.SCALAR_INT)
     public long newReader(@ArgWith(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
         System.out.println("- ListDbTestImpl");
         if(readerDTO.getId() == null) {

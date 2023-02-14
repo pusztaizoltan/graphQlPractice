@@ -5,7 +5,7 @@ import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
-import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.GGLField;
 import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.util.ReflectionUtil;
 import org.jetbrains.annotations.NotNull;
@@ -23,10 +23,10 @@ class FieldFactory {
      * FieldOf annotation on it
      */
     static @NotNull GraphQLFieldDefinition GQLObjectFieldFrom(@NotNull Field field) {
-        if (!field.isAnnotationPresent(QGLField.class)) {
+        if (!field.isAnnotationPresent(GGLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
-        QGLField QGLField = field.getAnnotation(QGLField.class);
+        GGLField QGLField = field.getAnnotation(GGLField.class);
         if (QGLField.type().isScalar()) {
             return scalarObjectField(field);
         } else if (QGLField.type() == GQLType.OBJECT) {
@@ -45,10 +45,10 @@ class FieldFactory {
      * FieldOf annotation on it
      */
     static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
-        if (!field.isAnnotationPresent(QGLField.class)) {
+        if (!field.isAnnotationPresent(GGLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
-        QGLField QGLField = field.getAnnotation(QGLField.class);
+        GGLField QGLField = field.getAnnotation(GGLField.class);
         if (QGLField.type().isScalar()) {
             return scalarInputField(field);
         } else if (QGLField.type() == GQLType.OBJECT) {
@@ -63,7 +63,7 @@ class FieldFactory {
     }
 
     private static @NotNull GraphQLFieldDefinition scalarObjectField(@NotNull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(QGLField.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = field.getAnnotation(GGLField.class).type().graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type(scalar)
@@ -91,7 +91,7 @@ class FieldFactory {
     }
 
     private static @NotNull GraphQLInputObjectField scalarInputField(@NotNull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(QGLField.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = field.getAnnotation(GGLField.class).type().graphQLScalarType;
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
                                       .type(scalar)

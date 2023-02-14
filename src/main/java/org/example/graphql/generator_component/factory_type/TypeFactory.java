@@ -4,7 +4,7 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
-import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.GGLField;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
@@ -19,7 +19,7 @@ public class TypeFactory {
     public static @NotNull GraphQLInputObjectType graphQLInputObjectTypeFromClass(@NotNull Class<?> classType) {
         GraphQLInputObjectType.Builder inputObjectTypeBuilder = GraphQLInputObjectType.newInputObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(QGLField.class)) {
+            if (field.isAnnotationPresent(GGLField.class)) {
                 inputObjectTypeBuilder.field(FieldFactory.GQLInputFieldFrom(field));
             }
         }
@@ -32,7 +32,7 @@ public class TypeFactory {
     public static @NotNull GraphQLObjectType graphQLObjectTypeFromClass(@NotNull Class<?> classType) {
         GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(QGLField.class)) {
+            if (field.isAnnotationPresent(GGLField.class)) {
                 objectTypeBuilder.field(FieldFactory.GQLObjectFieldFrom(field));
             }
         }

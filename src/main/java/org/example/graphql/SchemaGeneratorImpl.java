@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 
-import static org.example.graphql.generator_component.util.ReflectionUtil.isQueryOrMutation;
+import static org.example.graphql.generator_component.util.ReflectionUtil.isDataAccessor;
 
 public class SchemaGeneratorImpl {
     private final TypeCollector typeCollector = new TypeCollector();
@@ -19,17 +19,17 @@ public class SchemaGeneratorImpl {
      */
     public SchemaGeneratorImpl(@NotNull Object dataService) {
         for (Method method: dataService.getClass().getDeclaredMethods()) {
-            if(isQueryOrMutation(method)){
+            if(isDataAccessor(method)){
                 this.typeCollector.collectTypesFromServiceMethodReturn(method);
                 this.typeCollector.collectTypesFromServiceMethodArguments(method);
-
+                this.builder.addDataAccessFieldForMethod(method,dataService);
             }
 
         }
 //        this.typeCollector.parseClassesFromDataService(dataService);
 //        this.typeCollector.parseInputObjectsFromDataService(dataService);
-        this.builder.addQueryForDataService(dataService);
-        this.builder.addMutationForDataService(dataService);
+//        this.builder.addQueryForDataService(dataService);
+//        this.builder.addMutationForDataService(dataService);
     }
 
     /**

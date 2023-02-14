@@ -7,41 +7,44 @@ import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class ArgumentFactory {
 
-    static @NotNull GraphQLArgument argumentFrom(@NotNull Method method) {
-        ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
-        if (annotation.type().isScalar()) {
-            return scalarArgument(annotation);
-        } else if (annotation.type() == GQLType.ENUM) {
-            return enumArgument(method);
-        } else if (annotation.type() == GQLType.OBJECT) {
-            return objectArgument(method);
+    static @NotNull GraphQLArgument argumentFrom(@NotNull Parameter parameter) {
+        ArgWith annotation = parameter.getAnnotation(ArgWith.class);
+        GQLType argumentType = annotation.type();
+        if (argumentType.isScalar()) {
+            return scalarArgument(parameter);
+        } else if (argumentType == GQLType.ENUM) {
+            return enumArgument(parameter);
+        } else if (argumentType == GQLType.OBJECT) {
+            return objectArgument(parameter);
         } else {
             throw new RuntimeException("(Unimplemented argument type for " + annotation.type());
         }
     }
 
-    private static @NotNull GraphQLArgument scalarArgument(@NotNull ArgWith annotation) {
+    private static @NotNull GraphQLArgument scalarArgument(@NotNull Parameter parameter) {
+        ArgWith annotation = parameter.getAnnotation(ArgWith.class);
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
                               .type(annotation.type().graphQLScalarType)
                               .build();
     }
 
-    private static @NotNull GraphQLArgument enumArgument(@NotNull Method method) {
-        ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
-        String typeName = method.getParameters()[0].getType().getSimpleName();
+    private static @NotNull GraphQLArgument enumArgument(@NotNull Parameter parameter) {
+        ArgWith annotation = parameter.getAnnotation(ArgWith.class);
+        String typeName = parameter.getType().getSimpleName();
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
                               .type(GraphQLTypeReference.typeRef(typeName))
                               .build();
     }
 
-    private static @NotNull GraphQLArgument objectArgument(@NotNull Method method) {
-        ArgWith annotation = method.getParameters()[0].getAnnotation(ArgWith.class);
-        String typeName = method.getParameters()[0].getType().getSimpleName();
+    private static @NotNull GraphQLArgument objectArgument(@NotNull Parameter parameter) {
+        ArgWith annotation = parameter.getAnnotation(ArgWith.class);
+        String typeName = parameter.getType().getSimpleName();
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
                               .type(GraphQLTypeReference.typeRef(typeName))

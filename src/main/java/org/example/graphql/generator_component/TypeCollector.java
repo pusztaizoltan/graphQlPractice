@@ -2,7 +2,7 @@ package org.example.graphql.generator_component;
 
 import lombok.Getter;
 import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.GGLField;
 import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,7 +48,7 @@ public class TypeCollector {
 
     private void collectTypesFromClassFields(@NotNull Class<?> classType) {
         for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(QGLField.class)) {
+            if (field.isAnnotationPresent(GGLField.class)) {
                 GQLType fieldType = GQLType.ofField(field);
                 if (!fieldType.isScalar()) {
                     recursiveUpdateBy(getClassFromField(field, fieldType));

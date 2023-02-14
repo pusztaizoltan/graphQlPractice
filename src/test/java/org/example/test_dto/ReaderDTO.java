@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.test_entity.Reader;
-import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.GGLField;
 import org.example.graphql.annotation.GQLType;
 
 import java.util.Map;
@@ -13,11 +13,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReaderDTO {
-    @QGLField(type = GQLType.SCALAR_INT)
+    @GGLField(type = GQLType.SCALAR_INT)
     private Integer id;
-    @QGLField(type = GQLType.SCALAR_STRING)
+    @GGLField(type = GQLType.SCALAR_STRING)
     private String fullName;
-    @QGLField(type = GQLType.SCALAR_STRING)
+    @GGLField(type = GQLType.SCALAR_STRING)
     private String email;
 
     public ReaderDTO fromMap(Map<String, Object> argMap) {

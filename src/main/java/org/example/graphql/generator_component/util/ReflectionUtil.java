@@ -1,8 +1,7 @@
 package org.example.graphql.generator_component.util;
 
-import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.QGLField;
-import org.example.graphql.annotation.QGLMutation;
+import org.example.graphql.annotation.GGLField;
+import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.annotation.GQLQuery;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,26 +32,21 @@ public class ReflectionUtil {
     }
 
 
-    public static boolean isQueryOrMutation(Method method) {
+    public static boolean isDataAccessor(Method method) {
         return Modifier.isPublic(method.getModifiers()) &&
-               (method.isAnnotationPresent(QGLMutation.class) ||
+               (method.isAnnotationPresent(GQLMutation.class) ||
                 method.isAnnotationPresent(GQLQuery.class));
     }
 
 
     private static boolean isQueryField(@NotNull Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(QGLField.class);
+        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(GGLField.class);
     }
 
     private static boolean isMutationField(@NotNull Method method) {
-        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(QGLMutation.class);
+        return Modifier.isPublic(method.getModifiers()) && method.isAnnotationPresent(GQLMutation.class);
     }
 
-
-    private static boolean isImputeObjects(@NotNull Parameter parameter) {
-        return parameter.isAnnotationPresent(ArgWith.class) &&
-               !parameter.getAnnotation(ArgWith.class).type().isScalar();
-    }
 
     /**
      * Determine the Generic Type of afield

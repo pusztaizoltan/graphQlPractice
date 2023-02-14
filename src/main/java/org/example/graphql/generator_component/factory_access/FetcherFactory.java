@@ -2,7 +2,7 @@ package org.example.graphql.generator_component.factory_access;
 
 import graphql.schema.DataFetcher;
 import org.example.graphql.annotation.ArgWith;
-import org.example.graphql.annotation.QGLField;
+import org.example.graphql.annotation.GGLField;
 import org.example.graphql.annotation.GQLType;
 import org.jetbrains.annotations.NotNull;
 
@@ -60,7 +60,7 @@ public class FetcherFactory {
                     LinkedHashMap args = (LinkedHashMap) envArg;
                     System.out.println(args);
                     for (Field field : argType.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(QGLField.class)) {
+                        if (field.isAnnotationPresent(GGLField.class)) {
                             System.out.println(field.getName());
                             boolean accessible = field.isAccessible();
                             field.setAccessible(true);
