@@ -5,13 +5,19 @@ import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import org.example.graphql.annotation.GQLField;
+import org.example.graphql.generator_component.GraphQLBuilder;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Used in {@link GraphQLBuilder} to create Types for GraphQlSchema, in contrast of
+ * {@link org.example.graphql.generator_component.factory_access.DataAccessFactory} and
+ * {@link org.example.graphql.generator_component.factory_access.FetcherFactory} that
+ * are concerned with Query and Mutation fields
+ */
 public class TypeFactory {
     /**
      * Utility method to create GraphQLInputObjectType for provided Class type
@@ -50,10 +56,11 @@ public class TypeFactory {
     }
 
     private static @Nonnull List<GraphQLEnumValueDefinition> graphQLEnumValues(@Nonnull Class<Enum<?>> enumType) {
-        // todo noStream
-        return Arrays.stream(enumType.getEnumConstants())
-                     .map(TypeFactory::graphQLEnumValueFrom)
-                     .collect(Collectors.toList());
+        List<GraphQLEnumValueDefinition> enumValueDefinitionList = new LinkedList<>();
+        for (Enum<?> item : enumType.getEnumConstants()) {
+            enumValueDefinitionList.add(graphQLEnumValueFrom(item));
+        }
+        return enumValueDefinitionList;
     }
 
     private static @Nonnull GraphQLEnumValueDefinition graphQLEnumValueFrom(@Nonnull Enum<?> enumConstant) {

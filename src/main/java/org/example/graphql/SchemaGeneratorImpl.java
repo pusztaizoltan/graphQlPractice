@@ -10,6 +10,10 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+/**
+ * Class to organize {@link TypeCollector} and {@link GraphQLBuilder}
+ * operations on the required dataService and the optionally provided classes
+ */
 public class SchemaGeneratorImpl {
     private final TypeCollector typeCollector = new TypeCollector();
     private final GraphQLBuilder builder = new GraphQLBuilder();
@@ -40,7 +44,7 @@ public class SchemaGeneratorImpl {
     /**
      * Method to provide optional Type patterns for SchemaBuilding
      */
-    public void withAdditionalClasses(Class<?> @Nonnull ... classes) {
+    public void withAdditionalClasses(@Nonnull Class<?>... classes) {
         this.typeCollector.collectAdditionalTypesFromClasses(classes);
     }
 

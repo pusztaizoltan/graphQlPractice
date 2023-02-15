@@ -9,16 +9,20 @@ import graphql.schema.GraphQLSchema;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLQuery;
+import org.example.graphql.generator_component.factory_access.DataAccessFactory;
+import org.example.graphql.generator_component.factory_access.FetcherFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
 
-import static org.example.graphql.generator_component.factory_access.DataAccessFactory.createDataAccessFor;
-import static org.example.graphql.generator_component.factory_access.FetcherFactory.createFetcherFor;
 import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
 
+/**
+ * Class responsible for generating SchemaComponents based on provided Classes and
+ * data-service methods.
+ */
 public class GraphQLBuilder {
     private final String queryName = "Query";
     private final String mutationName = "Mutation";
@@ -37,9 +41,13 @@ public class GraphQLBuilder {
         return this.graphQLSchema.build();
     }
 
+    /**
+     * Responsible for populating the Mutation and Query entry points of the Schema
+     * with fields each wired to the respective method of the data-service.
+     */
     public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
-        GraphQLFieldDefinition accessField = createDataAccessFor(method);
-        DataFetcher<?> fetcher = createFetcherFor(method, dataService);
+        GraphQLFieldDefinition accessField = DataAccessFactory.createDataAccessorFor(method);
+        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
         if (method.isAnnotationPresent(GQLQuery.class)) {
             this.queryType.field(accessField);
             this.registry.dataFetcher(FieldCoordinates.coordinates(queryName, method.getName()), fetcher);
@@ -48,17 +56,11 @@ public class GraphQLBuilder {
             this.registry.dataFetcher(FieldCoordinates.coordinates(mutationName, method.getName()), fetcher);
         }
     }
+
     /**
-     * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
-     * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
-     */
-    /**
-     * Scans the dataService instance for methods that can be paired with GraphQl Mutation fields,
-     * and if it finds one add it to the SchemaBuilder as GraphQLFieldDefinition and to the RegistryBuilder
-     */
-    /**
-     * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
-     * and to the RegistryBuilder
+     * Scans tha argument Class types and add them to the SchemaBuilder and to the RegistryBuilder
+     * as GraphQLObjectType, GraphQLEnumType or GraphQLOInputObjectType, using the methods
+     * of {@link org.example.graphql.generator_component.factory_type.TypeFactory}
      */
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         // todo try to reorganize later considering there is input and object types too
@@ -74,7 +76,6 @@ public class GraphQLBuilder {
     }
 
     private void addInputType(@Nonnull Class<?> component) {
-        //todo use this way now, we will see if fetcher is needed;
         this.graphQLSchema.additionalType(graphQLInputObjectTypeFromClass(component));
     }
 

@@ -22,7 +22,7 @@ import static org.example.graphql.generator_component.util.ReflectionUtil.generi
 class FieldFactory {
     /**
      * Generate GraphQLFieldDefinition based on field and the required
-     * FieldOf annotation on it
+     * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {
@@ -44,7 +44,7 @@ class FieldFactory {
 
     /**
      * Generate GraphQLInputObjectField based on field and the required
-     * FieldOf annotation on it
+     * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {

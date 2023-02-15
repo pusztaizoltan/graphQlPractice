@@ -6,6 +6,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 
+/**
+ * Collection of methods used in multiple times in different classes and in different context
+ */
 public class ReflectionUtil {
     // TODO: the reflection util by design deals with metadata level objects such as Classes, Methods, Fields,
     // so this method also should accept a class
@@ -13,21 +16,21 @@ public class ReflectionUtil {
     // TODO: also see the objections against the streams: {@link ListDbTestImpl#testClassById(long)}
 
     /**
-     * Determine the Generic Type of afield
+     * Shortcut method  to determine the Generic Type of afield
      */
     public static Class<?> genericTypeOfField(@Nonnull Field field) {
         return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
     }
 
     /**
-     * Determine the Generic Type of the return of a method
+     * Shortcut method  to determine the Generic Type of the return of a method
      */
     public static Class<?> genericTypeOfMethod(@Nonnull Method method) {
         return (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
     }
 
     /**
-     * Determine the Generic Type of the return of aan argument
+     * Shortcut method  to determine the Generic Type of the return of aan argument
      */
     public static Class<?> genericTypeOfParameter(@Nonnull Parameter parameter) {
         return (Class<?>) ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];

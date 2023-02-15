@@ -12,11 +12,17 @@ import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Static Utility class used in{@link org.example.graphql.generator_component.GraphQLBuilder}
+ * to automatically create DataFetcher for the Query and Mutation type methods of data-service
+ * based on the signature of the method.
+ */
 public class FetcherFactory {
     /**
-     * Provide DataFetcher for a dataSource method based on the detected method signature
+     * Factory method of the class.
      */
     public static @Nonnull DataFetcher<?> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
+        // todo generalize
         Parameter[] parameters = method.getParameters();
         if (parameters.length == 0) {
             return (env) -> method.invoke(dataService);
