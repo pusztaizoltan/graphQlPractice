@@ -20,56 +20,59 @@ import java.util.Map;
  * based on the signature of the method.
  */
 public class FetcherFactory {
+    static Map<String,Object> environmentArgs;
+
     /**
      * Factory method of the class.
      */
     public static @Nonnull DataFetcher<?> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
         return (DataFetchingEnvironment env) -> {
+            environmentArgs = env.getArguments();
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                String argName = parameters[i].getAnnotation(GQLArg.class).name();
-                arguments[i] = mapArgument(parameters[i], env.getArguments().get(argName));
+                arguments[i] = mapArgument(parameters[i]);
             }
             return method.invoke(dataService, arguments);
         };
     }
 
-    private static Object mapArgument(Parameter parameter, Object envArgObject) {
+    private static Object mapArgument(Parameter parameter) {
+        String argName = parameter.getAnnotation(GQLArg.class).name();
         Class<?> argType = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
-            return envArgObject;
+            return environmentArgs.get(argName);
         } else if (gqlType == GQLType.ENUM) {
-            return Enum.valueOf((Class<Enum>) argType, (String) envArgObject);
+            return Enum.valueOf((Class<Enum>) argType, (String) environmentArgs.get(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
             try {
-                return mapByMapperMethod(argType, envArgObject);
+                return mapByMapperMethod(argType, argName);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
             try {
-                return mapByFieldMatching(argType, envArgObject);
+                return mapByFieldMatching(argType, argName);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             throw new RuntimeException("Unimplemented argumentMapper for" + parameter);
         }
-        return envArgObject;
+        return environmentArgs.get(argName);
     }
 
-    private static Object mapByMapperMethod(Class<?> argType, Object envArgObject) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private static Object mapByMapperMethod(Class<?> argType, String argname) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Object argObject = argType.getDeclaredConstructor().newInstance();
         Method fromMap = argType.getMethod("fromMap", Map.class);
-        argObject = fromMap.invoke(argObject, envArgObject);
+        argObject = fromMap.invoke(argObject, environmentArgs.get(argname));
         return argObject;
     }
 
-    private static Object mapByFieldMatching(Class<?> argType, Object envArgObject) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    private static Object mapByFieldMatching(Class<?> argType, String argname) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         Object argObject = argType.getDeclaredConstructor().newInstance();
-        LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) envArgObject;
+        LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argname);
         for (Field field : argType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 boolean accessible = field.isAccessible();
