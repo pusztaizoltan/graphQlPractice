@@ -25,53 +25,44 @@ public class FetcherFactory {
         GQLArg GQLArg = parameters[0].getAnnotation(GQLArg.class);
         String argName = GQLArg.name();
         if (argType.isPrimitive()) {
-            System.out.println("- " + method.getName() + " isPrimitive");
             return (env) -> method.invoke(dataService, env.getArguments().get(argName));
-        }
-        if (argType.isEnum()) {
-            System.out.println("- " + method.getName() + " isEnum");
+        } else if (argType.equals(String.class)) {
+            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
+        } else if (argType.isEnum()) {
             return (env) -> method.invoke(dataService, Enum.valueOf((Class<Enum>) argType, (String) env.getArguments().get(argName)));
-        }
-        if (argType.equals(String.class)) {
-            System.out.println("- " + method.getName() + " isString");
-            return (env) -> method.invoke(dataService, env.getArguments().get(argName));
-        }
-        // todo test if good
-        if (GQLArg.type() == GQLType.OBJECT) {
-            System.out.println("- " + method.getName() + " isObject");
+        } else if (GQLArg.type() == GQLType.OBJECT && hasMapperMethod(argType)) {
             return (env) -> {
-                System.out.println("------------------------");
-                var argObject = argType.getDeclaredConstructor().newInstance();
-                try {
-                    Method fromMap = argType.getMethod("fromMap", Map.class);
-                    argObject = fromMap.invoke(argObject, (Map) env.getArguments().get(argName));
-                    System.out.println(argObject.getClass());
-                    return method.invoke(dataService, argObject);
-                } catch (NoSuchMethodException e) {
-                    System.out.println(argName);
-                    var envArg = env.getArguments().get(argName);
-                    System.out.println("- envArg: " + envArg);
-                    var argT = envArg.getClass();
-                    System.out.println(argT);
-                    LinkedHashMap args = (LinkedHashMap) envArg;
-                    System.out.println(args);
-                    for (Field field : argType.getDeclaredFields()) {
-                        if (field.isAnnotationPresent(GQLField.class)) {
-                            System.out.println(field.getName());
-                            boolean accessible = field.isAccessible();
-                            field.setAccessible(true);
-                            var fieldValue = args.get(field.getName());
-                            System.out.println(fieldValue.getClass());
-                            field.set(argObject, args.get(field.getName()));
-                            field.setAccessible(accessible);
-                        }
-                    }
-                    System.out.println(argObject);
-                    System.out.println("------------------------");
-                    return method.invoke(dataService, argObject);
-                }
+                Object argObject = argType.getDeclaredConstructor().newInstance();
+                Method fromMap = argType.getMethod("fromMap", Map.class);
+                argObject = fromMap.invoke(argObject, env.getArguments().get(argName));
+                return method.invoke(dataService, argObject);
             };
+
+        } else if (GQLArg.type() == GQLType.OBJECT && !hasMapperMethod(argType)) {
+            return (env) -> {
+                Object argObject = argType.getDeclaredConstructor().newInstance();
+                LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) env.getArguments().get(argName);
+                for (Field field : argType.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(GQLField.class)) {
+                        boolean accessible = field.isAccessible();
+                        field.setAccessible(true);
+                        field.set(argObject, args.get(field.getName()));
+                        field.setAccessible(accessible);
+                    }
+                }
+                return method.invoke(dataService, argObject);
+            };
+        } else {
+            throw new RuntimeException("Unimplemented fetcher for " + method);
         }
-        throw new RuntimeException("Unimplemented fetcher for " + method);
+    }
+
+    private static boolean hasMapperMethod(Class<?> classType) {
+        try {
+            classType.getMethod("fromMap", Map.class);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 }
