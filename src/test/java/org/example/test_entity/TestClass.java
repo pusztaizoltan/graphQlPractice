@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 
+// TODO: is the 'Getter' annotation used anywhere? (and the lombok lib also)
+// TODO: also missing Javadocs
 @Getter
 public class TestClass {
     @GQLField(type = GQLType.SCALAR_INT)

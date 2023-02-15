@@ -8,6 +8,7 @@ import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLType;
 import org.example.test_entity.Reader;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 @Getter
@@ -22,18 +23,18 @@ public class ReaderDTO {
     @GQLField(type = GQLType.SCALAR_STRING)
     private String email;
 
-    public ReaderDTO fromMap(Map<String, Object> argMap) {
+    public @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
         return new ReaderDTO(
                 (Integer) argMap.get("id"),
                 (String) argMap.get("fullName"),
                 (String) argMap.get("email"));
     }
 
-    public Reader toReaderOfId(long id) {
+    public @Nonnull Reader toReaderOfId(long id) {
         return new Reader(id, fullName, email);
     }
 
-    public Reader toReaderOfId() {
+    public @Nonnull Reader toReaderOfId() {
         return new Reader(id, fullName, email);
     }
 }

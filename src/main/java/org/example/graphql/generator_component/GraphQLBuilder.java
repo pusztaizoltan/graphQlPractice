@@ -9,8 +9,8 @@ import graphql.schema.GraphQLSchema;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLQuery;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -20,33 +20,33 @@ import static org.example.graphql.generator_component.factory_access.FetcherFact
 import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
 
 public class GraphQLBuilder {
+    private final String queryName = "Query";
+    private final String mutationName = "Mutation";
     private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name("Query");
-    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name("Mutation");
+    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(queryName);
+    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(mutationName);
 
     /**
      * Finalize the building process
      */
-    public @NotNull GraphQLSchema build() {
+    public @Nonnull GraphQLSchema build() {
         this.graphQLSchema.query(queryType.build());
         this.graphQLSchema.mutation(mutationType.build());
         this.graphQLSchema.codeRegistry(registry.build());
         return this.graphQLSchema.build();
     }
 
-    public void addDataAccessFieldForMethod(Method method, Object dataService) {
+    public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
         GraphQLFieldDefinition accessField = createDataAccessFor(method);
         DataFetcher<?> fetcher = createFetcherFor(method, dataService);
-        String typeCoordinate;
         if (method.isAnnotationPresent(GQLQuery.class)) {
-            typeCoordinate = "Query";
             this.queryType.field(accessField);
+            this.registry.dataFetcher(FieldCoordinates.coordinates(queryName, method.getName()), fetcher);
         } else {
-            typeCoordinate = "Mutation";
             this.mutationType.field(accessField);
+            this.registry.dataFetcher(FieldCoordinates.coordinates(mutationName, method.getName()), fetcher);
         }
-        this.registry.dataFetcher(FieldCoordinates.coordinates(typeCoordinate, method.getName()), fetcher);
     }
     /**
      * Scans the dataService instance for methods that can be paired with GraphQl Query fields,
@@ -60,7 +60,7 @@ public class GraphQLBuilder {
      * Scans tha argument Class types and add them to the SchemaBuilder as GraphQLFieldDefinition
      * and to the RegistryBuilder
      */
-    public void addTypesForComponentClasses(@NotNull Set<Class<?>> components) {
+    public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         // todo try to reorganize later considering there is input and object types too
         for (Class<?> component : components) {
             if (component.isEnum()) {
@@ -73,16 +73,16 @@ public class GraphQLBuilder {
         }
     }
 
-    private void addInputType(@NotNull Class<?> component) {
+    private void addInputType(@Nonnull Class<?> component) {
         //todo use this way now, we will see if fetcher is needed;
         this.graphQLSchema.additionalType(graphQLInputObjectTypeFromClass(component));
     }
 
-    private void addEnumType(@NotNull Class<Enum<?>> component) {
+    private void addEnumType(@Nonnull Class<Enum<?>> component) {
         this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }
 
-    private void addObjectType(@NotNull Class<?> component) {
+    private void addObjectType(@Nonnull Class<?> component) {
         String typeName = component.getSimpleName();
         for (Field field : component.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {

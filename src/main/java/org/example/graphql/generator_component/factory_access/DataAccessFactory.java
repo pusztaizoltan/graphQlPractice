@@ -7,15 +7,20 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLType;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfMethod;
 
+// TODO: missing class level javadoc
 public class DataAccessFactory {
-    public static @NotNull GraphQLFieldDefinition createDataAccessFor(@NotNull Method method) {
+    // TODO: the method level javadocs are more helpful if they describe the intention in the first place,
+    // then the implementation details. In this case I could imagine something like
+    // "Checks if the method should be included into the schema as a list field"
+    // then the rules also can be detailed
+    public static @Nonnull GraphQLFieldDefinition createDataAccessFor(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition();
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
@@ -25,7 +30,7 @@ public class DataAccessFactory {
         return builder.name(method.getName()).type(returnTypeFrom(method)).build();
     }
 
-    private static GraphQLOutputType returnTypeFrom(Method method) {
+    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
         GQLType returnType = GQLType.ofMethod(method);
         if (returnType.isScalar()) {
             return returnType.graphQLScalarType;
@@ -40,7 +45,7 @@ public class DataAccessFactory {
         }
     }
 
-    private static @NotNull GraphQLArgument argumentFrom(@NotNull Parameter parameter) {
+    private static @Nonnull GraphQLArgument argumentFrom(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         GQLType argumentType = annotation.type();
         if (argumentType.isScalar()) {
@@ -54,7 +59,7 @@ public class DataAccessFactory {
         }
     }
 
-    private static @NotNull GraphQLArgument scalarArgument(@NotNull Parameter parameter) {
+    private static @Nonnull GraphQLArgument scalarArgument(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
@@ -62,7 +67,7 @@ public class DataAccessFactory {
                               .build();
     }
 
-    private static @NotNull GraphQLArgument enumArgument(@NotNull Parameter parameter) {
+    private static @Nonnull GraphQLArgument enumArgument(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         String typeName = parameter.getType().getSimpleName();
         return GraphQLArgument.newArgument()
@@ -71,7 +76,7 @@ public class DataAccessFactory {
                               .build();
     }
 
-    private static @NotNull GraphQLArgument objectArgument(@NotNull Parameter parameter) {
+    private static @Nonnull GraphQLArgument objectArgument(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         String typeName = parameter.getType().getSimpleName();
         return GraphQLArgument.newArgument()

@@ -5,8 +5,8 @@ import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import org.example.graphql.annotation.GQLField;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +16,7 @@ public class TypeFactory {
     /**
      * Utility method to create GraphQLInputObjectType for provided Class type
      */
-    public static @NotNull GraphQLInputObjectType graphQLInputObjectTypeFromClass(@NotNull Class<?> classType) {
+    public static @Nonnull GraphQLInputObjectType graphQLInputObjectTypeFromClass(@Nonnull Class<?> classType) {
         GraphQLInputObjectType.Builder inputObjectTypeBuilder = GraphQLInputObjectType.newInputObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
@@ -29,7 +29,7 @@ public class TypeFactory {
     /**
      * Utility method to create GraphQLObjectType for provided Class type
      */
-    public static @NotNull GraphQLObjectType graphQLObjectTypeFromClass(@NotNull Class<?> classType) {
+    public static @Nonnull GraphQLObjectType graphQLObjectTypeFromClass(@Nonnull Class<?> classType) {
         GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
@@ -42,20 +42,21 @@ public class TypeFactory {
     /**
      * Utility method to create GraphQLEnumType for provided Enum type
      */
-    public static @NotNull GraphQLEnumType graphQLEnumTypeFromEnum(@NotNull Class<Enum<?>> enumType) {
+    public static @Nonnull GraphQLEnumType graphQLEnumTypeFromEnum(@Nonnull Class<Enum<?>> enumType) {
         return GraphQLEnumType.newEnum()
                               .name(enumType.getSimpleName())
                               .values(graphQLEnumValues(enumType))
                               .build();
     }
 
-    private static @NotNull List<GraphQLEnumValueDefinition> graphQLEnumValues(@NotNull Class<Enum<?>> enumType) {
+    private static @Nonnull List<GraphQLEnumValueDefinition> graphQLEnumValues(@Nonnull Class<Enum<?>> enumType) {
+        // todo noStream
         return Arrays.stream(enumType.getEnumConstants())
                      .map(TypeFactory::graphQLEnumValueFrom)
                      .collect(Collectors.toList());
     }
 
-    private static @NotNull GraphQLEnumValueDefinition graphQLEnumValueFrom(@NotNull Enum<?> enumConstant) {
+    private static @Nonnull GraphQLEnumValueDefinition graphQLEnumValueFrom(@Nonnull Enum<?> enumConstant) {
         return GraphQLEnumValueDefinition.newEnumValueDefinition()
                                          .value(enumConstant.name())
                                          .name(enumConstant.name())

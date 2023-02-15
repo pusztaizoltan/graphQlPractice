@@ -10,8 +10,8 @@ import org.example.test_entity.Book;
 import org.example.test_entity.GenreType;
 import org.example.test_entity.Reader;
 import org.example.test_entity.TestClass;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,62 +27,68 @@ public class ListDbTestImpl {
         initDb();
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
     public TestClass testClassById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+        // TODO: within our project we ar not using streams because of the side effects produced by them:
+        // - lots of unwanted small objects are created which in a big scale (millions of occurrences)
+        //   may cause server garbage collection breakdown
+        // TODO 2: using lists for lookup has not the best efficiency considering a possible larger
+        // set of data, the code will iterate through the whole set. For such cases we are using HashMaps
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
     public Reader readerById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
     public Book bookById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
-    @NotNull
+    // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Reader> allReader() {
         return readerDB;
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Book> allBook() {
         return bookDB;
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Book> bookByGenre(@GQLArg(name = "genre", type = GQLType.ENUM) GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Author> authorByIsAlive(@GQLArg(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
-    @NotNull
+    @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Book> bookByTitleContent(@GQLArg(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newReader(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @NotNull ReaderDTO readerDTO) {
+    public long newReader(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
         System.out.println("- ListDbTestImpl");
         if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);

@@ -4,8 +4,8 @@ import graphql.schema.DataFetcher;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
-import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -16,7 +16,7 @@ public class FetcherFactory {
     /**
      * Provide DataFetcher for a dataSource method based on the detected method signature
      */
-    public static @NotNull DataFetcher<?> createFetcherFor(@NotNull Method method, @NotNull Object dataService) {
+    public static @Nonnull DataFetcher<?> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
         Parameter[] parameters = method.getParameters();
         if (parameters.length == 0) {
             return (env) -> method.invoke(dataService);
@@ -37,7 +37,6 @@ public class FetcherFactory {
                 argObject = fromMap.invoke(argObject, env.getArguments().get(argName));
                 return method.invoke(dataService, argObject);
             };
-
         } else if (GQLArg.type() == GQLType.OBJECT && !hasMapperMethod(argType)) {
             return (env) -> {
                 Object argObject = argType.getDeclaredConstructor().newInstance();
@@ -57,7 +56,7 @@ public class FetcherFactory {
         }
     }
 
-    private static boolean hasMapperMethod(Class<?> classType) {
+    private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
         try {
             classType.getMethod("fromMap", Map.class);
             return true;

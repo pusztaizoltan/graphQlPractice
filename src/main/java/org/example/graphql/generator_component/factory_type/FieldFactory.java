@@ -7,8 +7,9 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
-import org.jetbrains.annotations.NotNull;
 
+// todo it is preferred for the nullity annotations to use the javax.annotation, os I added the respective lib to the gradle.build
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfField;
@@ -23,7 +24,7 @@ class FieldFactory {
      * Generate GraphQLFieldDefinition based on field and the required
      * FieldOf annotation on it
      */
-    static @NotNull GraphQLFieldDefinition GQLObjectFieldFrom(@NotNull Field field) {
+    static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
@@ -45,7 +46,7 @@ class FieldFactory {
      * Generate GraphQLInputObjectField based on field and the required
      * FieldOf annotation on it
      */
-    static @NotNull GraphQLInputObjectField GQLInputFieldFrom(@NotNull Field field) {
+    static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {
             throw new RuntimeException("Parsing attempt of unannotated field:" + field);
         }
@@ -63,7 +64,7 @@ class FieldFactory {
         }
     }
 
-    private static @NotNull GraphQLFieldDefinition scalarObjectField(@NotNull Field field) {
+    private static @Nonnull GraphQLFieldDefinition scalarObjectField(@Nonnull Field field) {
         GraphQLScalarType scalar = field.getAnnotation(GQLField.class).type().graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -71,7 +72,7 @@ class FieldFactory {
                                      .build();
     }
 
-    private static @NotNull GraphQLFieldDefinition listObjectField(@NotNull Field field) {
+    private static @Nonnull GraphQLFieldDefinition listObjectField(@Nonnull Field field) {
         String typeName = genericTypeOfField(field).getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -79,7 +80,7 @@ class FieldFactory {
                                      .build();
     }
 
-    private static @NotNull GraphQLFieldDefinition objectObjectField(@NotNull Field field) {
+    private static @Nonnull GraphQLFieldDefinition objectObjectField(@Nonnull Field field) {
         String type = field.getType().getSimpleName();
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
@@ -87,11 +88,11 @@ class FieldFactory {
                                      .build();
     }
 
-    private static @NotNull GraphQLFieldDefinition enumObjectField(@NotNull Field field) {
+    private static @Nonnull GraphQLFieldDefinition enumObjectField(@Nonnull Field field) {
         return objectObjectField(field);
     }
 
-    private static @NotNull GraphQLInputObjectField scalarInputField(@NotNull Field field) {
+    private static @Nonnull GraphQLInputObjectField scalarInputField(@Nonnull Field field) {
         GraphQLScalarType scalar = field.getAnnotation(GQLField.class).type().graphQLScalarType;
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
@@ -99,7 +100,7 @@ class FieldFactory {
                                       .build();
     }
 
-    private static @NotNull GraphQLInputObjectField listInputField(@NotNull Field field) {
+    private static @Nonnull GraphQLInputObjectField listInputField(@Nonnull Field field) {
         String typeName = genericTypeOfField(field).getSimpleName();
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
@@ -107,7 +108,7 @@ class FieldFactory {
                                       .build();
     }
 
-    private static @NotNull GraphQLInputObjectField objectInputField(@NotNull Field field) {
+    private static @Nonnull GraphQLInputObjectField objectInputField(@Nonnull Field field) {
         String type = field.getType().getSimpleName();
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
@@ -115,7 +116,7 @@ class FieldFactory {
                                       .build();
     }
 
-    private static @NotNull GraphQLInputObjectField enumInputField(@NotNull Field field) {
+    private static @Nonnull GraphQLInputObjectField enumInputField(@Nonnull Field field) {
         return objectInputField(field);
     }
 }
