@@ -63,7 +63,6 @@ public class GraphQLBuilder {
      * of {@link org.example.graphql.generator_component.factory_type.TypeFactory}
      */
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
-        // todo try to reorganize later considering there is input and object types too
         for (Class<?> component : components) {
             if (component.isEnum()) {
                 addEnumType((Class<Enum<?>>) component);
