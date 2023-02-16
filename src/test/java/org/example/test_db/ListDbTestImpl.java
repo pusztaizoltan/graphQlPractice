@@ -55,6 +55,12 @@ public class ListDbTestImpl {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
+    @Nonnull
+    @GQLQuery(type = GQLType.OBJECT)
+    public Author authorById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+        return authorDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
+    }
+
     // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
     // todo for human reader No but for JVM it is a useful shortcut
     @Nonnull
@@ -67,6 +73,12 @@ public class ListDbTestImpl {
     @GQLQuery(type = GQLType.LIST)
     public List<Book> allBook() {
         return bookDB;
+    }
+
+    @Nonnull
+    @GQLQuery(type = GQLType.LIST)
+    public List<Author> allAuthor() {
+        return authorDB;
     }
 
     @Nonnull
