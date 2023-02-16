@@ -83,7 +83,7 @@ public class FetcherFactory {
                     field.setAccessible(accessible);
                 }
             }
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return argObject;
