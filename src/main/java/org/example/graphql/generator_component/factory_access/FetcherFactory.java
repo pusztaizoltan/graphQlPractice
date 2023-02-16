@@ -8,6 +8,7 @@ import org.example.graphql.annotation.GQLType;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
@@ -45,7 +46,7 @@ public class FetcherFactory {
         } else if (gqlType == GQLType.ENUM) {
             return Enum.valueOf(argType.asSubclass(Enum.class), (String) environmentArgs.get(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
-            return mapByMapperMethod(argType, argName);
+            return mapByStaticMapperMethod(argType, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
             return mapByFieldMatching(argType, argName);
         } else {
@@ -53,20 +54,19 @@ public class FetcherFactory {
         }
     }
 
-    private static Object mapByMapperMethod(Class<?> argType, String argName) {
-        Object argObject = null;
+    private static <T> T mapByStaticMapperMethod(Class<T> argType, String argName) {
+        T argObject = null;
         try {
-            argObject = argType.getDeclaredConstructor().newInstance();
             Method fromMap = argType.getMethod("fromMap", Map.class);
-            argObject = fromMap.invoke(argObject, environmentArgs.get(argName));
-        } catch (Exception e) {
+            argObject = (T) fromMap.invoke(null, environmentArgs.get(argName));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
         return argObject;
     }
 
-    private static Object mapByFieldMatching(Class<?> argType, String argName) {
-        Object argObject = null;
+    private static <T> T mapByFieldMatching(Class<T> argType, String argName) {
+        T argObject = null;
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
             LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argName);
@@ -78,7 +78,6 @@ public class FetcherFactory {
                     field.setAccessible(accessible);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

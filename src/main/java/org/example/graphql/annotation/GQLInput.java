@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * output types.
  * <p>
  * Classes marked with this annotation are preferably
- * expected to have a fromMap named method to wire it to its
+ * expected to have a fromMap named static method to wire it to its
  * respective GraphQl input, but it's not strictly necessary,
  * since during wiring the use of it will be the first option
  * to try and not the only.

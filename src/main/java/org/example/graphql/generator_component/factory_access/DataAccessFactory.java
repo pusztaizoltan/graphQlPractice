@@ -15,6 +15,7 @@ import java.lang.reflect.Parameter;
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfMethod;
 
 // TODO: missing class level javadoc
+// todo done also in other Classes
 
 /**
  * Static Utility class used in{@link org.example.graphql.generator_component.GraphQLBuilder}
@@ -27,6 +28,7 @@ public class DataAccessFactory {
     // then the implementation details. In this case I could imagine something like
     // "Checks if the method should be included into the schema as a list field"
     // then the rules also can be detailed
+    // todo done also javadoc are rewrote
 
     /**
      * Only entry point of the class that generate the GraphQLFieldDefinition for Mutation or Query.

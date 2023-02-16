@@ -5,7 +5,9 @@ import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 
 // TODO: is the 'Getter' annotation used anywhere? (and the lombok lib also)
+// todo not for all fields but ListDbTestImpl use it
 // TODO: also missing Javadocs
+// todo: no Part of Production code What are the rules for javadocs in Test?
 @Getter
 public class TestClass {
     @GQLField(type = GQLType.SCALAR_INT)

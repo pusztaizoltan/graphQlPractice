@@ -4,6 +4,7 @@ import graphql.ExecutionResult;
 import graphql.GraphQL;
 import org.example.graphql.SchemaGeneratorImpl;
 import org.example.test_db.ListDbTestImpl;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,8 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class QueryTest {
-    public static final GraphQL build = new SchemaGeneratorImpl(new ListDbTestImpl()).getGraphQL();
+    public static GraphQL build;
 
+    @BeforeAll
+    static void initTest() {
+        ListDbTestImpl listDbTest = new ListDbTestImpl();
+        listDbTest.initDb();
+        build = new SchemaGeneratorImpl(listDbTest).getGraphQL();
+    }
     @Test
     void queryAllTestClass_ShouldReturnAllTenTestObject() {
         ExecutionResult result = build.execute("{allTestClass {id, content}}");

@@ -9,6 +9,7 @@ import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 
 // todo it is preferred for the nullity annotations to use the javax.annotation, os I added the respective lib to the gradle.build
+// todo done also in everywhere
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 

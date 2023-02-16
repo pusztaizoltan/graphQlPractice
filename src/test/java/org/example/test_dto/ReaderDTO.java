@@ -15,7 +15,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @GQLInput()
-public class ReaderDTO implements Mappable<ReaderDTO>{
+public class ReaderDTO{
     @GQLField(type = GQLType.SCALAR_INT)
     private Integer id;
     @GQLField(type = GQLType.SCALAR_STRING)
@@ -23,8 +23,8 @@ public class ReaderDTO implements Mappable<ReaderDTO>{
     @GQLField(type = GQLType.SCALAR_STRING)
     private String email;
 
-    @Override
-    public @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
+
+    public static @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
         return new ReaderDTO(
                 (Integer) argMap.get("id"),
                 (String) argMap.get("fullName"),

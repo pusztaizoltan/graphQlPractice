@@ -14,6 +14,7 @@ public class ReflectionUtil {
     // so this method also should accept a class
     // TODO: the name also is bad, the 'methodsOf' would be enough or by the classic naming 'getMethods'
     // TODO: also see the objections against the streams: {@link ListDbTestImpl#testClassById(long)}
+    // todo done questioned parts no longer exists
 
     /**
      * Shortcut method  to determine the Generic Type of afield

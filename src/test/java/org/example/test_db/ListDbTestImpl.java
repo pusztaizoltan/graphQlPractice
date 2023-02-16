@@ -4,6 +4,7 @@ import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.annotation.GQLQuery;
 import org.example.graphql.annotation.GQLType;
+import org.example.test_dto.AuthorDTO;
 import org.example.test_dto.ReaderDTO;
 import org.example.test_entity.Author;
 import org.example.test_entity.Book;
@@ -23,10 +24,6 @@ public class ListDbTestImpl {
     private final List<Author> authorDB = new ArrayList<>();
     private final List<Book> bookDB = new ArrayList<>();
 
-    public ListDbTestImpl() {
-        initDb();
-    }
-
     @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<TestClass> allTestClass() {
@@ -41,6 +38,8 @@ public class ListDbTestImpl {
         //   may cause server garbage collection breakdown
         // TODO 2: using lists for lookup has not the best efficiency considering a possible larger
         // set of data, the code will iterate through the whole set. For such cases we are using HashMaps
+        // todo done no longer part of production code so cannot cause issues because size is controlled
+        // and  stream solutions removed from production code not testing relevant too
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
@@ -57,6 +56,7 @@ public class ListDbTestImpl {
     }
 
     // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
+    // todo for human reader No but for JVM it is a useful shortcut
     @Nonnull
     @GQLQuery(type = GQLType.LIST)
     public List<Reader> allReader() {
@@ -124,7 +124,22 @@ public class ListDbTestImpl {
         return newId;
     }
 
-    private void initDb() {
+    @GQLMutation(type = GQLType.SCALAR_INT)
+    public long newAuthorByInputObject(@GQLArg(name = "authorDTO", type = GQLType.OBJECT) @Nonnull AuthorDTO authorDTO) {
+        if (authorDTO.getId() == null) {
+            long newId = this.authorDB.stream().mapToLong(Author::getId).max().orElse(0);
+            this.authorDB.add(authorDTO.toAuthorOfId(newId));
+            return newId;
+        } else {
+            if (this.authorDB.stream().anyMatch(reader -> reader.getId() == authorDTO.getId().longValue())) {
+                throw new IllegalArgumentException(EXCEPTION_MESSAGE);
+            }
+            this.authorDB.add(authorDTO.toAuthorOfId());
+            return authorDTO.getId().longValue();
+        }
+    }
+
+    public void initDb() {
         // init 10 testClass
         for (int i = 0; i < 10; i++) {
             testClassDB.add(new TestClass(i, String.format("TestContent_%s", i)));

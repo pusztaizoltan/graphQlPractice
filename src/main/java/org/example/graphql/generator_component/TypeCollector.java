@@ -16,7 +16,7 @@ import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 // from an already parsed class. The class is parsed by the Java compiler
 // TODO: as I see the purpose of this class is more like a 'model class holder' because it's only functionality to
 // collect the types from methods returns and store in a HashMap
-
+// todo done renamed
 /**
  * Class responsible for collecting java types as schema type base
  * weather defined by client or automatically extracted from provided
