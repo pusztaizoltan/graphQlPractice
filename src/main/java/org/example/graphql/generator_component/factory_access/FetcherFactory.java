@@ -73,7 +73,7 @@ public class FetcherFactory {
             LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argName);
             for (Field field : argType.getDeclaredFields()) {
                 if (field.isAnnotationPresent(GQLField.class)) {
-                    boolean accessible = field.isAccessible();
+                    boolean accessible = field.canAccess(argObject);
                     field.setAccessible(true);
                     field.set(argObject, args.get(field.getName()));
                     field.setAccessible(accessible);
