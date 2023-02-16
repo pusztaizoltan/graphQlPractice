@@ -45,6 +45,7 @@ public class SchemaGeneratorImpl {
     /**
      * Method to provide optional Type patterns for SchemaBuilding
      */
+    @SuppressWarnings("unused")
     public void withAdditionalClasses(@Nonnull Class<?>... classes) {
         this.typeCollector.collectAdditionalTypesFromClasses(classes);
     }
