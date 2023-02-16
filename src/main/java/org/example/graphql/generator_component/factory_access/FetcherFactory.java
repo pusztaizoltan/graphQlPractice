@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -20,14 +19,14 @@ import java.util.Map;
  * based on the signature of the method.
  */
 public class FetcherFactory {
-    static Map<String, Object> environmentArgs;
+    static DataFetchingEnvironment environment;
 
     /**
      * Factory method of the class.
      */
     public static @Nonnull DataFetcher<?> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
         return (DataFetchingEnvironment env) -> {
-            environmentArgs = env.getArguments();
+            environment = env;
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
@@ -42,9 +41,9 @@ public class FetcherFactory {
         Class<?> argType = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
-            return environmentArgs.get(argName);
+            return environment.getArgument(argName);
         } else if (gqlType == GQLType.ENUM) {
-            return Enum.valueOf(argType.asSubclass(Enum.class), (String) environmentArgs.get(argName));
+            return Enum.valueOf(argType.asSubclass(Enum.class), environment.getArgument(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
             return mapByStaticMapperMethod(argType, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
@@ -59,8 +58,10 @@ public class FetcherFactory {
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
             Method fromMap = argType.getMethod("fromMap", Map.class);
-            argObject = (T) fromMap.invoke(argObject, environmentArgs.get(argName));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            Map<String, Object> args = environment.getArgument(argName);
+            argObject = (T) fromMap.invoke(argObject, args);
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
+                 InstantiationException e) {
             e.printStackTrace();
         }
         return argObject;
@@ -70,7 +71,7 @@ public class FetcherFactory {
         T argObject = null;
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
-            LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argName);
+            Map<String, Object> args = environment.getArgument(argName);
             for (Field field : argType.getDeclaredFields()) {
                 if (field.isAnnotationPresent(GQLField.class)) {
                     boolean accessible = field.canAccess(argObject);
