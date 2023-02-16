@@ -28,6 +28,11 @@ public class ReaderDTO{
         this.email = email;
     }
 
+
+    /**
+     * Used by reflection as primary GraphQLinput wireing tool
+     */
+    @SuppressWarnings("unused")
     public @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
         return new ReaderDTO(
                 (Integer) argMap.get("id"),

@@ -12,6 +12,7 @@ import java.lang.reflect.Parameter;
  * Type category constants to facilitate the conversion
  * between java types and GraphGl schema components
  */
+@SuppressWarnings("unused")
 public enum GQLType {
     ENUM(null),
     OBJECT(null),
