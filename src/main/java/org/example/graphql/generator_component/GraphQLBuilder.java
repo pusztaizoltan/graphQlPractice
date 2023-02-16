@@ -47,7 +47,7 @@ public class GraphQLBuilder {
      */
     public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
         GraphQLFieldDefinition accessField = DataAccessFactory.createDataAccessorFor(method);
-        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
+        DataFetcher<?> fetcher =  FetcherFactory.createFetcherFor(method, dataService);
         if (method.isAnnotationPresent(GQLQuery.class)) {
             this.queryType.field(accessField);
             this.registry.dataFetcher(FieldCoordinates.coordinates(queryName, method.getName()), fetcher);

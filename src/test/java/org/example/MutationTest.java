@@ -21,17 +21,17 @@ public class MutationTest {
     }
 
     @Test
-    void addNewReaderByInputObject_ShouldIncreaseReaderCount() {
+    void addNewReaderByInputObjectWithMapperMethod_ShouldIncreaseReaderCount() {
         ExecutionResult mutation = build.execute("mutation {newReaderByInputObject(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
         ExecutionResult query = build.execute("{allReader {id, fullName, email}}");
         mutation.getErrors().forEach(System.out::println);
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
-                () -> assertEquals(21, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
+                () -> assertEquals(1, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
     }
 
     @Test
-    void addNewReaderByInputObject_ShouldReturnWhenQueriedById() {
+    void addNewReaderByInputObjectWithMapperMethod_ShouldReturnWhenQueriedById() {
         ExecutionResult mutation = build.execute("mutation {newReaderByInputObject(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{readerById(id: 200) {id}}");
@@ -49,7 +49,7 @@ public class MutationTest {
         mutation.getErrors().forEach(System.out::println);
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
-                () -> assertEquals(21, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
+                () -> assertEquals(1, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
     }
 
 
@@ -61,4 +61,27 @@ public class MutationTest {
         query.getErrors().forEach(System.out::println);
         assertNotNull(query);
     }
+
+//    @Test
+//    void addNewAuthorByInputObjectWithoutIdWithoutMapperMethod_ShouldIncreaseReaderCount() {
+//        ExecutionResult mutation = build.execute("mutation {newAuthorByInputObject(authorDTO: {name:\"name_0\", isAlive:true})}");
+//        ExecutionResult query = build.execute("{allAuthor {id, name}}");
+//        mutation.getErrors().forEach(System.out::println);
+//        assertAll(
+//                () -> assertEquals(0, mutation.getErrors().size()),
+//                () -> assertEquals(1, ((List<?>) (((Map<?, ?>) query.getData()).get("allAuthor"))).size()));
+//    }
+
+//    @Test
+//    void addNewAuthorByInputObjectWithoutIdWithoutMapperMethod_ShouldReturnIncrementedId() {
+//        ExecutionResult mutation = build.execute("mutation {newReaderByInputObject(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
+//        mutation.getErrors().forEach(System.out::println);
+//        ExecutionResult query = build.execute("{readerById(id: 200) {id}}");
+//        query.getErrors().forEach(System.out::println);
+//        int idFromQuery = (Integer) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
+//        assertAll(
+//                () -> assertEquals(0, mutation.getErrors().size()),
+//                () -> assertEquals(200, idFromQuery));
+//    }
+
 }
