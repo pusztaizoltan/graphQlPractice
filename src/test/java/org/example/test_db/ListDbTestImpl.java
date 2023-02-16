@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class ListDbTestImpl {
     private static final String EXCEPTION_MESSAGE = "invalid id";
     private final List<TestClass> testClassDB = new ArrayList<>();
