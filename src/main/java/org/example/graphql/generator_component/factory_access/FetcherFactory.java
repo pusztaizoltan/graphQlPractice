@@ -43,14 +43,7 @@ public class FetcherFactory {
         if (gqlType.isScalar()) {
             return environmentArgs.get(argName);
         } else if (gqlType == GQLType.ENUM) {
-            // todo under work
-            System.out.println("- " + parameter.getType());
-            var bb = GQLType.class;
-            parameter.isImplicit();
-            parameter.isNamePresent();
-            var aa =parameter.getParameterizedType();
-
-            return Enum.valueOf((Class<? extends Enum>) argType, (String) environmentArgs.get(argName));
+            return Enum.valueOf(argType.asSubclass(Enum.class), (String) environmentArgs.get(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
             return mapByMapperMethod(argType, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
