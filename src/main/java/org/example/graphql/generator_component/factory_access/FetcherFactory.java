@@ -57,36 +57,55 @@ public class FetcherFactory {
     }
 
     private static Object mapByStaticMapperMethod(Class<?> argType, String argName) {
-        Object argObject = null;
+        Object argObject = tryInstanceOf(argType);
+        Method fromMap = tryGetMapperMethod(argType);
+        Map<String, Object> args = environment.getArgument(argName);
         try {
-            argObject = argType.getDeclaredConstructor().newInstance();
-            Method fromMap = argType.getMethod("fromMap", Map.class);
-            Map<String, Object> args = environment.getArgument(argName);
+            assert fromMap != null;
             argObject = fromMap.invoke(argObject, args);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
-                 InstantiationException e) {
+        } catch (IllegalAccessException |InvocationTargetException e) {
             e.printStackTrace();
         }
         return argObject;
     }
 
     private static <T> T mapByFieldMatching(Class<T> argType, String argName) {
-        T argObject = null;
-        try {
-            argObject = argType.getDeclaredConstructor().newInstance();
-            Map<String, Object> args = environment.getArgument(argName);
-            for (Field field : argType.getDeclaredFields()) {
-                if (field.isAnnotationPresent(GQLField.class)) {
-                    boolean accessible = field.canAccess(argObject);
-                    field.setAccessible(true);
+        T argObject = tryInstanceOf(argType);
+        Map<String, Object> args = environment.getArgument(argName);
+        for (Field field : argType.getDeclaredFields()) {
+            if (field.isAnnotationPresent(GQLField.class)) {
+                boolean accessible = field.canAccess(argObject);
+                field.setAccessible(true);
+                try {
                     field.set(argObject, args.get(field.getName()));
-                    field.setAccessible(accessible);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
                 }
+                field.setAccessible(accessible);
             }
-        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
         }
         return argObject;
+    }
+
+    static <T> T tryInstanceOf(Class<T> argType) {
+        try {
+            return argType.getDeclaredConstructor().newInstance();
+        } catch (NoSuchMethodException |
+                 InstantiationException |
+                 IllegalAccessException |
+                 InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private static Method tryGetMapperMethod(@Nonnull Class<?> classType) {
+        try {
+            return classType.getMethod("fromMap", Map.class);
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
