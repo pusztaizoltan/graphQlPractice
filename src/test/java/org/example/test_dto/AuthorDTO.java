@@ -1,13 +1,11 @@
 package org.example.test_dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLType;
 import org.example.test_entity.Author;
-import org.example.test_entity.Reader;
 
 import javax.annotation.Nonnull;
 
