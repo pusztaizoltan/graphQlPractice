@@ -8,7 +8,6 @@ import org.example.graphql.annotation.GQLType;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
@@ -20,7 +19,7 @@ import java.util.Map;
  * based on the signature of the method.
  */
 public class FetcherFactory {
-    static Map<String,Object> environmentArgs;
+    static Map<String, Object> environmentArgs;
 
     /**
      * Factory method of the class.
@@ -44,42 +43,46 @@ public class FetcherFactory {
         if (gqlType.isScalar()) {
             return environmentArgs.get(argName);
         } else if (gqlType == GQLType.ENUM) {
+            System.out.println("- " + parameter.getType());
+            var aa = GQLType.class;
             return Enum.valueOf((Class<Enum>) argType, (String) environmentArgs.get(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
-            try {
-                return mapByMapperMethod(argType, argName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            return mapByMapperMethod(argType, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
-            try {
-                return mapByFieldMatching(argType, argName);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            return mapByFieldMatching(argType, argName);
         } else {
             throw new RuntimeException("Unimplemented argumentMapper for" + parameter);
         }
-        return environmentArgs.get(argName);
     }
 
-    private static Object mapByMapperMethod(Class<?> argType, String argname) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Object argObject = argType.getDeclaredConstructor().newInstance();
-        Method fromMap = argType.getMethod("fromMap", Map.class);
-        argObject = fromMap.invoke(argObject, environmentArgs.get(argname));
+    private static Object mapByMapperMethod(Class<?> argType, String argname) {
+        Object argObject = null;
+        try {
+            argObject = argType.getDeclaredConstructor().newInstance();
+            Method fromMap = argType.getMethod("fromMap", Map.class);
+            argObject = fromMap.invoke(argObject, environmentArgs.get(argname));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return argObject;
     }
 
-    private static Object mapByFieldMatching(Class<?> argType, String argname) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        Object argObject = argType.getDeclaredConstructor().newInstance();
-        LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argname);
-        for (Field field : argType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GQLField.class)) {
-                boolean accessible = field.isAccessible();
-                field.setAccessible(true);
-                field.set(argObject, args.get(field.getName()));
-                field.setAccessible(accessible);
+    private static Object mapByFieldMatching(Class<?> argType, String argname) {
+        Object argObject = null;
+        try {
+            argObject = argType.getDeclaredConstructor().newInstance();
+            LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argname);
+            for (Field field : argType.getDeclaredFields()) {
+                if (field.isAnnotationPresent(GQLField.class)) {
+                    boolean accessible = field.isAccessible();
+                    field.setAccessible(true);
+                    field.set(argObject, args.get(field.getName()));
+                    field.setAccessible(accessible);
+                }
             }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return argObject;
     }
