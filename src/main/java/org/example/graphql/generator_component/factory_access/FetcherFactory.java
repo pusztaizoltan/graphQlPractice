@@ -21,6 +21,9 @@ import java.util.Map;
 public class FetcherFactory {
     static DataFetchingEnvironment environment;
 
+    private FetcherFactory() {
+    }
+
     /**
      * Factory method of the class.
      */
@@ -53,13 +56,13 @@ public class FetcherFactory {
         }
     }
 
-    private static <T> T mapByStaticMapperMethod(Class<T> argType, String argName) {
-        T argObject = null;
+    private static Object mapByStaticMapperMethod(Class<?> argType, String argName) {
+        Object argObject = null;
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
             Method fromMap = argType.getMethod("fromMap", Map.class);
             Map<String, Object> args = environment.getArgument(argName);
-            argObject = (T) fromMap.invoke(argObject, args);
+            argObject = fromMap.invoke(argObject, args);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
                  InstantiationException e) {
             e.printStackTrace();
