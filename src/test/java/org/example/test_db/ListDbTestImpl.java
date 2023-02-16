@@ -88,7 +88,7 @@ public class ListDbTestImpl {
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newReaderByDTO(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
+    public long newReaderByInputObject(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
         if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
             this.readerDB.add(readerDTO.toReaderOfId(newId));

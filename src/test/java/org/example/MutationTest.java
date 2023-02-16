@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MutationTest {
     public static GraphQL build;
@@ -22,8 +21,8 @@ public class MutationTest {
     }
 
     @Test
-    void addNewReader_ShouldIncreaseReaderCount() {
-        ExecutionResult mutation = build.execute("mutation {newReader(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
+    void addNewReaderByInputObject_ShouldIncreaseReaderCount() {
+        ExecutionResult mutation = build.execute("mutation {newReaderByInputObject(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
         ExecutionResult query = build.execute("{allReader {id, fullName, email}}");
         mutation.getErrors().forEach(System.out::println);
         assertAll(
@@ -32,8 +31,8 @@ public class MutationTest {
     }
 
     @Test
-    void addNewReader_ShouldReturnWhenQueriedById() {
-        ExecutionResult mutation = build.execute("mutation {newReader(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
+    void addNewReaderByInputObject_ShouldReturnWhenQueriedById() {
+        ExecutionResult mutation = build.execute("mutation {newReaderByInputObject(readerDTO: {id: 200, fullName:\"fullName_0\", email:\"email_0\"})}");
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{readerById(id: 200) {id}}");
         query.getErrors().forEach(System.out::println);
@@ -41,5 +40,25 @@ public class MutationTest {
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
                 () -> assertEquals(200, idFromQuery));
+    }
+
+    @Test
+    void addNewReaderByInputArgumentsWithId_ShouldIncreaseReaderCount(){
+        ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithId(id: 200, fullName:\"fullName_0\", email:\"email_0\")}");
+        ExecutionResult query = build.execute("{allReader {id, fullName, email}}");
+        mutation.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, mutation.getErrors().size()),
+                () -> assertEquals(21, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
+    }
+
+
+    @Test
+    void addNewReaderByInputArgumentsWithoutId_ShouldReturnIncrementedId(){
+        ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithoutId(fullName:\"fullName_0\", email:\"email_0\")}");
+        mutation.getErrors().forEach(System.out::println);
+        ExecutionResult query = build.execute("{readerById(id: 21) {id}}");
+        query.getErrors().forEach(System.out::println);
+        assertNotNull(query);
     }
 }
