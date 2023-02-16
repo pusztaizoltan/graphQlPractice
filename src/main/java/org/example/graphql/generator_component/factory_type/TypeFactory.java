@@ -19,6 +19,9 @@ import java.util.List;
  * are concerned with Query and Mutation fields
  */
 public class TypeFactory {
+    private TypeFactory() {
+    }
+
     /**
      * Utility method to create GraphQLInputObjectType for provided Class type
      */

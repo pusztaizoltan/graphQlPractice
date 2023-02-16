@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -17,12 +18,14 @@ import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 // TODO: as I see the purpose of this class is more like a 'model class holder' because it's only functionality to
 // collect the types from methods returns and store in a HashMap
 // todo done renamed
+
 /**
  * Class responsible for collecting java types as schema type base
  * weather defined by client or automatically extracted from provided
  * data-service method.
  */
 public class TypeCollector {
+    private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented type collector for ";
     @Getter
     private final HashSet<Class<?>> components = new HashSet<>();
 
@@ -90,7 +93,7 @@ public class TypeCollector {
         } else if (returnType == GQLType.LIST) {
             return genericTypeOfMethod(method);
         } else {
-            throw new RuntimeException("Unimplemented queryParser for " + method.getReturnType());
+            throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + method.getReturnType());
         }
     }
 
@@ -100,7 +103,7 @@ public class TypeCollector {
         } else if (argumentType == GQLType.LIST) {
             return genericTypeOfParameter(parameter);
         } else {
-            throw new RuntimeException("Unimplemented queryParser for " + parameter.getType());
+            throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + parameter.getType());
         }
     }
 
@@ -110,7 +113,7 @@ public class TypeCollector {
         } else if (fieldType == GQLType.LIST) {
             return genericTypeOfField(field);
         } else {
-            throw new RuntimeException("Unimplemented queryParser for " + field.getType());
+            throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + field.getType());
         }
     }
 }

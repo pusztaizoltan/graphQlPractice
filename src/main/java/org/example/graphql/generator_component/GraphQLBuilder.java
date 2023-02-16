@@ -24,12 +24,12 @@ import static org.example.graphql.generator_component.factory_type.TypeFactory.*
  * data-service methods.
  */
 public class GraphQLBuilder {
-    private final String queryName = "Query";
-    private final String mutationName = "Mutation";
+    private static final String QUERY_NAME = "Query";
+    private static final String MUTATION_NAME = "Mutation";
     private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(queryName);
-    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(mutationName);
+    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(QUERY_NAME);
+    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(MUTATION_NAME);
 
     /**
      * Finalize the building process
@@ -47,13 +47,13 @@ public class GraphQLBuilder {
      */
     public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
         GraphQLFieldDefinition accessField = DataAccessFactory.createDataAccessorFor(method);
-        DataFetcher<?> fetcher =  FetcherFactory.createFetcherFor(method, dataService);
+        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
         if (method.isAnnotationPresent(GQLQuery.class)) {
             this.queryType.field(accessField);
-            this.registry.dataFetcher(FieldCoordinates.coordinates(queryName, method.getName()), fetcher);
+            this.registry.dataFetcher(FieldCoordinates.coordinates(QUERY_NAME, method.getName()), fetcher);
         } else {
             this.mutationType.field(accessField);
-            this.registry.dataFetcher(FieldCoordinates.coordinates(mutationName, method.getName()), fetcher);
+            this.registry.dataFetcher(FieldCoordinates.coordinates(MUTATION_NAME, method.getName()), fetcher);
         }
     }
 

@@ -10,6 +10,8 @@ import java.lang.reflect.ParameterizedType;
  * Collection of methods used in multiple times in different classes and in different context
  */
 public class ReflectionUtil {
+    private ReflectionUtil() {
+    }
     // TODO: the reflection util by design deals with metadata level objects such as Classes, Methods, Fields,
     // so this method also should accept a class
     // TODO: the name also is bad, the 'methodsOf' would be enough or by the classic naming 'getMethods'

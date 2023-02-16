@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -52,7 +53,7 @@ public class FetcherFactory {
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
             return mapByFieldMatching(argType, argName);
         } else {
-            throw new RuntimeException("Unimplemented argumentMapper for" + parameter);
+            throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
     }
 

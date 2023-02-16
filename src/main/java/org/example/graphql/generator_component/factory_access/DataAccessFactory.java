@@ -7,6 +7,7 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -29,6 +30,9 @@ public class DataAccessFactory {
     // "Checks if the method should be included into the schema as a list field"
     // then the rules also can be detailed
     // todo done also javadoc are rewrote
+
+    private DataAccessFactory() {
+    }
 
     /**
      * Only entry point of the class that generate the GraphQLFieldDefinition for Mutation or Query.
@@ -56,7 +60,7 @@ public class DataAccessFactory {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
         } else {
-            throw new RuntimeException("Not implemented output-type for Data-Access field of " + method);
+            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
         }
     }
 
@@ -70,7 +74,7 @@ public class DataAccessFactory {
         } else if (argumentType == GQLType.OBJECT) {
             return objectArgument(parameter);
         } else {
-            throw new RuntimeException("(Unimplemented argument type for " + annotation.type());
+            throw new UnimplementedException("(Unimplemented argument type for " + annotation.type());
         }
     }
 
@@ -82,15 +86,6 @@ public class DataAccessFactory {
                               .build();
     }
 
-    private static @Nonnull GraphQLArgument enumArgument(@Nonnull Parameter parameter) {
-        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
-        String typeName = parameter.getType().getSimpleName();
-        return GraphQLArgument.newArgument()
-                              .name(annotation.name())
-                              .type(GraphQLTypeReference.typeRef(typeName))
-                              .build();
-    }
-
     private static @Nonnull GraphQLArgument objectArgument(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         String typeName = parameter.getType().getSimpleName();
@@ -99,4 +94,9 @@ public class DataAccessFactory {
                               .type(GraphQLTypeReference.typeRef(typeName))
                               .build();
     }
+
+    private static @Nonnull GraphQLArgument enumArgument(@Nonnull Parameter parameter) {
+        return objectArgument(parameter);
+    }
+
 }

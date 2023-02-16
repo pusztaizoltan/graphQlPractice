@@ -7,9 +7,9 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.MissingAnnotationException;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
-// todo it is preferred for the nullity annotations to use the javax.annotation, os I added the respective lib to the gradle.build
-// todo done also in everywhere
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
@@ -21,25 +21,28 @@ import static org.example.graphql.generator_component.util.ReflectionUtil.generi
  * according to that, to package-private.
  */
 class FieldFactory {
+    private FieldFactory() {
+    }
+
     /**
      * Generate GraphQLFieldDefinition based on field and the required
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {
-            throw new RuntimeException("Parsing attempt of unannotated field:" + field);
+            throw new MissingAnnotationException("Parsing attempt of unannotated field:" + field);
         }
-        GQLField QGLField = field.getAnnotation(GQLField.class);
-        if (QGLField.type().isScalar()) {
+        GQLType gqlType = GQLType.ofField(field);
+        if (gqlType.isScalar()) {
             return scalarObjectField(field);
-        } else if (QGLField.type() == GQLType.OBJECT) {
+        } else if (gqlType == GQLType.OBJECT) {
             return objectObjectField(field);
-        } else if (QGLField.type() == GQLType.LIST) {
+        } else if (gqlType == GQLType.LIST) {
             return listObjectField(field);
-        } else if (QGLField.type() == GQLType.ENUM) {
+        } else if (gqlType == GQLType.ENUM) {
             return enumObjectField(field);
         } else {
-            throw new RuntimeException("Unimplemented fieldAdapter for " + QGLField);
+            throw new UnimplementedException("Unimplemented fieldAdapter for " + field);
         }
     }
 
@@ -49,24 +52,24 @@ class FieldFactory {
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
         if (!field.isAnnotationPresent(GQLField.class)) {
-            throw new RuntimeException("Parsing attempt of unannotated field:" + field);
+            throw new MissingAnnotationException("Parsing attempt of unannotated field:" + field);
         }
-        GQLField QGLField = field.getAnnotation(GQLField.class);
-        if (QGLField.type().isScalar()) {
+        GQLType gqlType = GQLType.ofField(field);
+        if (gqlType.isScalar()) {
             return scalarInputField(field);
-        } else if (QGLField.type() == GQLType.OBJECT) {
+        } else if (gqlType == GQLType.OBJECT) {
             return objectInputField(field);
-        } else if (QGLField.type() == GQLType.LIST) {
+        } else if (gqlType == GQLType.LIST) {
             return listInputField(field);
-        } else if (QGLField.type() == GQLType.ENUM) {
+        } else if (gqlType == GQLType.ENUM) {
             return enumInputField(field);
         } else {
-            throw new RuntimeException("Unimplemented fieldAdapter for " + QGLField);
+            throw new UnimplementedException("Unimplemented fieldAdapter for " + field);
         }
     }
 
     private static @Nonnull GraphQLFieldDefinition scalarObjectField(@Nonnull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(GQLField.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = GQLType.ofField(field).graphQLScalarType;
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type(scalar)
@@ -94,7 +97,7 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLInputObjectField scalarInputField(@Nonnull Field field) {
-        GraphQLScalarType scalar = field.getAnnotation(GQLField.class).type().graphQLScalarType;
+        GraphQLScalarType scalar = GQLType.ofField(field).graphQLScalarType;
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
                                       .type(scalar)

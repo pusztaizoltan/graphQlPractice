@@ -2,6 +2,7 @@ package org.example.graphql.annotation;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -38,7 +39,7 @@ public enum GQLType {
         } else if (method.isAnnotationPresent(GQLMutation.class)) {
             return method.getAnnotation(GQLMutation.class).type();
         } else {
-            throw new RuntimeException("Expected method annotation is missing on" + method);
+            throw new UnimplementedException("Expected method annotation is missing on" + method);
         }
     }
 
