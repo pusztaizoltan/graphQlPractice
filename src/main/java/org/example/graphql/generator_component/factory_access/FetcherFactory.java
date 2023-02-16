@@ -43,9 +43,14 @@ public class FetcherFactory {
         if (gqlType.isScalar()) {
             return environmentArgs.get(argName);
         } else if (gqlType == GQLType.ENUM) {
+            // todo under work
             System.out.println("- " + parameter.getType());
-            var aa = GQLType.class;
-            return Enum.valueOf((Class<Enum>) argType, (String) environmentArgs.get(argName));
+            var bb = GQLType.class;
+            parameter.isImplicit();
+            parameter.isNamePresent();
+            var aa =parameter.getParameterizedType();
+
+            return Enum.valueOf((Class<? extends Enum>) argType, (String) environmentArgs.get(argName));
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
             return mapByMapperMethod(argType, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
@@ -55,23 +60,23 @@ public class FetcherFactory {
         }
     }
 
-    private static Object mapByMapperMethod(Class<?> argType, String argname) {
+    private static Object mapByMapperMethod(Class<?> argType, String argName) {
         Object argObject = null;
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
             Method fromMap = argType.getMethod("fromMap", Map.class);
-            argObject = fromMap.invoke(argObject, environmentArgs.get(argname));
+            argObject = fromMap.invoke(argObject, environmentArgs.get(argName));
         } catch (Exception e) {
             e.printStackTrace();
         }
         return argObject;
     }
 
-    private static Object mapByFieldMatching(Class<?> argType, String argname) {
+    private static Object mapByFieldMatching(Class<?> argType, String argName) {
         Object argObject = null;
         try {
             argObject = argType.getDeclaredConstructor().newInstance();
-            LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argname);
+            LinkedHashMap<String, ?> args = (LinkedHashMap<String, ?>) environmentArgs.get(argName);
             for (Field field : argType.getDeclaredFields()) {
                 if (field.isAnnotationPresent(GQLField.class)) {
                     boolean accessible = field.isAccessible();

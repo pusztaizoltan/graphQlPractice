@@ -88,7 +88,7 @@ public class ListDbTestImpl {
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newReader(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
+    public long newReaderByDTO(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
         if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
             this.readerDB.add(readerDTO.toReaderOfId(newId));
@@ -100,6 +100,28 @@ public class ListDbTestImpl {
             this.readerDB.add(readerDTO.toReaderOfId());
             return readerDTO.getId().longValue();
         }
+    }
+
+    @GQLMutation(type = GQLType.SCALAR_INT)
+    public long newReaderByFieldArgsWithId(
+            @GQLArg(name = "id", type = GQLType.SCALAR_INT) int id,
+            @GQLArg(name = "fullName", type = GQLType.SCALAR_STRING) @Nonnull String fullName,
+            @GQLArg(name = "email", type = GQLType.SCALAR_STRING) @Nonnull String email) {
+        if (this.readerDB.stream().anyMatch(reader -> reader.getId() == id)) {
+            throw new IllegalArgumentException(EXCEPTION_MESSAGE);
+        } else {
+            this.readerDB.add(new Reader(id, fullName, email));
+        }
+        return id;
+    }
+
+    @GQLMutation(type = GQLType.SCALAR_INT)
+    public long newReaderByFieldArgsWithoutId(
+            @GQLArg(name = "fullName", type = GQLType.SCALAR_STRING) @Nonnull String fullName,
+            @GQLArg(name = "email", type = GQLType.SCALAR_STRING) @Nonnull String email) {
+        long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
+        this.readerDB.add(new Reader(newId, fullName, email));
+        return newId;
     }
 
     private void initDb() {
