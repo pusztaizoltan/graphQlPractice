@@ -57,9 +57,10 @@ public class FetcherFactory {
     private static <T> T mapByStaticMapperMethod(Class<T> argType, String argName) {
         T argObject = null;
         try {
+            argObject = argType.getDeclaredConstructor().newInstance();
             Method fromMap = argType.getMethod("fromMap", Map.class);
-            argObject = (T) fromMap.invoke(null, environmentArgs.get(argName));
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            argObject = (T) fromMap.invoke(argObject, environmentArgs.get(argName));
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
             e.printStackTrace();
         }
         return argObject;

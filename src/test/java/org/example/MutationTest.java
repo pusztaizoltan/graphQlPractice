@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MutationTest {
-    public static GraphQL build;
+    public GraphQL build;
 
     @BeforeEach
     void initTest() {
@@ -55,11 +55,14 @@ public class MutationTest {
 
     @Test
     void addNewReaderByInputArgumentsWithoutId_ShouldReturnIncrementedId(){
-        ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithoutId(fullName:\"fullName_0\", email:\"email_0\")}");
+        ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithoutId( fullName:\"fullName_0\", email:\"email_0\")}");
         mutation.getErrors().forEach(System.out::println);
-        ExecutionResult query = build.execute("{readerById(id: 21) {id}}");
+        ExecutionResult query = build.execute("{readerById(id: 0) {id}}");
         query.getErrors().forEach(System.out::println);
-        assertNotNull(query);
+        int idFromQuery = (Integer) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
+        assertAll(
+                () -> assertEquals(0, mutation.getErrors().size()),
+                () -> assertEquals(0, idFromQuery));
     }
 
 //    @Test
