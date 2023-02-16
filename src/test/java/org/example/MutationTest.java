@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MutationTest {
     public GraphQL build;
@@ -43,7 +44,7 @@ public class MutationTest {
     }
 
     @Test
-    void addNewReaderByInputArgumentsWithId_ShouldIncreaseReaderCount(){
+    void addNewReaderByInputArgumentsWithId_ShouldIncreaseReaderCount() {
         ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithId(id: 200, fullName:\"fullName_0\", email:\"email_0\")}");
         ExecutionResult query = build.execute("{allReader {id, fullName, email}}");
         mutation.getErrors().forEach(System.out::println);
@@ -52,9 +53,8 @@ public class MutationTest {
                 () -> assertEquals(1, ((List<?>) (((Map<?, ?>) query.getData()).get("allReader"))).size()));
     }
 
-
     @Test
-    void addNewReaderByInputArgumentsWithoutId_ShouldReturnIncrementedId(){
+    void addNewReaderByInputArgumentsWithoutId_ShouldReturnIncrementedId() {
         ExecutionResult mutation = build.execute("mutation {newReaderByFieldArgsWithoutId( fullName:\"fullName_0\", email:\"email_0\")}");
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{readerById(id: 0) {id}}");
@@ -87,5 +87,4 @@ public class MutationTest {
                 () -> assertEquals(0, mutation.getErrors().size()),
                 () -> assertEquals(0, idFromQuery));
     }
-
 }

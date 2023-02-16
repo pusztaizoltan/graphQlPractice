@@ -22,6 +22,7 @@ class QueryTest {
         listDbTest.initDb();
         build = new SchemaGeneratorImpl(listDbTest).getGraphQL();
     }
+
     @Test
     void queryAllTestClass_ShouldReturnAllTenTestObject() {
         ExecutionResult result = build.execute("{allTestClass {id, content}}");
