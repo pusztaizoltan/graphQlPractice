@@ -51,13 +51,29 @@ public class FetcherFactory {
             return environment.getArgument(argName);
         } else if (gqlType == GQLType.ENUM) {
             return Enum.valueOf(argumentClass.asSubclass(Enum.class), environment.getArgument(argName));
-        } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argumentClass)) {
-            return mapByStaticMapperMethod(argumentClass, argName);
-        } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argumentClass)) {
-            return mapBySetterMatching(argumentClass, argName);
+        } else if (gqlType == GQLType.OBJECT) {
+            if (hasMapperMethod(argumentClass)) {
+                return mapByStaticMapperMethod(argumentClass, argName);
+            } else {
+                return mapBySetterMatching(argumentClass, argName);
+            }
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
+    }
+
+    private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
+        for (Method method : classType.getMethods()) {
+            if (Modifier.isStatic(method.getModifiers())) {
+                if (method.getName().equals("fromMap")) {
+                    Parameter[] parameters = method.getParameters();
+                    if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private static @Nonnull Object mapByStaticMapperMethod(@Nonnull Class<?> argumentClass, @Nonnull String argName) {
@@ -107,19 +123,5 @@ public class FetcherFactory {
                  IntrospectionException e) {
             throw new UnimplementedException(exceptionMessage + property);
         }
-    }
-
-    private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
-        for (Method method : classType.getMethods()) {
-            if (Modifier.isStatic(method.getModifiers())) {
-                if (method.getName().equals("fromMap")) {
-                    Parameter[] parameters = method.getParameters();
-                    if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
     }
 }
