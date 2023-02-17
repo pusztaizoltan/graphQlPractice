@@ -48,10 +48,11 @@ public class TypeFactory {
     /**
      * Utility method to create GraphQLEnumType for provided Enum type
      */
-    public static @Nonnull GraphQLEnumType graphQLEnumTypeFromEnum(@Nonnull Class<Enum<?>> enumType) {
+    public static @Nonnull GraphQLEnumType graphQLEnumTypeFromEnum(@Nonnull Class<?> enumType) {
         GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(enumType.getSimpleName());
-        for (Enum<?> item : enumType.getEnumConstants()) {
-            builder.value(item.name());
+        Enum<?>[] enumConstants = enumType.asSubclass(Enum.class).getEnumConstants();
+        for (Enum<?> enumConstant : enumConstants) {
+            builder.value(enumConstant.name());
         }
         return builder.build();
     }
