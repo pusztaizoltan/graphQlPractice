@@ -30,7 +30,7 @@ public class FetcherFactory {
     /**
      * Factory method of the class.
      */
-    public static @Nonnull DataFetcher<?> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
+    public static @Nonnull DataFetcher<Object> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
         return (DataFetchingEnvironment env) -> {
             environment = env;
             Parameter[] parameters = method.getParameters();
@@ -73,17 +73,17 @@ public class FetcherFactory {
     }
 
     private static <T> @Nonnull T mapBySetterMatching(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
-        T inputObject = tryInstantiatingInputObject(argumentClass);
+        T inputObject = instantiateInputObject(argumentClass);
         Map<String, Object> arguments = environment.getArgument(argName);
         for (Field field : argumentClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                trySettingInputValue(inputObject, field, arguments.get(field.getName()));
+                setInputValue(inputObject, field, arguments.get(field.getName()));
             }
         }
         return inputObject;
     }
 
-    private static <T> @Nonnull T tryInstantiatingInputObject(@Nonnull Class<T> argumentClass) {
+    private static <T> @Nonnull T instantiateInputObject(@Nonnull Class<T> argumentClass) {
         String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
             return argumentClass.getDeclaredConstructor().newInstance();
@@ -95,7 +95,7 @@ public class FetcherFactory {
         }
     }
 
-    private static void trySettingInputValue(@Nonnull Object inputObject, @Nonnull Field property, @Nonnull Object inputValue) {
+    private static void setInputValue(@Nonnull Object inputObject, @Nonnull Field property, @Nonnull Object inputValue) {
         String exceptionMessage = "Unimplemented public setter for secondary input-wiring solution for ";
         try {
             new PropertyDescriptor(property.getName(), property.getDeclaringClass())
