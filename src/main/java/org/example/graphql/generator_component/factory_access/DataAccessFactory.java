@@ -65,8 +65,7 @@ public class DataAccessFactory {
     }
 
     private static @Nonnull GraphQLArgument argumentFrom(@Nonnull Parameter parameter) {
-        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
-        GQLType argumentType = annotation.type();
+        GQLType argumentType = GQLType.ofParameter(parameter);
         if (argumentType.isScalar()) {
             return scalarArgument(parameter);
         } else if (argumentType == GQLType.ENUM) {
@@ -74,7 +73,7 @@ public class DataAccessFactory {
         } else if (argumentType == GQLType.OBJECT) {
             return objectArgument(parameter);
         } else {
-            throw new UnimplementedException("(Unimplemented argument type for " + annotation.type());
+            throw new UnimplementedException("(Unimplemented argument type for " + argumentType);
         }
     }
 

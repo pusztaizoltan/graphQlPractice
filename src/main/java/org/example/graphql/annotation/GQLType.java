@@ -2,7 +2,7 @@ package org.example.graphql.annotation;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
-import org.example.graphql.generator_component.util.UnimplementedException;
+import org.example.graphql.generator_component.util.MissingAnnotationException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -24,6 +24,7 @@ public enum GQLType {
     SCALAR_BOOLEAN(Scalars.GraphQLBoolean),
     SCALAR_ID(Scalars.GraphQLID),
     ;
+    private static final String UNANNOTATED_EXCEPTION = "Parsing attempt of unannotated ";
     public final GraphQLScalarType graphQLScalarType;
 
     GQLType(GraphQLScalarType graphQLScalarType) {
@@ -39,7 +40,7 @@ public enum GQLType {
         } else if (method.isAnnotationPresent(GQLMutation.class)) {
             return method.getAnnotation(GQLMutation.class).type();
         } else {
-            throw new UnimplementedException("Expected method annotation is missing on" + method);
+            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "method: " + method);
         }
     }
 
@@ -47,14 +48,22 @@ public enum GQLType {
      * ShortCut method to access the GQLType of a parameter annotation
      */
     public static GQLType ofParameter(@Nonnull Parameter parameter) {
-        return parameter.getAnnotation(GQLArg.class).type();
+        if (parameter.isAnnotationPresent(GQLArg.class)) {
+            return parameter.getAnnotation(GQLArg.class).type();
+        } else {
+            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "parameter: " + parameter);
+        }
     }
 
     /**
      * ShortCut method to access the GQLType of a field annotation
      */
     public static GQLType ofField(@Nonnull Field field) {
-        return field.getAnnotation(GQLField.class).type();
+        if (field.isAnnotationPresent(GQLField.class)) {
+            return field.getAnnotation(GQLField.class).type();
+        } else {
+            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "field: " + field);
+        }
     }
 
     /**

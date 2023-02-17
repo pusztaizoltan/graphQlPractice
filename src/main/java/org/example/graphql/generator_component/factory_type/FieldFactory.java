@@ -7,7 +7,6 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
-import org.example.graphql.generator_component.util.MissingAnnotationException;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -29,9 +28,6 @@ class FieldFactory {
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
-        if (!field.isAnnotationPresent(GQLField.class)) {
-            throw new MissingAnnotationException("Parsing attempt of unannotated field:" + field);
-        }
         GQLType gqlType = GQLType.ofField(field);
         if (gqlType.isScalar()) {
             return scalarObjectField(field);
@@ -51,9 +47,6 @@ class FieldFactory {
      * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
-        if (!field.isAnnotationPresent(GQLField.class)) {
-            throw new MissingAnnotationException("Parsing attempt of unannotated field:" + field);
-        }
         GQLType gqlType = GQLType.ofField(field);
         if (gqlType.isScalar()) {
             return scalarInputField(field);
