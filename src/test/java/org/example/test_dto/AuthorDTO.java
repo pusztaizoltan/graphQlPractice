@@ -20,13 +20,14 @@ public class AuthorDTO {
     @GQLField(type = GQLType.SCALAR_STRING)
     private String name;
     @GQLField(type = GQLType.SCALAR_BOOLEAN)
-    private boolean isAlive;
+    // todo remember don't name as isAlive because PropertyDescriptor will search for isIsAlive accessor
+    private boolean alive;
 
     public @Nonnull Author toAuthorOfId(long id) {
-        return new Author(id, name, isAlive);
+        return new Author(id, name, alive);
     }
 
     public @Nonnull Author toAuthorOfId() {
-        return new Author(id, name, isAlive);
+        return new Author(id, name, alive);
     }
 }

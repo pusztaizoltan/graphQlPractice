@@ -53,65 +53,59 @@ public class FetcherFactory {
         } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argumentClass)) {
             return mapByStaticMapperMethod(argumentClass, argName);
         } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argumentClass)) {
-            return mapByFieldMatching(argumentClass, argName);
+            return mapBySetterMatching(argumentClass, argName);
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
     }
 
-    private static Object mapByStaticMapperMethod(@Nonnull Class<?> argumentClass,@Nonnull String argName) {
+    private static @Nonnull Object mapByStaticMapperMethod(@Nonnull Class<?> argumentClass, @Nonnull String argName) {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
         try {
-            Map<String, Object> inputArgument =  environment.getArgument(argName);
+            Map<String, Object> inputArgument = environment.getArgument(argName);
             return argumentClass.getMethod("fromMap", Map.class)
                                 .invoke(null, inputArgument);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        } catch (IllegalAccessException |
+                 InvocationTargetException |
+                 NoSuchMethodException e) {
             throw new UnimplementedException(exceptionMessage + argumentClass);
         }
     }
 
-    private static <T> T mapByFieldMatching(Class<T> argType, String argName) {
-//        Statement statement = new Statement((Object) argObject,"fromMap", (Object[]) args.get(field.getName()));
-//        PropertyDescriptor aa;
-        T argObject = tryInstanceOf(argType);
-        Map<String, Object> args = environment.getArgument(argName);
-        for (Field field : argType.getDeclaredFields()) {
+    private static <T> @Nonnull T mapBySetterMatching(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
+        T inputObject = tryInstantiatingInputObject(argumentClass);
+        Map<String, Object> arguments = environment.getArgument(argName);
+        for (Field field : argumentClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-//                try {
-//                    // todo boolean nameing
-//                    new PropertyDescriptor(field.getName(), argType)
-//                            .getWriteMethod()
-//                            .invoke(argObject, args.get(field.getName()));
-//                } catch (IllegalAccessException e) {
-//                    throw new RuntimeException(e);
-//                } catch (InvocationTargetException e) {
-//                    throw new RuntimeException(e);
-//                } catch (IntrospectionException e) {
-//                    throw new RuntimeException(e);
-//                }
-                boolean accessible = field.canAccess(argObject);
-                field.setAccessible(true);
-                try {
-                    field.set(argObject, args.get(field.getName()));
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                field.setAccessible(accessible);
+                trySettingInputValue(inputObject, field, arguments.get(field.getName()));
             }
         }
-        return argObject;
+        return inputObject;
     }
 
-    static <T> T tryInstanceOf(Class<T> argType) {
+    private static <T> @Nonnull T tryInstantiatingInputObject(@Nonnull Class<T> argumentClass) {
+        String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
-            return argType.getDeclaredConstructor().newInstance();
+            return argumentClass.getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException |
                  InstantiationException |
                  IllegalAccessException |
                  InvocationTargetException e) {
-            e.printStackTrace();
+            throw new UnimplementedException(exceptionMessage + argumentClass);
         }
-        return null;
+    }
+
+    private static void trySettingInputValue(@Nonnull Object inputObject, @Nonnull Field property, @Nonnull Object inputValue) {
+        String exceptionMessage = "Unimplemented public setter for secondary input-wiring solution for ";
+        try {
+            new PropertyDescriptor(property.getName(), property.getDeclaringClass())
+                    .getWriteMethod()
+                    .invoke(inputObject, inputValue);
+        } catch (IllegalAccessException |
+                 InvocationTargetException |
+                 IntrospectionException e) {
+            throw new UnimplementedException(exceptionMessage + property);
+        }
     }
 
     private static boolean hasMapperMethod(@Nonnull Class<?> classType) {

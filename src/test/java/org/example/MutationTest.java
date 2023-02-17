@@ -67,7 +67,7 @@ public class MutationTest {
 
     @Test
     void addNewAuthorByInputObjectWithoutIdWithoutMapperMethod_ShouldIncreaseReaderCount() {
-        ExecutionResult mutation = build.execute("mutation {newAuthorByInputObject(authorDTO: {name:\"name_0\", isAlive:true})}");
+        ExecutionResult mutation = build.execute("mutation {newAuthorByInputObject(authorDTO: {name:\"name_0\", alive:true})}");
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{allAuthor {id, name}}");
         query.getErrors().forEach(System.out::println);
@@ -78,7 +78,7 @@ public class MutationTest {
 
     @Test
     void addNewAuthorByInputObjectWithoutIdWithoutMapperMethod_ShouldReturnIncrementedId() {
-        ExecutionResult mutation = build.execute("mutation {newAuthorByInputObject(authorDTO: {name:\"name_0\", isAlive:true})}");
+        ExecutionResult mutation = build.execute("mutation {newAuthorByInputObject(authorDTO: {name:\"name_0\", alive:true})}");
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{authorById(id: 0) {id}}");
         query.getErrors().forEach(System.out::println);
