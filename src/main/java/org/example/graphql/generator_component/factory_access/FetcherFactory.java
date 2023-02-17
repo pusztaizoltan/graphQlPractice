@@ -52,39 +52,32 @@ public class FetcherFactory {
         } else if (gqlType == GQLType.ENUM) {
             return Enum.valueOf(argumentClass.asSubclass(Enum.class), environment.getArgument(argName));
         } else if (gqlType == GQLType.OBJECT) {
-            if (hasMapperMethod(argumentClass)) {
-                return mapByStaticMapperMethod(argumentClass, argName);
-            } else {
-                return mapBySetterMatching(argumentClass, argName);
-            }
+            return mapObjectArgument(argumentClass, argName);
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
     }
 
-    private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
+    private static @Nonnull Object mapObjectArgument(@Nonnull Class<?> argumentClass, @Nonnull String argName) {
+        try {
+            return tryMappingByStaticMapperMethod(argumentClass, argName);
+        } catch (UnimplementedException | InvocationTargetException | IllegalAccessException e) {
+            return mapBySetterMatching(argumentClass, argName);
+        }
+    }
+
+    private static Object tryMappingByStaticMapperMethod(@Nonnull Class<?> classType, @Nonnull String argName) throws InvocationTargetException, IllegalAccessException {
+        String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
         for (Method method : classType.getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
-                    return true;
+                    Map<String, Object> inputArgument = environment.getArgument(argName);
+                    return method.invoke(null, inputArgument);
                 }
             }
         }
-        return false;
-    }
-
-    private static @Nonnull Object mapByStaticMapperMethod(@Nonnull Class<?> argumentClass, @Nonnull String argName) {
-        String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
-        try {
-            Map<String, Object> inputArgument = environment.getArgument(argName);
-            return argumentClass.getMethod("fromMap", Map.class)
-                                .invoke(null, inputArgument);
-        } catch (IllegalAccessException |
-                 InvocationTargetException |
-                 NoSuchMethodException e) {
-            throw new UnimplementedException(exceptionMessage + argumentClass);
-        }
+        throw new UnimplementedException(exceptionMessage + classType);
     }
 
     private static <T> @Nonnull T mapBySetterMatching(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
