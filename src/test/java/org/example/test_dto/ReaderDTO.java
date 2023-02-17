@@ -33,7 +33,7 @@ public class ReaderDTO{
      * Used by reflection as primary GraphQL-input wiring tool
      */
     @SuppressWarnings("unused")
-    public @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
+    public static @Nonnull ReaderDTO fromMap(@Nonnull Map<String, Object> argMap) {
         return new ReaderDTO(
                 (Integer) argMap.get("id"),
                 (String) argMap.get("fullName"),
