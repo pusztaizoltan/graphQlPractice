@@ -64,12 +64,10 @@ public class FetcherFactory {
 
     private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
         for (Method method : classType.getMethods()) {
-            if (Modifier.isStatic(method.getModifiers())) {
-                if (method.getName().equals("fromMap")) {
-                    Parameter[] parameters = method.getParameters();
-                    if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
-                        return true;
-                    }
+            if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
+                Parameter[] parameters = method.getParameters();
+                if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
+                    return true;
                 }
             }
         }
