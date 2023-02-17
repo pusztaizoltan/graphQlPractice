@@ -37,15 +37,15 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                Class<?> argumentClass = parameters[i].getType();
-                arguments[i] = mapArgument(parameters[i], argumentClass);
+                arguments[i] = mapArgument(parameters[i]);
             }
             return method.invoke(dataService, arguments);
         };
     }
 
-    private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, @Nonnull Class<T> argumentClass) {
+    private static @Nonnull Object mapArgument(@Nonnull Parameter parameter) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
+        Class<?> argumentClass = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
             return environment.getArgument(argName);
