@@ -65,6 +65,7 @@ public class GraphQLBuilder {
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         for (Class<?> component : components) {
             if (component.isEnum()) {
+//                var aa component
                 addEnumType((Class<Enum<?>>) component);
             } else if (component.isAnnotationPresent(GQLInput.class)) {
                 addInputType(component);

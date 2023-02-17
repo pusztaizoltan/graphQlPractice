@@ -1,7 +1,6 @@
 package org.example.graphql.generator_component.factory_type;
 
 import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLEnumValueDefinition;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import org.example.graphql.annotation.GQLField;
@@ -9,8 +8,6 @@ import org.example.graphql.generator_component.GraphQLBuilder;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Used in {@link GraphQLBuilder} to create Types for GraphQlSchema, in contrast of
@@ -52,24 +49,10 @@ public class TypeFactory {
      * Utility method to create GraphQLEnumType for provided Enum type
      */
     public static @Nonnull GraphQLEnumType graphQLEnumTypeFromEnum(@Nonnull Class<Enum<?>> enumType) {
-        return GraphQLEnumType.newEnum()
-                              .name(enumType.getSimpleName())
-                              .values(graphQLEnumValues(enumType))
-                              .build();
-    }
-
-    private static @Nonnull List<GraphQLEnumValueDefinition> graphQLEnumValues(@Nonnull Class<Enum<?>> enumType) {
-        List<GraphQLEnumValueDefinition> enumValueDefinitionList = new LinkedList<>();
+        GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(enumType.getSimpleName());
         for (Enum<?> item : enumType.getEnumConstants()) {
-            enumValueDefinitionList.add(graphQLEnumValueFrom(item));
+            builder.value(item.name());
         }
-        return enumValueDefinitionList;
-    }
-
-    private static @Nonnull GraphQLEnumValueDefinition graphQLEnumValueFrom(@Nonnull Enum<?> enumConstant) {
-        return GraphQLEnumValueDefinition.newEnumValueDefinition()
-                                         .value(enumConstant.name())
-                                         .name(enumConstant.name())
-                                         .build();
+        return builder.build();
     }
 }
