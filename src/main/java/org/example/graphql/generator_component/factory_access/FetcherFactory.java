@@ -13,6 +13,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 
@@ -109,11 +110,16 @@ public class FetcherFactory {
     }
 
     private static boolean hasMapperMethod(@Nonnull Class<?> classType) {
-        try {
-            classType.getMethod("fromMap", Map.class);
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
+        for (Method method : classType.getMethods()) {
+            if (Modifier.isStatic(method.getModifiers())) {
+                if (method.getName().equals("fromMap")) {
+                    Parameter[] parameters = method.getParameters();
+                    if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
+                        return true;
+                    }
+                }
+            }
         }
+        return false;
     }
 }
