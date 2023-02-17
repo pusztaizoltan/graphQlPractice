@@ -8,6 +8,8 @@ import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -40,41 +42,53 @@ public class FetcherFactory {
         };
     }
 
-    private static Object mapArgument(Parameter parameter) {
+    private static @Nonnull Object mapArgument(@Nonnull Parameter parameter) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        Class<?> argType = parameter.getType();
+        Class<?> argumentClass = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
             return environment.getArgument(argName);
         } else if (gqlType == GQLType.ENUM) {
-            return Enum.valueOf(argType.asSubclass(Enum.class), environment.getArgument(argName));
-        } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argType)) {
-            return mapByStaticMapperMethod(argType, argName);
-        } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argType)) {
-            return mapByFieldMatching(argType, argName);
+            return Enum.valueOf(argumentClass.asSubclass(Enum.class), environment.getArgument(argName));
+        } else if (gqlType == GQLType.OBJECT && hasMapperMethod(argumentClass)) {
+            return mapByStaticMapperMethod(argumentClass, argName);
+        } else if (gqlType == GQLType.OBJECT && !hasMapperMethod(argumentClass)) {
+            return mapByFieldMatching(argumentClass, argName);
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
     }
 
-    private static Object mapByStaticMapperMethod(Class<?> argType, String argName) {
-        Object argObject = null;
-        Method fromMap = tryGetMapperMethod(argType);
-        Map<String, Object> args = environment.getArgument(argName);
+    private static Object mapByStaticMapperMethod(@Nonnull Class<?> argumentClass,@Nonnull String argName) {
+        String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
         try {
-            assert fromMap != null;
-            argObject = fromMap.invoke(null, args);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            Map<String, Object> inputArgument =  environment.getArgument(argName);
+            return argumentClass.getMethod("fromMap", Map.class)
+                                .invoke(null, inputArgument);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new UnimplementedException(exceptionMessage + argumentClass);
         }
-        return argObject;
     }
 
     private static <T> T mapByFieldMatching(Class<T> argType, String argName) {
+//        Statement statement = new Statement((Object) argObject,"fromMap", (Object[]) args.get(field.getName()));
+//        PropertyDescriptor aa;
         T argObject = tryInstanceOf(argType);
         Map<String, Object> args = environment.getArgument(argName);
         for (Field field : argType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
+//                try {
+//                    // todo boolean nameing
+//                    new PropertyDescriptor(field.getName(), argType)
+//                            .getWriteMethod()
+//                            .invoke(argObject, args.get(field.getName()));
+//                } catch (IllegalAccessException e) {
+//                    throw new RuntimeException(e);
+//                } catch (InvocationTargetException e) {
+//                    throw new RuntimeException(e);
+//                } catch (IntrospectionException e) {
+//                    throw new RuntimeException(e);
+//                }
                 boolean accessible = field.canAccess(argObject);
                 field.setAccessible(true);
                 try {
@@ -95,15 +109,6 @@ public class FetcherFactory {
                  InstantiationException |
                  IllegalAccessException |
                  InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private static Method tryGetMapperMethod(@Nonnull Class<?> classType) {
-        try {
-            return classType.getMethod("fromMap", Map.class);
-        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
         return null;
