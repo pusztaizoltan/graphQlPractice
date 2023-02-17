@@ -37,15 +37,15 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                arguments[i] = mapArgument(parameters[i]);
+                Class<?> argumentClass = parameters[i].getType();
+                arguments[i] = mapArgument(parameters[i], argumentClass);
             }
             return method.invoke(dataService, arguments);
         };
     }
 
-    private static @Nonnull Object mapArgument(@Nonnull Parameter parameter) {
+    private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, @Nonnull Class<T> argumentClass) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        Class<?> argumentClass = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
             return environment.getArgument(argName);
@@ -58,7 +58,7 @@ public class FetcherFactory {
         }
     }
 
-    private static @Nonnull Object mapObjectArgument(@Nonnull Class<?> argumentClass, @Nonnull String argName) {
+    private static <T> @Nonnull T mapObjectArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
         try {
             return tryMappingByStaticMapperMethod(argumentClass, argName);
         } catch (UnimplementedException | InvocationTargetException | IllegalAccessException e) {
@@ -66,18 +66,18 @@ public class FetcherFactory {
         }
     }
 
-    private static Object tryMappingByStaticMapperMethod(@Nonnull Class<?> classType, @Nonnull String argName) throws InvocationTargetException, IllegalAccessException {
+    private static <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull Class<T> argumentClass, @Nonnull String argName) throws InvocationTargetException, IllegalAccessException {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
-        for (Method method : classType.getMethods()) {
+        for (Method method : argumentClass.getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
                     Map<String, Object> inputArgument = environment.getArgument(argName);
-                    return method.invoke(null, inputArgument);
+                    return argumentClass.cast(method.invoke(null, inputArgument));
                 }
             }
         }
-        throw new UnimplementedException(exceptionMessage + classType);
+        throw new UnimplementedException(exceptionMessage + argumentClass);
     }
 
     private static <T> @Nonnull T mapBySetterMatching(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
