@@ -1,4 +1,4 @@
-package org.example.graphql.generator_component.factory_type;
+package org.example.graphql.generator_component.factory_type.oop;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
@@ -7,6 +7,7 @@ import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.factory_type.TypeFactory;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;

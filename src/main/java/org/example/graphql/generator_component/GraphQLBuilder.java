@@ -11,6 +11,8 @@ import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLQuery;
 import org.example.graphql.generator_component.factory_access.DataAccessFactory;
 import org.example.graphql.generator_component.factory_access.FetcherFactory;
+import org.example.graphql.generator_component.factory_type.oop.Fetchable;
+import org.example.graphql.generator_component.factory_type.TypeFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -74,6 +76,16 @@ public class GraphQLBuilder {
         }
     }
 
+    public void addTypesForComponentClassesOOP(@Nonnull Set<Class<?>> components) {
+        for (Class<?> component : components) {
+            var aa = TypeFactory.getTypeConverter(component);
+            this.graphQLSchema.additionalType(aa.getGraphQLType());
+            if(aa.isFetchable()){
+                this.registry.dataFetchers(((Fetchable)aa).getRegistry());
+            }
+
+        }
+    }
     private void addEnumType(@Nonnull Class<?> component) {
         this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
     }

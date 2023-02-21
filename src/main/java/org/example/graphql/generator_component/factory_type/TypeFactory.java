@@ -4,7 +4,13 @@ import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLObjectType;
 import org.example.graphql.annotation.GQLField;
+import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.generator_component.GraphQLBuilder;
+import org.example.graphql.generator_component.factory_type.oop.EnumConverter;
+import org.example.graphql.generator_component.factory_type.oop.FieldFactory;
+import org.example.graphql.generator_component.factory_type.oop.InputConverter;
+import org.example.graphql.generator_component.factory_type.oop.ObjectConverter;
+import org.example.graphql.generator_component.factory_type.oop.TypeConverter;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -19,6 +25,15 @@ public class TypeFactory {
     private TypeFactory() {
     }
 
+    public static <T> TypeConverter<T> getTypeConverter(Class<T> javaType){
+        if(javaType.isEnum()){
+            return new EnumConverter<T>(javaType);
+        } else if (javaType.isAnnotationPresent(GQLInput.class)) {
+            return new InputConverter<T>(javaType);
+        } else {
+            return new ObjectConverter<T>(javaType);
+        }
+    }
     /**
      * Utility method to create GraphQLInputObjectType for provided Class type
      */
