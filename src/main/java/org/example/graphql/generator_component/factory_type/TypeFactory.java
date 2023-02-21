@@ -2,10 +2,12 @@ package org.example.graphql.generator_component.factory_type;
 
 import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.generator_component.GraphQLBuilder;
-import org.example.graphql.generator_component.factory_type.oop.ConverterAbstract;
-import org.example.graphql.generator_component.factory_type.oop.ConverterEnum;
-import org.example.graphql.generator_component.factory_type.oop.ConverterInput;
-import org.example.graphql.generator_component.factory_type.oop.ConverterObject;
+import org.example.graphql.generator_component.factory_type.type_converters.ConverterAbstract;
+import org.example.graphql.generator_component.factory_type.type_converters.ConverterEnum;
+import org.example.graphql.generator_component.factory_type.type_converters.ConverterInput;
+import org.example.graphql.generator_component.factory_type.type_converters.ConverterObject;
+
+import javax.annotation.Nonnull;
 
 /**
  * Used in {@link GraphQLBuilder} to create Types for GraphQlSchema, in contrast of
@@ -20,7 +22,7 @@ public class TypeFactory {
     /**
      * Factory method of TypeFactory
      */
-    public static <T> ConverterAbstract<T> getTypeConverter(Class<T> javaType) {
+    public static <T> @Nonnull ConverterAbstract<T> getTypeConverter(@Nonnull Class<T> javaType) {
         if (javaType.isEnum()) {
             return new ConverterEnum<>(javaType);
         } else if (javaType.isAnnotationPresent(GQLInput.class)) {

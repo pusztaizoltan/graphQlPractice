@@ -1,4 +1,4 @@
-package org.example.graphql.generator_component.factory_type.oop;
+package org.example.graphql.generator_component.factory_type.type_converters;
 
 import graphql.schema.GraphQLCodeRegistry;
 

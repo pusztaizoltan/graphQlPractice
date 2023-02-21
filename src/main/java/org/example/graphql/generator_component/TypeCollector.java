@@ -69,14 +69,14 @@ public class TypeCollector {
         }
     }
 
-    private void collectRecursivelyFromClassFields(@Nonnull Class<?> classType) {
+    private <T> void collectRecursivelyFromClassFields(@Nonnull Class<T> classType) {
         if (!this.components.contains(classType)) {
             this.components.add(classType);
             collectTypesFromClassFields(classType);
         }
     }
 
-    private void collectTypesFromClassFields(@Nonnull Class<?> classType) {
+    private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 GQLType fieldType = GQLType.ofField(field);

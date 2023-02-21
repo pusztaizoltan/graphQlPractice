@@ -10,8 +10,8 @@ import org.example.graphql.annotation.GQLQuery;
 import org.example.graphql.generator_component.factory_access.DataAccessFactory;
 import org.example.graphql.generator_component.factory_access.FetcherFactory;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
-import org.example.graphql.generator_component.factory_type.oop.Fetchable;
-import org.example.graphql.generator_component.factory_type.oop.ConverterAbstract;
+import org.example.graphql.generator_component.factory_type.type_converters.Fetchable;
+import org.example.graphql.generator_component.factory_type.type_converters.ConverterAbstract;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -62,10 +62,10 @@ public class GraphQLBuilder {
      */
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         for (Class<?> component : components) {
-            ConverterAbstract<?> converterAbstract = TypeFactory.getTypeConverter(component);
-            this.graphQLSchema.additionalType(converterAbstract.getGraphQLType());
-            if (converterAbstract.isFetchable()) {
-                this.registry.dataFetchers(((Fetchable) converterAbstract).getRegistry());
+            ConverterAbstract<?> converter = TypeFactory.getTypeConverter(component);
+            this.graphQLSchema.additionalType(converter.getGraphQLType());
+            if (converter.isFetchable()) {
+                this.registry.dataFetchers(((Fetchable) converter).getRegistry());
             }
         }
     }
