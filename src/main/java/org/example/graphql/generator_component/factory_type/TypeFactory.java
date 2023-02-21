@@ -1,19 +1,11 @@
 package org.example.graphql.generator_component.factory_type;
 
-import graphql.schema.GraphQLEnumType;
-import graphql.schema.GraphQLInputObjectType;
-import graphql.schema.GraphQLObjectType;
-import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.generator_component.GraphQLBuilder;
-import org.example.graphql.generator_component.factory_type.oop.EnumConverter;
-import org.example.graphql.generator_component.factory_type.oop.FieldFactory;
-import org.example.graphql.generator_component.factory_type.oop.InputConverter;
-import org.example.graphql.generator_component.factory_type.oop.ObjectConverter;
-import org.example.graphql.generator_component.factory_type.oop.TypeConverter;
-
-import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
+import org.example.graphql.generator_component.factory_type.oop.ConverterAbstract;
+import org.example.graphql.generator_component.factory_type.oop.ConverterEnum;
+import org.example.graphql.generator_component.factory_type.oop.ConverterInput;
+import org.example.graphql.generator_component.factory_type.oop.ConverterObject;
 
 /**
  * Used in {@link GraphQLBuilder} to create Types for GraphQlSchema, in contrast of
@@ -25,50 +17,16 @@ public class TypeFactory {
     private TypeFactory() {
     }
 
-    public static <T> TypeConverter<T> getTypeConverter(Class<T> javaType){
-        if(javaType.isEnum()){
-            return new EnumConverter<T>(javaType);
+    /**
+     * Factory method of TypeFactory
+     */
+    public static <T> ConverterAbstract<T> getTypeConverter(Class<T> javaType) {
+        if (javaType.isEnum()) {
+            return new ConverterEnum<>(javaType);
         } else if (javaType.isAnnotationPresent(GQLInput.class)) {
-            return new InputConverter<T>(javaType);
+            return new ConverterInput<>(javaType);
         } else {
-            return new ObjectConverter<T>(javaType);
+            return new ConverterObject<>(javaType);
         }
-    }
-    /**
-     * Utility method to create GraphQLInputObjectType for provided Class type
-     */
-    public static @Nonnull GraphQLInputObjectType graphQLInputObjectTypeFromClass(@Nonnull Class<?> classType) {
-        GraphQLInputObjectType.Builder inputObjectTypeBuilder = GraphQLInputObjectType.newInputObject().name(classType.getSimpleName());
-        for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GQLField.class)) {
-                inputObjectTypeBuilder.field(FieldFactory.GQLInputFieldFrom(field));
-            }
-        }
-        return inputObjectTypeBuilder.build();
-    }
-
-    /**
-     * Utility method to create GraphQLObjectType for provided Class type
-     */
-    public static @Nonnull GraphQLObjectType graphQLObjectTypeFromClass(@Nonnull Class<?> classType) {
-        GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(classType.getSimpleName());
-        for (Field field : classType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GQLField.class)) {
-                objectTypeBuilder.field(FieldFactory.GQLObjectFieldFrom(field));
-            }
-        }
-        return objectTypeBuilder.build();
-    }
-
-    /**
-     * Utility method to create GraphQLEnumType for provided Enum type
-     */
-    public static @Nonnull GraphQLEnumType graphQLEnumTypeFromEnum(@Nonnull Class<?> enumType) {
-        GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(enumType.getSimpleName());
-        Enum<?>[] enumConstants = enumType.asSubclass(Enum.class).getEnumConstants();
-        for (Enum<?> enumConstant : enumConstants) {
-            builder.value(enumConstant.name());
-        }
-        return builder.build();
     }
 }

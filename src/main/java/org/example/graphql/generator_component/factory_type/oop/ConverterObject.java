@@ -4,30 +4,28 @@ import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
-import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLField;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class ObjectConverter<T> extends TypeConverter<T> implements Fetchable {
+public class ConverterObject<T> extends ConverterAbstract<T> implements Fetchable {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
 
-    public ObjectConverter(Class<T> javaType) {
+    public ConverterObject(Class<T> javaType) {
         super(javaType);
-        super.graphQLType = buildGraphQLAnalogue();
         registerFetchers();
     }
 
     @Override
-    protected @Nonnull GraphQLType buildGraphQLAnalogue() {
-        GraphQLObjectType.Builder objectTypeBuilder = GraphQLObjectType.newObject().name(super.getName());
+    protected void buildGraphQLAnalogue() {
+        GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(super.getName());
         for (Field field : super.javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                objectTypeBuilder.field(FieldFactory.GQLObjectFieldFrom(field));
+                builder.field(FieldFactory.GQLObjectFieldFrom(field));
             }
         }
-        return objectTypeBuilder.build();
+        super.graphQLType = builder.build();
     }
 
     private void registerFetchers() {

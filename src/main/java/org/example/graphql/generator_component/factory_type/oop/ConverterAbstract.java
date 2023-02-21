@@ -1,21 +1,21 @@
 package org.example.graphql.generator_component.factory_type.oop;
 
 import graphql.schema.GraphQLType;
-import org.example.graphql.generator_component.factory_type.oop.Fetchable;
 
 import javax.annotation.Nonnull;
 
-public abstract class TypeConverter<T> {
-    Class<T> javaType;
-    GraphQLType graphQLType;
+public abstract class ConverterAbstract<T> {
+    protected final Class<T> javaType;
+    protected GraphQLType graphQLType;
 
-    public TypeConverter(Class<T> javaType) {
+    protected ConverterAbstract(@Nonnull Class<T> javaType) {
         this.javaType = javaType;
+        buildGraphQLAnalogue();
     }
 
-    protected abstract @Nonnull GraphQLType buildGraphQLAnalogue();
+    protected abstract void buildGraphQLAnalogue();
 
-    String getName(){
+    public String getName() {
         return javaType.getSimpleName();
     }
 
@@ -23,7 +23,7 @@ public abstract class TypeConverter<T> {
         return graphQLType;
     }
 
-    public boolean  isFetchable(){
+    public boolean isFetchable() {
         return this instanceof Fetchable;
     }
 }

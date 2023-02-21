@@ -6,20 +6,16 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphql.annotation.GQLField;
-import org.example.graphql.annotation.GQLInput;
 import org.example.graphql.annotation.GQLQuery;
 import org.example.graphql.generator_component.factory_access.DataAccessFactory;
 import org.example.graphql.generator_component.factory_access.FetcherFactory;
-import org.example.graphql.generator_component.factory_type.oop.Fetchable;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
+import org.example.graphql.generator_component.factory_type.oop.Fetchable;
+import org.example.graphql.generator_component.factory_type.oop.ConverterAbstract;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
-
-import static org.example.graphql.generator_component.factory_type.TypeFactory.*;
 
 /**
  * Class responsible for generating SchemaComponents based on provided Classes and
@@ -66,44 +62,11 @@ public class GraphQLBuilder {
      */
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         for (Class<?> component : components) {
-            if (component.isEnum()) {
-                addEnumType(component);
-            } else if (component.isAnnotationPresent(GQLInput.class)) {
-                addInputType(component);
-            } else {
-                addObjectType(component);
+            ConverterAbstract<?> converterAbstract = TypeFactory.getTypeConverter(component);
+            this.graphQLSchema.additionalType(converterAbstract.getGraphQLType());
+            if (converterAbstract.isFetchable()) {
+                this.registry.dataFetchers(((Fetchable) converterAbstract).getRegistry());
             }
         }
-    }
-
-    public void addTypesForComponentClassesOOP(@Nonnull Set<Class<?>> components) {
-        for (Class<?> component : components) {
-            var aa = TypeFactory.getTypeConverter(component);
-            this.graphQLSchema.additionalType(aa.getGraphQLType());
-            if(aa.isFetchable()){
-                this.registry.dataFetchers(((Fetchable)aa).getRegistry());
-            }
-
-        }
-    }
-    private void addEnumType(@Nonnull Class<?> component) {
-        this.graphQLSchema.additionalType(graphQLEnumTypeFromEnum(component));
-    }
-
-    private void addInputType(@Nonnull Class<?> component) {
-        this.graphQLSchema.additionalType(graphQLInputObjectTypeFromClass(component));
-    }
-
-    private void addObjectType(@Nonnull Class<?> component) {
-        String typeName = component.getSimpleName();
-        for (Field field : component.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GQLField.class)) {
-                Class<?> fieldType = field.getType();
-                String fieldName = fieldType.getSimpleName();
-                DataFetcher<?> fetcher = env -> fieldType.cast(field.get(component.cast(env.getSource())));
-                this.registry.dataFetcher(FieldCoordinates.coordinates(typeName, fieldName), fetcher);
-            }
-        }
-        this.graphQLSchema.additionalType(graphQLObjectTypeFromClass(component));
     }
 }
