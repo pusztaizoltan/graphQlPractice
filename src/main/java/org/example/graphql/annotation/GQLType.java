@@ -58,21 +58,25 @@ public enum GQLType {
         this.graphQLScalarType = graphQLScalarType;
     }
 
-    /**
-     * ShortCut method to access the GQLType of a method annotation
-     */
-    public static GQLType ofMethod(@Nonnull Method method) {
-        if(map.containsKey(method.getReturnType())){
+    public static GQLType ofClass(@Nonnull Class<?> classType) {
+        if(map.containsKey(classType)){
             return SCALAR;
-        } else if (Collection.class.isAssignableFrom(method.getReturnType())) {
+        } else if (Collection.class.isAssignableFrom(classType)) {
             return LIST;
-        } else if (method.getReturnType().isEnum()) {
+        } else if (classType.isEnum()) {
             return ENUM;
-        } else if (method.getReturnType().isArray()) {
+        } else if (classType.isArray()) {
             return ARRAY;
         } else{
             return OBJECT;
         }
+    }
+
+    /**
+     * ShortCut method to access the GQLType of a method annotation
+     */
+    public static GQLType ofMethod(@Nonnull Method method) {
+        return ofClass(method.getReturnType());
 //        if (method.isAnnotationPresent(GQLQuery.class)) {
 //            return method.getAnnotation(GQLQuery.class).type();
 //        } else if (method.isAnnotationPresent(GQLMutation.class)) {
@@ -86,17 +90,7 @@ public enum GQLType {
      * ShortCut method to access the GQLType of a parameter annotation
      */
     public static GQLType ofParameter(@Nonnull Parameter parameter) {
-        if(map.containsKey(parameter.getType())){
-            return SCALAR;
-        } else if (Collection.class.isAssignableFrom(parameter.getType())) {
-            return LIST;
-        } else if (parameter.getType().isEnum()) {
-            return ENUM;
-        } else if (parameter.getType().isArray()) {
-            return ARRAY;
-        } else{
-            return OBJECT;
-        }
+        return ofClass(parameter.getType());
 //        if (parameter.isAnnotationPresent(GQLArg.class)) {
 //            return parameter.getAnnotation(GQLArg.class).type();
 //        } else {
@@ -108,17 +102,7 @@ public enum GQLType {
      * ShortCut method to access the GQLType of a field annotation
      */
     public static GQLType ofField(@Nonnull Field field) {
-        if(map.containsKey(field.getType())){
-            return SCALAR;
-        } else if (Collection.class.isAssignableFrom(field.getType())) {
-            return LIST;
-        } else if (field.getType().isEnum()) {
-            return ENUM;
-        } else if (field.getType().isArray()) {
-            return ARRAY;
-        } else{
-            return OBJECT;
-        }
+        return ofClass(field.getType());
 //        if (field.isAnnotationPresent(GQLField.class)) {
 //            return field.getAnnotation(GQLField.class).type();
 //        } else {
