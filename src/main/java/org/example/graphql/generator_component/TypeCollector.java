@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
 
+import static org.example.graphql.annotation.GQLType.*;
 import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 // TODO: I think the 'parse' term is misleading, because in this case you build a model
 // from an already parsed class. The class is parsed by the Java compiler
@@ -36,10 +37,9 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        GQLType returnType = GQLType.ofMethod(method);
-        if (!returnType.isScalar()) {
+        if (!isScalar(method.getReturnType())) {
             System.out.println("ret: " +method.getReturnType());
-            collectRecursivelyFromClassFields(getClassFromReturn(method, returnType));
+            collectRecursivelyFromClassFields(getClassFromReturn(method));
         }
     }
 
@@ -52,10 +52,9 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                GQLType argumentType = GQLType.ofParameter(parameter);
-                if (!argumentType.isScalar()) {
+                if (!isScalar(parameter.getType())) {
                     System.out.println("arg: " +parameter.getType());
-                    collectRecursivelyFromClassFields(getClassFromArgument(parameter, argumentType));
+                    collectRecursivelyFromClassFields(getClassFromArgument(parameter));
                 }
             }
         }
@@ -73,54 +72,58 @@ public class TypeCollector {
 
     private <T> void collectRecursivelyFromClassFields(@Nonnull Class<T> classType) {
         if (!this.components.contains(classType)) {
-            this.components.add(classType);
-            System.out.println(classType);
-            collectTypesFromClassFields(classType);
+            if (!isScalar(classType)) {
+                this.components.add(classType);
+                System.out.println(classType);
+                collectTypesFromClassFields(classType);
+            }
         }
     }
 
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                GQLType fieldType = GQLType.ofField(field);
-                if (!fieldType.isScalar()) {
+                if (!isScalar(field.getType())) {
                     System.out.println("field: " +field.getType());
-                    collectRecursivelyFromClassFields(getClassFromField(field, fieldType));
+                    collectRecursivelyFromClassFields(getClassFromField(field));
                 }
             }
         }
     }
 
-    private Class<?> getClassFromReturn(@Nonnull Method method, GQLType returnType) {
-        if (returnType == GQLType.OBJECT || returnType == GQLType.ENUM) {
+    private Class<?> getClassFromReturn(@Nonnull Method method) {
+        GQLType returnType = ofMethod(method);
+        if (returnType == OBJECT || returnType == ENUM) {
             return method.getReturnType();
-        } else if (returnType == GQLType.LIST) {
+        } else if (returnType == LIST) {
             return genericTypeOfMethod(method);
-        } else if (returnType == GQLType.ARRAY) {
+        } else if (returnType == ARRAY) {
             return method.getReturnType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + method.getReturnType());
         }
     }
 
-    private Class<?> getClassFromArgument(@Nonnull Parameter parameter, GQLType argumentType) {
-        if (argumentType == GQLType.OBJECT || argumentType == GQLType.ENUM) {
+    private Class<?> getClassFromArgument(@Nonnull Parameter parameter) {
+        GQLType argumentType = ofParameter(parameter);
+        if (argumentType == OBJECT || argumentType == ENUM) {
             return parameter.getType();
-        } else if (argumentType == GQLType.LIST) {
+        } else if (argumentType == LIST) {
             return genericTypeOfParameter(parameter);
-        } else if (argumentType == GQLType.ARRAY) {
+        } else if (argumentType == ARRAY) {
             return parameter.getType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + parameter.getType());
         }
     }
 
-    private Class<?> getClassFromField(@Nonnull Field field, GQLType fieldType) {
-        if (fieldType == GQLType.OBJECT || fieldType == GQLType.ENUM) {
+    private Class<?> getClassFromField(@Nonnull Field field) {
+        GQLType fieldType = ofField(field);
+        if (fieldType == OBJECT || fieldType == ENUM) {
             return field.getType();
-        } else if (fieldType == GQLType.LIST) {
+        } else if (fieldType == LIST) {
             return genericTypeOfField(field);
-        } else if (fieldType == GQLType.ARRAY) {
+        } else if (fieldType == ARRAY) {
             return field.getType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + field.getType());

@@ -133,14 +133,14 @@ class QueryTest {
 //                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassAsArray"))).size()));
 //    }
 
-//    @Test
-//    void queryAllTestClassIdAsList_ShouldReturnAllTenId() {
-//        ExecutionResult result = build.execute("{allTestClassIdAsList {id}}");
-//        result.getErrors().forEach(System.out::println);
-//        assertAll(
-//                () -> assertEquals(0, result.getErrors().size()),
-//                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassIdAsList"))).size()));
-//    }
+    @Test
+    void queryAllTestClassIdAsList_ShouldReturnAllTenId() {
+        ExecutionResult result = build.execute("{allTestClassIdAsList}");
+        result.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, result.getErrors().size()),
+                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassIdAsList"))).size()));
+    }
 
 
 //    @Test
