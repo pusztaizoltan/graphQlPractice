@@ -8,6 +8,8 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Type category constants to facilitate the conversion
@@ -25,6 +27,28 @@ public enum GQLType {
     SCALAR_ID(Scalars.GraphQLID),
     ;
     private static final String UNANNOTATED_EXCEPTION = "Parsing attempt of unannotated ";
+    private final static Map<Class<?>, GraphQLScalarType> map = new HashMap<>();
+
+    static {
+        map.put(boolean.class, Scalars.GraphQLBoolean);
+        map.put(Boolean.class, Scalars.GraphQLBoolean);
+        map.put(byte.class, Scalars.GraphQLInt);
+        map.put(Byte.class, Scalars.GraphQLInt);
+        map.put(short.class, Scalars.GraphQLInt);
+        map.put(Short.class, Scalars.GraphQLInt);
+        map.put(int.class, Scalars.GraphQLInt);
+        map.put(Integer.class, Scalars.GraphQLInt);
+        map.put(long.class, Scalars.GraphQLInt);
+        map.put(Long.class, Scalars.GraphQLInt);
+        map.put(float.class, Scalars.GraphQLFloat);
+        map.put(Float.class, Scalars.GraphQLFloat);
+        map.put(double.class, Scalars.GraphQLFloat);
+        map.put(Double.class, Scalars.GraphQLFloat);
+        map.put(char.class, Scalars.GraphQLInt);
+        map.put(Character.class, Scalars.GraphQLInt);
+        map.put(String.class, Scalars.GraphQLString);
+    }
+
     public final GraphQLScalarType graphQLScalarType;
 
     GQLType(GraphQLScalarType graphQLScalarType) {
@@ -70,7 +94,14 @@ public enum GQLType {
      * ShortCut method to differentiate between simple and complex GraphQl schema elements
      */
     public boolean isScalar() {
-        return graphQLScalarType != null;
+        return this.graphQLScalarType != null;
+    }
+
+    public boolean isScalar(Class<?> classType) {
+        return map.containsKey(classType);
+    }
+    public GraphQLScalarType getScalar(Class<?> classType) {
+        return map.get(classType);
     }
 }
 
