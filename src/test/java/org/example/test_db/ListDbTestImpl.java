@@ -38,6 +38,20 @@ public class ListDbTestImpl {
     }
 
     @Nonnull
+    @GQLQuery(type = GQLType.ARRAY)
+    // todo
+    public long[] allTestClassIdAsArray() {
+        return testClassDB.stream().mapToLong(TestClass::getId).toArray();
+    }
+
+    @Nonnull
+    @GQLQuery(type = GQLType.LIST)
+    // todo
+    public List<Long> allTestClassIdAsList() {
+        return testClassDB.stream().mapToLong(TestClass::getId).boxed().collect(Collectors.toList());
+    }
+
+    @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
     public TestClass testClassById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
         // TODO: within our project we ar not using streams because of the side effects produced by them:
