@@ -37,19 +37,19 @@ public class ListDbTestImpl {
         return testClassDB.toArray(testClassDB.toArray(TestClass[]::new));
     }
 
-    @Nonnull
-    @GQLQuery(type = GQLType.ARRAY)
-    // todo
-    public long[] allTestClassIdAsArray() {
-        return testClassDB.stream().mapToLong(TestClass::getId).toArray();
-    }
+//    @Nonnull
+//    @GQLQuery(type = GQLType.ARRAY)
+//    // todo
+//    public long[] allTestClassIdAsArray() {
+//        return testClassDB.stream().mapToLong(TestClass::getId).toArray();
+//    }
 
-    @Nonnull
-    @GQLQuery(type = GQLType.LIST)
-    // todo
-    public List<Long> allTestClassIdAsList() {
-        return testClassDB.stream().mapToLong(TestClass::getId).boxed().collect(Collectors.toList());
-    }
+//    @Nonnull
+//    @GQLQuery(type = GQLType.LIST)
+//    // todo
+//    public List<Long> allTestClassIdAsList() {
+//        return testClassDB.stream().mapToLong(TestClass::getId).boxed().collect(Collectors.toList());
+//    }
 
     @Nonnull
     @GQLQuery(type = GQLType.OBJECT)

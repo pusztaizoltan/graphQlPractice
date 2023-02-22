@@ -63,7 +63,7 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLFieldDefinition scalarObjectField(@Nonnull Field field) {
-        GraphQLScalarType scalar = GQLType.ofField(field).graphQLScalarType;
+        GraphQLScalarType scalar = GQLType.getScalar(field.getType());
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type(scalar)
@@ -91,7 +91,7 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLInputObjectField scalarInputField(@Nonnull Field field) {
-        GraphQLScalarType scalar = GQLType.ofField(field).graphQLScalarType;
+        GraphQLScalarType scalar = GQLType.getScalar(field.getType());
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
                                       .type(scalar)

@@ -72,13 +72,23 @@ public class DataAccessFactory {
         }
         // analogous to GraphQl list
         else if (Collection.class.isAssignableFrom(method.getReturnType())){
-            String typeName = genericTypeOfMethod(method).getSimpleName();
-            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            Class<?> genericType = genericTypeOfMethod(method);
+            String typeName = genericType.getSimpleName();
+            if(GQLType.isScalar(genericType)){
+                return GraphQLList.list(GQLType.getScalar(genericType));
+            } else {
+                return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            }
         }
         // analogous to GraphQl list
         else if (method.getReturnType().isArray()) {
-            String typeName = method.getReturnType().componentType().getSimpleName();
-            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            Class<?> componentType = method.getReturnType().componentType();
+            String typeName = componentType.getSimpleName();
+            if(GQLType.isScalar(componentType)){
+                return GraphQLList.list(GQLType.getScalar(componentType));
+            } else {
+                return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            }
 //        } else if (method.getReturnType().componentType()) {
         } else  {
             String typeName = method.getReturnType().getSimpleName();
@@ -91,7 +101,7 @@ public class DataAccessFactory {
     private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {
         GQLType argumentType = GQLType.ofParameter(parameter);
         if (argumentType.isScalar()) {
-            return argumentType.graphQLScalarType;
+            return GQLType.getScalar(parameter.getType());
         } else if (argumentType == GQLType.ENUM) {
             String typeName = parameter.getType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);

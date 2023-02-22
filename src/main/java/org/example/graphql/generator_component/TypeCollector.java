@@ -38,6 +38,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
         GQLType returnType = GQLType.ofMethod(method);
         if (!returnType.isScalar()) {
+            System.out.println("ret: " +method.getReturnType());
             collectRecursivelyFromClassFields(getClassFromReturn(method, returnType));
         }
     }
@@ -53,6 +54,7 @@ public class TypeCollector {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
                 GQLType argumentType = GQLType.ofParameter(parameter);
                 if (!argumentType.isScalar()) {
+                    System.out.println("arg: " +parameter.getType());
                     collectRecursivelyFromClassFields(getClassFromArgument(parameter, argumentType));
                 }
             }
@@ -72,6 +74,7 @@ public class TypeCollector {
     private <T> void collectRecursivelyFromClassFields(@Nonnull Class<T> classType) {
         if (!this.components.contains(classType)) {
             this.components.add(classType);
+            System.out.println(classType);
             collectTypesFromClassFields(classType);
         }
     }
@@ -81,6 +84,7 @@ public class TypeCollector {
             if (field.isAnnotationPresent(GQLField.class)) {
                 GQLType fieldType = GQLType.ofField(field);
                 if (!fieldType.isScalar()) {
+                    System.out.println("field: " +field.getType());
                     collectRecursivelyFromClassFields(getClassFromField(field, fieldType));
                 }
             }
