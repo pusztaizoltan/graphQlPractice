@@ -1,6 +1,7 @@
 package org.example.graphql.generator_component.factory_type.type_converters;
 
 import graphql.schema.GraphQLType;
+import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 

@@ -5,6 +5,7 @@ import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import org.example.graphql.annotation.GQLField;
+import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
