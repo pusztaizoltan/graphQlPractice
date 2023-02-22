@@ -37,25 +37,34 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                arguments[i] = mapArgument(parameters[i]);
+                Class<?> argumentClass = parameters[i].getType();
+                arguments[i] = mapArgument(parameters[i], argumentClass);
             }
             return method.invoke(dataService, arguments);
         };
     }
 
-    private static @Nonnull Object mapArgument(@Nonnull Parameter parameter) {
+    private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, Class<T> argumentClass) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        Class<?> argumentClass = parameter.getType();
         GQLType gqlType = GQLType.ofParameter(parameter);
         if (gqlType.isScalar()) {
             return environment.getArgument(argName);
         } else if (gqlType == GQLType.ENUM) {
-            return Enum.valueOf(argumentClass.asSubclass(Enum.class), environment.getArgument(argName));
+            return mapEnumArgument(argumentClass, argName);
         } else if (gqlType == GQLType.OBJECT) {
             return mapObjectArgument(argumentClass, argName);
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
         }
+    }
+
+    private static <T> @Nonnull T mapEnumArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
+        for (T enumConstant : argumentClass.getEnumConstants()) {
+            if (((Enum<?>) enumConstant).name().equals(environment.getArgument(argName))) {
+                return enumConstant;
+            }
+        }
+        throw new IllegalArgumentException("Invalid enum constant");
     }
 
     private static <T> @Nonnull T mapObjectArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {

@@ -9,6 +9,7 @@ import graphql.schema.GraphQLSchema;
 import org.example.graphql.annotation.GQLQuery;
 import org.example.graphql.generator_component.factory_access.DataAccessFactory;
 import org.example.graphql.generator_component.factory_access.FetcherFactory;
+import org.example.graphql.generator_component.factory_access.QueryConverter;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
 import org.example.graphql.generator_component.factory_type.type_converters.Fetchable;
 import org.example.graphql.generator_component.factory_type.type_converters.ConverterAbstract;
@@ -44,6 +45,7 @@ public class GraphQLBuilder {
      * with fields each wired to the respective method of the data-service.
      */
     public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
+//        new QueryConverter<>(method); //
         GraphQLFieldDefinition accessField = DataAccessFactory.createDataAccessorFor(method);
         DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
         if (method.isAnnotationPresent(GQLQuery.class)) {
