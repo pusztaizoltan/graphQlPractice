@@ -13,6 +13,7 @@ import org.example.graphql.generator_component.util.UnimplementedException;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Collection;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfMethod;
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfParameter;
@@ -50,30 +51,41 @@ public class DataAccessFactory {
         return builder.name(method.getName()).type(returnTypeFrom(method)).build();
     }
 
-    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
-        GQLType returnType = GQLType.ofMethod(method);
-        if (returnType.isScalar()) {
-            return returnType.graphQLScalarType;
-        } else if (returnType == GQLType.LIST) {
-            String typeName = genericTypeOfMethod(method).getSimpleName();
-            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
-        } else if (returnType == GQLType.OBJECT) {
-            String typeName = method.getReturnType().getSimpleName();
-            return GraphQLTypeReference.typeRef(typeName);
-        } else if (returnType == GQLType.ENUM) {
-            String typeName = method.getReturnType().getSimpleName();
-            return GraphQLTypeReference.typeRef(typeName);
-        } else {
-            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
-        }
-    }
-
     private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull Parameter parameter) {
         GQLArg annotation = parameter.getAnnotation(GQLArg.class);
         return GraphQLArgument.newArgument()
                               .name(annotation.name())
                               .type(argumentTypeFrom(parameter))
                               .build();
+    }
+
+    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
+        GQLType returnType = GQLType.ofMethod(method);
+        // analogous to GraphQl scalar
+        if (GQLType.isScalar(method.getReturnType())) {
+            return GQLType.getScalar(method.getReturnType());
+        }
+        // analogous to GraphQl enum
+        else if (method.getReturnType().isEnum()) {
+            String typeName = method.getReturnType().getSimpleName();
+            return GraphQLTypeReference.typeRef(typeName);
+        }
+        // analogous to GraphQl list
+        else if (Collection.class.isAssignableFrom(method.getReturnType())){
+            String typeName = genericTypeOfMethod(method).getSimpleName();
+            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+        }
+        // analogous to GraphQl list
+        else if (method.getReturnType().isArray()) {
+            String typeName = method.getReturnType().componentType().getSimpleName();
+            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+//        } else if (method.getReturnType().componentType()) {
+        } else  {
+            String typeName = method.getReturnType().getSimpleName();
+            return GraphQLTypeReference.typeRef(typeName);
+//        } else {
+//            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
+        }
     }
 
     private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {

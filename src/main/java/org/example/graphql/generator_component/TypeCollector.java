@@ -92,6 +92,8 @@ public class TypeCollector {
             return method.getReturnType();
         } else if (returnType == GQLType.LIST) {
             return genericTypeOfMethod(method);
+        } else if (returnType == GQLType.ARRAY) {
+            return method.getReturnType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + method.getReturnType());
         }
@@ -102,6 +104,8 @@ public class TypeCollector {
             return parameter.getType();
         } else if (argumentType == GQLType.LIST) {
             return genericTypeOfParameter(parameter);
+        } else if (argumentType == GQLType.ARRAY) {
+            return parameter.getType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + parameter.getType());
         }
@@ -112,6 +116,8 @@ public class TypeCollector {
             return field.getType();
         } else if (fieldType == GQLType.LIST) {
             return genericTypeOfField(field);
+        } else if (fieldType == GQLType.ARRAY) {
+            return field.getType().componentType();
         } else {
             throw new UnimplementedException(UNIMPLEMENTED_MESSAGE + field.getType());
         }

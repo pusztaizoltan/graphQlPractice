@@ -20,6 +20,7 @@ public enum GQLType {
     ENUM(null),
     OBJECT(null),
     LIST(null),
+    ARRAY(null),
     SCALAR_INT(Scalars.GraphQLInt),
     SCALAR_FLOAT(Scalars.GraphQLFloat),
     SCALAR_STRING(Scalars.GraphQLString),
@@ -97,10 +98,10 @@ public enum GQLType {
         return this.graphQLScalarType != null;
     }
 
-    public boolean isScalar(Class<?> classType) {
+    public static boolean isScalar(Class<?> classType) {
         return map.containsKey(classType);
     }
-    public GraphQLScalarType getScalar(Class<?> classType) {
+    public static GraphQLScalarType getScalar(Class<?> classType) {
         return map.get(classType);
     }
 }
