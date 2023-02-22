@@ -2,7 +2,6 @@ package org.example.graphql.annotation;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
-import org.example.graphql.generator_component.util.MissingAnnotationException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -16,20 +15,8 @@ import java.util.Map;
  * Type category constants to facilitate the conversion
  * between java types and GraphGl schema components
  */
-@SuppressWarnings("unused")
 public enum GQLType {
-    ENUM(null),
-    OBJECT(null),
-    LIST(null),
-    ARRAY(null),
-    SCALAR(null),
-    SCALAR_INT(Scalars.GraphQLInt),
-    SCALAR_FLOAT(Scalars.GraphQLFloat),
-    SCALAR_STRING(Scalars.GraphQLString),
-    SCALAR_BOOLEAN(Scalars.GraphQLBoolean),
-    SCALAR_ID(Scalars.GraphQLID),
-    ;
-    private static final String UNANNOTATED_EXCEPTION = "Parsing attempt of unannotated ";
+    ENUM, OBJECT, LIST, ARRAY, SCALAR;
     private final static Map<Class<?>, GraphQLScalarType> map = new HashMap<>();
 
     static {
@@ -52,14 +39,8 @@ public enum GQLType {
         map.put(String.class, Scalars.GraphQLString);
     }
 
-    public final GraphQLScalarType graphQLScalarType;
-
-    GQLType(GraphQLScalarType graphQLScalarType) {
-        this.graphQLScalarType = graphQLScalarType;
-    }
-
     public static GQLType ofClass(@Nonnull Class<?> classType) {
-        if(map.containsKey(classType)){
+        if (map.containsKey(classType)) {
             return SCALAR;
         } else if (Collection.class.isAssignableFrom(classType)) {
             return LIST;
@@ -67,7 +48,7 @@ public enum GQLType {
             return ENUM;
         } else if (classType.isArray()) {
             return ARRAY;
-        } else{
+        } else {
             return OBJECT;
         }
     }
@@ -77,13 +58,6 @@ public enum GQLType {
      */
     public static GQLType ofMethod(@Nonnull Method method) {
         return ofClass(method.getReturnType());
-//        if (method.isAnnotationPresent(GQLQuery.class)) {
-//            return method.getAnnotation(GQLQuery.class).type();
-//        } else if (method.isAnnotationPresent(GQLMutation.class)) {
-//            return method.getAnnotation(GQLMutation.class).type();
-//        } else {
-//            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "method: " + method);
-//        }
     }
 
     /**
@@ -91,11 +65,6 @@ public enum GQLType {
      */
     public static GQLType ofParameter(@Nonnull Parameter parameter) {
         return ofClass(parameter.getType());
-//        if (parameter.isAnnotationPresent(GQLArg.class)) {
-//            return parameter.getAnnotation(GQLArg.class).type();
-//        } else {
-//            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "parameter: " + parameter);
-//        }
     }
 
     /**
@@ -103,11 +72,6 @@ public enum GQLType {
      */
     public static GQLType ofField(@Nonnull Field field) {
         return ofClass(field.getType());
-//        if (field.isAnnotationPresent(GQLField.class)) {
-//            return field.getAnnotation(GQLField.class).type();
-//        } else {
-//            throw new MissingAnnotationException(UNANNOTATED_EXCEPTION + "field: " + field);
-//        }
     }
 
     /**
@@ -121,6 +85,7 @@ public enum GQLType {
     public static boolean isScalar(Class<?> classType) {
         return map.containsKey(classType);
     }
+
     public static GraphQLScalarType getScalar(Class<?> classType) {
         return map.get(classType);
     }

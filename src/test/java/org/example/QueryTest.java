@@ -124,14 +124,14 @@ class QueryTest {
         );
     }
 
-//    @Test
-//    void queryAllTestClassAsArray_ShouldReturnAllTenTestObject() {
-//        ExecutionResult result = build.execute("{allTestClassAsArray {id, content}}");
-//        result.getErrors().forEach(System.out::println);
-//        assertAll(
-//                () -> assertEquals(0, result.getErrors().size()),
-//                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassAsArray"))).size()));
-//    }
+    @Test
+    void queryAllTestClassAsArray_ShouldReturnAllTenTestObject() {
+        ExecutionResult result = build.execute("{allTestClassAsArray {id, content}}");
+        result.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, result.getErrors().size()),
+                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassAsArray"))).size()));
+    }
 
     @Test
     void queryAllTestClassIdAsList_ShouldReturnAllTenId() {
@@ -140,6 +140,15 @@ class QueryTest {
         assertAll(
                 () -> assertEquals(0, result.getErrors().size()),
                 () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassIdAsList"))).size()));
+    }
+
+    @Test
+    void queryAllTestClassIdAsArray_ShouldReturnAllTenId() {
+        ExecutionResult result = build.execute("{allTestClassIdAsArray}");
+        result.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, result.getErrors().size()),
+                () -> assertEquals(10, ((List<?>) (((Map<?, ?>) result.getData()).get("allTestClassIdAsArray"))).size()));
     }
 
 

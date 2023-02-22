@@ -3,7 +3,6 @@ package org.example.test_db;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.annotation.GQLQuery;
-import org.example.graphql.annotation.GQLType;
 import org.example.test_dto.AuthorDTO;
 import org.example.test_dto.ReaderDTO;
 import org.example.test_entity.Author;
@@ -37,14 +36,12 @@ public class ListDbTestImpl {
         return testClassDB.toArray(testClassDB.toArray(TestClass[]::new));
     }
 
-//    @Nonnull
-//    @GQLQuery
-//    // todo
-//    public long[] allTestClassIdAsArray() {
-//        return testClassDB.stream().mapToLong(TestClass::getId).toArray();
-//    }
+    @Nonnull
+    @GQLQuery
+    public long[] allTestClassIdAsArray() {
+        return testClassDB.stream().mapToLong(TestClass::getId).toArray();
+    }
 
-    // todo
     @Nonnull
     @GQLQuery
     public List<Long> allTestClassIdAsList() {
