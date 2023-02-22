@@ -15,11 +15,11 @@ import java.util.Map;
 @NoArgsConstructor
 @GQLInput()
 public class ReaderDTO{
-    @GQLField(type = GQLType.SCALAR_INT)
+    @GQLField
     private Integer id;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private String fullName;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private String email;
 
     public ReaderDTO(@Nullable Integer id, String fullName, String email) {

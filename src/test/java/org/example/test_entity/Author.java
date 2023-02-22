@@ -9,13 +9,13 @@ import java.util.List;
 
 @Getter
 public class Author {
-    @GQLField(type = GQLType.SCALAR_INT)
+    @GQLField
     private final long id;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private final String name;
-    @GQLField(type = GQLType.SCALAR_BOOLEAN)
+    @GQLField
     private final boolean isAlive;
-    @GQLField(type = GQLType.LIST)
+    @GQLField
     private final List<org.example.test_entity.Book> books = new ArrayList<>();
 
     public Author(long id, String name, boolean isAlive) {

@@ -15,11 +15,11 @@ import javax.annotation.Nonnull;
 @NoArgsConstructor
 @GQLInput()
 public class AuthorDTO {
-    @GQLField(type = GQLType.SCALAR_INT)
+    @GQLField
     private Integer id;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private String name;
-    @GQLField(type = GQLType.SCALAR_BOOLEAN)
+    @GQLField
     // todo remember don't name as isAlive because PropertyDescriptor will search for isIsAlive accessor
     private boolean alive;
 

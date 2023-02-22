@@ -9,15 +9,15 @@ import java.util.List;
 
 @Getter
 public class Book {
-    @GQLField(type = GQLType.SCALAR_INT)
+    @GQLField
     private final long id;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private final String title;
-    @GQLField(type = GQLType.ENUM)
+    @GQLField
     private final GenreType genre;
-    @GQLField(type = GQLType.OBJECT)
+    @GQLField
     private final Author author;
-    @GQLField(type = GQLType.LIST)
+    @GQLField
     private final List<Reader> readers = new ArrayList<>();
 
     public Book(long id, String title, GenreType genre, Author author) {

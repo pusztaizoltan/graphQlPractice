@@ -10,9 +10,9 @@ import org.example.graphql.annotation.GQLType;
 // todo: no Part of Production code What are the rules for javadocs in Test?
 @Getter
 public class TestClass {
-    @GQLField(type = GQLType.SCALAR_INT)
+    @GQLField
     private final int id;
-    @GQLField(type = GQLType.SCALAR_STRING)
+    @GQLField
     private final String content;
 
     public TestClass(int id, String content) {
