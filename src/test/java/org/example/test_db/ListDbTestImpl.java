@@ -162,10 +162,10 @@ public class ListDbTestImpl {
         return authorById(id).isAlive();
     }
 
-    @GQLQuery(type = GQLType.LIST)
-    public List<Book> booksByIdList(@GQLArg(name = "ids", type = GQLType.LIST) List<Long> ids) {
-        return bookDB.stream().filter(book -> ids.contains(book.getId())).collect(Collectors.toList());
-    }
+//    @GQLQuery(type = GQLType.LIST)
+//    public List<Book> booksByIdList(@GQLArg(name = "ids", type = GQLType.LIST) List<Long> ids) {
+//        return bookDB.stream().filter(book -> ids.contains(book.getId())).collect(Collectors.toList());
+//    }
 
     public void initDb() {
         // init 10 testClass

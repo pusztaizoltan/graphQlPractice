@@ -2,6 +2,7 @@ package org.example.graphql.generator_component.factory_access;
 
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
@@ -14,7 +15,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfMethod;
-
+import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfParameter;
 // TODO: missing class level javadoc
 // todo done also in other Classes
 
@@ -43,7 +44,7 @@ public class DataAccessFactory {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition();
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                builder.argument(argumentFrom(parameter));
+                builder.argument(createArgumentFor(parameter));
             }
         }
         return builder.name(method.getName()).type(returnTypeFrom(method)).build();
@@ -59,7 +60,7 @@ public class DataAccessFactory {
         } else if (returnType == GQLType.OBJECT) {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
-        } else if(returnType == GQLType.ENUM) {
+        } else if (returnType == GQLType.ENUM) {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
         } else {
@@ -67,38 +68,30 @@ public class DataAccessFactory {
         }
     }
 
-    private static @Nonnull GraphQLArgument argumentFrom(@Nonnull Parameter parameter) {
+    private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull Parameter parameter) {
+        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
+        return GraphQLArgument.newArgument()
+                              .name(annotation.name())
+                              .type(argumentTypeFrom(parameter))
+                              .build();
+    }
+
+    private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {
         GQLType argumentType = GQLType.ofParameter(parameter);
         if (argumentType.isScalar()) {
-            return scalarArgument(parameter);
+            return argumentType.graphQLScalarType;
         } else if (argumentType == GQLType.ENUM) {
-            return enumArgument(parameter);
+            String typeName = parameter.getType().getSimpleName();
+            return GraphQLTypeReference.typeRef(typeName);
         } else if (argumentType == GQLType.OBJECT) {
-            return objectArgument(parameter);
+            String typeName = parameter.getType().getSimpleName();
+            return GraphQLTypeReference.typeRef(typeName);
+        } else if (argumentType == GQLType.LIST) {
+            // todo problem if scalar return type in list
+            String typeName = genericTypeOfParameter(parameter).getSimpleName();
+            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
         } else {
             throw new UnimplementedException("(Unimplemented argument type for " + argumentType);
         }
     }
-
-    private static @Nonnull GraphQLArgument scalarArgument(@Nonnull Parameter parameter) {
-        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
-        return GraphQLArgument.newArgument()
-                              .name(annotation.name())
-                              .type(annotation.type().graphQLScalarType)
-                              .build();
-    }
-
-    private static @Nonnull GraphQLArgument objectArgument(@Nonnull Parameter parameter) {
-        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
-        String typeName = parameter.getType().getSimpleName();
-        return GraphQLArgument.newArgument()
-                              .name(annotation.name())
-                              .type(GraphQLTypeReference.typeRef(typeName))
-                              .build();
-    }
-
-    private static @Nonnull GraphQLArgument enumArgument(@Nonnull Parameter parameter) {
-        return objectArgument(parameter);
-    }
-
 }

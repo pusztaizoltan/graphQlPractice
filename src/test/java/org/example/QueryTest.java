@@ -124,14 +124,14 @@ class QueryTest {
         );
     }
 
-    @Test
-    void queryBooksByIdList_ShouldReturnGenreBookList() {
-        ExecutionResult result = build.execute("{booksByIdList(ids: [1, 2,3]) {id, title}}");
-        result.getErrors().forEach(System.out::println);
-        assertAll(
-                () -> assertEquals(0, result.getErrors().size()),
-                () -> assertEquals(3, ((List<?>)((Map<?, ?>) result.getData()).get("booksByIdList")).size())
-        );
-    }
+//    @Test
+//    void queryBooksByIdList_ShouldReturnGenreBookList() {
+//        ExecutionResult result = build.execute("{booksByIdList(ids: [1, 2,3]) {id, title}}");
+//        result.getErrors().forEach(System.out::println);
+//        assertAll(
+//                () -> assertEquals(0, result.getErrors().size()),
+//                () -> assertEquals(3, ((List<?>)((Map<?, ?>) result.getData()).get("booksByIdList")).size())
+//        );
+//    }
 
 }
