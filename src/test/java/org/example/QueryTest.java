@@ -113,4 +113,14 @@ class QueryTest {
                 () -> assertEquals("ROMANTIC", ((Map<?, ?>) result.getData()).get("genreOfBookById"))
         );
     }
+
+    @Test
+    void queryIsAliveOfAuthorById_ShouldReturnGenreBoolean() {
+        ExecutionResult result = build.execute("{isAliveOfAuthorById(id: 1)}");
+        result.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, result.getErrors().size()),
+                () -> assertEquals(false, ((Map<?, ?>) result.getData()).get("isAliveOfAuthorById"))
+        );
+    }
 }
