@@ -53,7 +53,7 @@ public class ListDbTestImpl {
 
     @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
-    public TestClass testClassById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public TestClass testClassById(@GQLArg(name = "id") long id) {
         // TODO: within our project we ar not using streams because of the side effects produced by them:
         // - lots of unwanted small objects are created which in a big scale (millions of occurrences)
         //   may cause server garbage collection breakdown
@@ -66,19 +66,19 @@ public class ListDbTestImpl {
 
     @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
-    public Reader readerById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public Reader readerById(@GQLArg(name = "id") long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
-    public Book bookById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public Book bookById(@GQLArg(name = "id") long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @Nonnull
     @GQLQuery(type = GQLType.OBJECT)
-    public Author authorById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public Author authorById(@GQLArg(name = "id") long id) {
         return authorDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
@@ -104,24 +104,24 @@ public class ListDbTestImpl {
 
     @Nonnull
     @GQLQuery(type = GQLType.LIST)
-    public List<Book> bookByGenre(@GQLArg(name = "genre", type = GQLType.ENUM) GenreType genre) {
+    public List<Book> bookByGenre(@GQLArg(name = "genre") GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
     @Nonnull
     @GQLQuery(type = GQLType.LIST)
-    public List<Author> authorByIsAlive(@GQLArg(name = "isAlive", type = GQLType.SCALAR_BOOLEAN) boolean isAlive) {
+    public List<Author> authorByIsAlive(@GQLArg(name = "isAlive") boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
     @Nonnull
     @GQLQuery(type = GQLType.LIST)
-    public List<Book> bookByTitleContent(@GQLArg(name = "titleContent", type = GQLType.SCALAR_STRING) String titleContent) {
+    public List<Book> bookByTitleContent(@GQLArg(name = "titleContent") String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newReaderByInputObject(@GQLArg(name = "readerDTO", type = GQLType.OBJECT) @Nonnull ReaderDTO readerDTO) {
+    public long newReaderByInputObject(@GQLArg(name = "readerDTO") @Nonnull ReaderDTO readerDTO) {
         if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
             this.readerDB.add(readerDTO.toReaderOfId(newId));
@@ -137,9 +137,9 @@ public class ListDbTestImpl {
 
     @GQLMutation(type = GQLType.SCALAR_INT)
     public long newReaderByFieldArgsWithId(
-            @GQLArg(name = "id", type = GQLType.SCALAR_INT) int id,
-            @GQLArg(name = "fullName", type = GQLType.SCALAR_STRING) @Nonnull String fullName,
-            @GQLArg(name = "email", type = GQLType.SCALAR_STRING) @Nonnull String email) {
+            @GQLArg(name = "id") int id,
+            @GQLArg(name = "fullName") @Nonnull String fullName,
+            @GQLArg(name = "email") @Nonnull String email) {
         if (this.readerDB.stream().anyMatch(reader -> reader.getId() == id)) {
             throw new IllegalArgumentException(EXCEPTION_MESSAGE);
         } else {
@@ -150,15 +150,15 @@ public class ListDbTestImpl {
 
     @GQLMutation(type = GQLType.SCALAR_INT)
     public long newReaderByFieldArgsWithoutId(
-            @GQLArg(name = "fullName", type = GQLType.SCALAR_STRING) @Nonnull String fullName,
-            @GQLArg(name = "email", type = GQLType.SCALAR_STRING) @Nonnull String email) {
+            @GQLArg(name = "fullName") @Nonnull String fullName,
+            @GQLArg(name = "email") @Nonnull String email) {
         long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
         this.readerDB.add(new Reader(newId, fullName, email));
         return newId;
     }
 
     @GQLMutation(type = GQLType.SCALAR_INT)
-    public long newAuthorByInputObject(@GQLArg(name = "authorDTO", type = GQLType.OBJECT) @Nonnull AuthorDTO authorDTO) {
+    public long newAuthorByInputObject(@GQLArg(name = "authorDTO") @Nonnull AuthorDTO authorDTO) {
         if (authorDTO.getId() == null) {
             long newId = this.authorDB.stream().mapToLong(Author::getId).max().orElse(0);
             this.authorDB.add(authorDTO.toAuthorOfId(newId));
@@ -173,12 +173,12 @@ public class ListDbTestImpl {
     }
 
     @GQLQuery(type = GQLType.ENUM)
-    public GenreType genreOfBookById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public GenreType genreOfBookById(@GQLArg(name = "id") long id) {
         return bookById(id).getGenre();
     }
 
     @GQLQuery(type = GQLType.SCALAR_BOOLEAN)
-    public boolean isAliveOfAuthorById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+    public boolean isAliveOfAuthorById(@GQLArg(name = "id") long id) {
         return authorById(id).isAlive();
     }
 
