@@ -103,4 +103,14 @@ class QueryTest {
                 () -> assertEquals(0, result.getErrors().size()),
                 () -> assertEquals(25, ((List<?>) ((Map<?, ?>) result.getData()).get("bookByGenre")).size()));
     }
+
+    @Test
+    void queryGenreOfBookById_ShouldReturnGenreEnum() {
+        ExecutionResult result = build.execute("{genreOfBookById(id: 1)}");
+        result.getErrors().forEach(System.out::println);
+        assertAll(
+                () -> assertEquals(0, result.getErrors().size()),
+                () -> assertEquals("ROMANTIC", ((Map<?, ?>) result.getData()).get("genreOfBookById"))
+        );
+    }
 }

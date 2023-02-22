@@ -59,6 +59,9 @@ public class DataAccessFactory {
         } else if (returnType == GQLType.OBJECT) {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
+        } else if(returnType == GQLType.ENUM) {
+            String typeName = method.getReturnType().getSimpleName();
+            return GraphQLTypeReference.typeRef(typeName);
         } else {
             throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
         }

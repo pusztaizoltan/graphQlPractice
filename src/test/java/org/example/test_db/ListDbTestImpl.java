@@ -152,6 +152,16 @@ public class ListDbTestImpl {
         }
     }
 
+    @GQLQuery(type = GQLType.ENUM)
+    public GenreType genreOfBookById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+        return bookById(id).getGenre();
+    }
+
+    @GQLQuery(type = GQLType.SCALAR_BOOLEAN)
+    public boolean isAliveOfAuthorById(@GQLArg(name = "id", type = GQLType.SCALAR_INT) long id) {
+        return authorById(id).isAlive();
+    }
+
     public void initDb() {
         // init 10 testClass
         for (int i = 0; i < 10; i++) {
