@@ -1,17 +1,15 @@
 package org.example.graphql.generator_component.util;
 
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
 
 import java.lang.reflect.AnnotatedElement;
 
-public class TypeDetails<C,T extends AnnotatedElement> extends TypeData<T> {
-    public final Class<C> contentType;
-//    public TypeData.Type  graphQLType;
+public class TypeDetails<C, T extends AnnotatedElement> extends TypeData<T> {
+    private final Class<C> contentType;
 
-    public TypeDetails(TypeData.Type dataType, Class<C> contentType,T annotatedElement) {
+    public TypeDetails(TypeData.Type dataType, Class<C> contentType, T annotatedElement) {
         super(dataType, annotatedElement);
         this.contentType = contentType;
     }
@@ -22,16 +20,11 @@ public class TypeDetails<C,T extends AnnotatedElement> extends TypeData<T> {
     }
 
     @Override
-    public GraphQLType getScalarType() {
-        return TypeData.SCALAR_MAP.get(contentType);
-    }
-
-    @Override
     public boolean hasScalarContent() {
         return TypeData.SCALAR_MAP.containsKey(contentType);
     }
 
-    public GraphQLType getGraphQLType(){
+    public GraphQLType getGraphQLType() {
         if (this.isScalar()) {
             return TypeData.SCALAR_MAP.get(contentType);
         } else if (this.isEnum()) {

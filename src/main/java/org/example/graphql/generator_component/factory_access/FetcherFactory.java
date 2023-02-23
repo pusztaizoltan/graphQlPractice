@@ -2,9 +2,9 @@ package org.example.graphql.generator_component.factory_access;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
-import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.util.TypeData;
+import org.example.graphql.generator_component.util.TypeDetails;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -39,28 +39,22 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                Class<?> argumentClass = parameters[i].getType();
-                arguments[i] = mapArgument(parameters[i], argumentClass);
+                TypeDetails<?, Parameter> data = (TypeDetails<?, Parameter>) TypeData.ofParameter(parameters[i]);
+                arguments[i] = mapArgument(data);
             }
             return method.invoke(dataService, arguments);
         };
     }
 
-    private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, Class<T> argumentClass) {
-        String argName = parameter.getAnnotation(GQLArg.class).name();
-        TypeData<Parameter> data = TypeData.ofParameter(parameter);
+    private static <T> @Nonnull T mapArgument(@Nonnull TypeDetails<T, Parameter> data) {
         if (data.isScalar()) {
-            return environment.getArgument(argName);
+            return environment.getArgument(data.getName());
         } else if (data.isEnum()) {
-            return mapEnumArgument(argumentClass, argName);
+            return mapEnumArgument(data);
         } else if (data.isObject()) {
-            return mapObjectArgument(argumentClass, argName);
+            return mapObjectArgument(data);
         } else if (data.isList()) {
-            List<Integer> arg = environment.getArgument(argName);
-            System.out.println(argumentClass);
-            System.out.println(environment.getArgument(argName).toString());
-            System.out.println(((List) environment.getArgument(argName)).size());
-            System.out.println(environment.getArgument(argName).getClass());
+            List<Integer> arg = environment.getArgument(data.getName());
 //            return environment.getArgument(argName);
             ArrayList<Long> list = new ArrayList<>();
             for (int i = 0; i < arg.size(); i++) {
@@ -68,48 +62,48 @@ public class FetcherFactory {
             }
             return (T) list;
         } else {
-            throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + parameter);
+            throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + data.getOrigin());
         }
     }
 //    private static Object mapScalarListArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName){
 //        return
 //    }
 
-    private static <T> @Nonnull T mapEnumArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
-        for (T enumConstant : argumentClass.getEnumConstants()) {
-            if (((Enum<?>) enumConstant).name().equals(environment.getArgument(argName))) {
+    private static <T> @Nonnull T mapEnumArgument(TypeDetails<T, Parameter> data) {
+        for (T enumConstant : data.getContentType().getEnumConstants()) {
+            if (((Enum<?>) enumConstant).name().equals(environment.getArgument(data.getName()))) {
                 return enumConstant;
             }
         }
         throw new IllegalArgumentException("Invalid enum constant");
     }
 
-    private static <T> @Nonnull T mapObjectArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
+    private static <T> @Nonnull T mapObjectArgument(@Nonnull TypeDetails<T, Parameter> data) {
         try {
-            return tryMappingByStaticMapperMethod(argumentClass, argName);
+            return tryMappingByStaticMapperMethod(data);
         } catch (UnimplementedException | InvocationTargetException | IllegalAccessException e) {
-            return mapBySetterMatching(argumentClass, argName);
+            return mapBySetterMatching(data);
         }
     }
 
-    private static <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull Class<T> argumentClass, @Nonnull String argName) throws InvocationTargetException, IllegalAccessException {
+    private static <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull TypeDetails<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
-        for (Method method : argumentClass.getMethods()) {
+        for (Method method : data.getContentType().getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
-                    Map<String, Object> inputArgument = environment.getArgument(argName);
-                    return argumentClass.cast(method.invoke(null, inputArgument));
+                    Map<String, Object> inputArgument = environment.getArgument(data.getName());
+                    return data.getContentType().cast(method.invoke(null, inputArgument));
                 }
             }
         }
-        throw new UnimplementedException(exceptionMessage + argumentClass);
+        throw new UnimplementedException(exceptionMessage + data.getContentType());
     }
 
-    private static <T> @Nonnull T mapBySetterMatching(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
-        T inputObject = instantiateInputObject(argumentClass);
-        Map<String, Object> arguments = environment.getArgument(argName);
-        for (Field field : argumentClass.getDeclaredFields()) {
+    private static <T> @Nonnull T mapBySetterMatching(@Nonnull TypeDetails<T, Parameter> data) {
+        T inputObject = instantiateInputObject(data);
+        Map<String, Object> arguments = environment.getArgument(data.getName());
+        for (Field field : data.getContentType().getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 setInputValue(inputObject, field, arguments.get(field.getName()));
             }
@@ -117,15 +111,15 @@ public class FetcherFactory {
         return inputObject;
     }
 
-    private static <T> @Nonnull T instantiateInputObject(@Nonnull Class<T> argumentClass) {
+    private static <T> @Nonnull T instantiateInputObject(@Nonnull TypeDetails<T, Parameter> data) {
         String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
-            return argumentClass.getDeclaredConstructor().newInstance();
+            return data.getContentType().getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException |
                  InstantiationException |
                  IllegalAccessException |
                  InvocationTargetException e) {
-            throw new UnimplementedException(exceptionMessage + argumentClass);
+            throw new UnimplementedException(exceptionMessage + data.getContentType());
         }
     }
 
