@@ -128,6 +128,8 @@ public abstract class TypeData<T extends AnnotatedElement> {
 
     public abstract Class<?> getContentType();
 
+    public abstract GraphQLType getGraphQLType();
+
     public abstract GraphQLType getScalarType();
 
     public abstract boolean hasScalarContent();

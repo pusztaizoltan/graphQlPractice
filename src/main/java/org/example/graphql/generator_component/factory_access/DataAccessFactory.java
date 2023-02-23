@@ -38,7 +38,7 @@ public class DataAccessFactory {
      * the static factory methods of the class
      */
     public static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
-        GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition();
+        GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
         TypeData<Method> methodData = TypeData.ofMethod(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
@@ -46,56 +46,13 @@ public class DataAccessFactory {
                 builder.argument(createArgumentFor(parameterData));
             }
         }
-        return builder.name(method.getName()).type(returnTypeFrom(methodData)).build();
+        return builder.type((GraphQLOutputType) methodData.getGraphQLType()).build();
     }
 
     private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeData<Parameter> data) {
         return GraphQLArgument.newArgument()
                               .name(data.getName())
-                              .type(argumentTypeFrom(data))
+                              .type((GraphQLInputType) data.getGraphQLType())
                               .build();
-    }
-
-    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull TypeData<Method> data) {
-        if (data.isScalar()) {
-            return (GraphQLOutputType) data.getScalarType();
-        } else if (data.isEnum()) {
-            return GraphQLTypeReference.typeRef(data.getContentType().getSimpleName());
-        } else if (data.isList()) {
-            if (data.hasScalarContent()) {
-                return GraphQLList.list(data.getScalarType());
-            } else {
-                return GraphQLList.list(GraphQLTypeReference.typeRef(data.getContentType().getSimpleName()));
-            }
-        } else if (data.isArray()) {
-            if (data.hasScalarContent()) {
-                return GraphQLList.list(data.getScalarType());
-            } else {
-                return GraphQLList.list(GraphQLTypeReference.typeRef(data.getContentType().getSimpleName()));
-            }
-        } else if (data.isObject()) {
-            return GraphQLTypeReference.typeRef(data.getContentType().getSimpleName());
-        } else {
-            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + data.getOrigin());
-        }
-    }
-
-    private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull TypeData<Parameter> data) {
-        if (data.isScalar()) {
-            return (GraphQLInputType) data.getScalarType();
-        } else if (data.isEnum()) {
-            return GraphQLTypeReference.typeRef(data.getContentType().getSimpleName());
-        } else if (data.isObject()) {
-            return GraphQLTypeReference.typeRef(data.getContentType().getSimpleName());
-        } else if (data.isList()) {
-            // todo problem if scalar return type in list
-            if (data.hasScalarContent()) {
-                return GraphQLList.list(data.getScalarType());
-            } else {
-                return GraphQLList.list(GraphQLTypeReference.typeRef(data.getContentType().getSimpleName()));
-            }
-        } else {
-            throw new UnimplementedException("(Unimplemented argument type for " + data.getOrigin());
-        }
     }
 }
