@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
-import org.example.graphql.annotation.GQLType;
 import org.example.test_entity.Author;
 
 import javax.annotation.Nonnull;

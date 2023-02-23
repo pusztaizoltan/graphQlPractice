@@ -1,17 +1,13 @@
 package org.example.graphql.generator_component.util;
 
-import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLType;
-import org.example.graphql.annotation.GQLType;
-
 
 public class TypeDetails<T> extends TypeData {
-
     public final Class<T> contentType;
-    public GraphQLType graphQLType;
+//    public TypeData.Type  graphQLType;
 
-    public TypeDetails(GQLType gqlType, Class<T> contentType) {
-        super(gqlType);
+    public TypeDetails(TypeData.Type dataType, Class<T> contentType) {
+        super(dataType);
         this.contentType = contentType;
     }
 
@@ -20,4 +16,13 @@ public class TypeDetails<T> extends TypeData {
         return contentType;
     }
 
+    @Override
+    public GraphQLType getScalarType() {
+        return TypeData.SCALAR_MAP.get(contentType);
+    }
+
+    @Override
+    public boolean hasScalarContent() {
+        return TypeData.SCALAR_MAP.containsKey(contentType);
+    }
 }

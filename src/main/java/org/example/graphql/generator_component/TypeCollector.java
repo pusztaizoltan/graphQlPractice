@@ -10,9 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
-
-import static org.example.graphql.annotation.GQLType.*;
-import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 // TODO: I think the 'parse' term is misleading, because in this case you build a model
 // from an already parsed class. The class is parsed by the Java compiler
 // TODO: as I see the purpose of this class is more like a 'model class holder' because it's only functionality to
@@ -25,7 +22,6 @@ import static org.example.graphql.generator_component.util.ReflectionUtil.*;
  * data-service method.
  */
 public class TypeCollector {
-
     @Getter
     private final HashSet<Class<?>> components = new HashSet<>();
 
@@ -36,8 +32,9 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        if (!isScalar(method.getReturnType())) {
-            collectRecursivelyFromClassFields(TypeData.ofMethod(method).getContentType());
+        TypeData data = TypeData.ofMethod(method);
+        if (!data.isScalar()) {
+            collectRecursivelyFromClassFields(data.getContentType());
         }
     }
 
@@ -50,8 +47,9 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                if (!isScalar(parameter.getType())) {
-                    collectRecursivelyFromClassFields(TypeData.ofParameter(parameter).getContentType());
+                TypeData data = TypeData.ofParameter(parameter);
+                if (!data.isScalar()) {
+                    collectRecursivelyFromClassFields(data.getContentType());
                 }
             }
         }
@@ -69,7 +67,7 @@ public class TypeCollector {
 
     private <T> void collectRecursivelyFromClassFields(@Nonnull Class<T> classType) {
         if (!this.components.contains(classType)) {
-            if (!isScalar(classType)) {
+            if (!TypeData.isScalar(classType)) {
                 this.components.add(classType);
                 collectTypesFromClassFields(classType);
             }
@@ -79,8 +77,9 @@ public class TypeCollector {
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                if (!isScalar(field.getType())) {
-                    collectRecursivelyFromClassFields(TypeData.ofField(field).getContentType());
+                TypeData data = TypeData.ofField(field);
+                if (!data.isScalar()) {
+                    collectRecursivelyFromClassFields(data.getContentType());
                 }
             }
         }

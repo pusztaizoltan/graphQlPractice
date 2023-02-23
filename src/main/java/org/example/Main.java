@@ -2,13 +2,13 @@ package org.example;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class Main {
-    List<Integer> list = new ArrayList<>(List.of(1,2,3)){};
+    List<Integer> list = new ArrayList<>(List.of(1, 2, 3)) {
+    };
     Long num = 1L;
 
     public static void main(String[] args) {
@@ -42,9 +42,10 @@ public class Main {
 //        System.out.println(cc.getGenericSuperclass());
 //        System.out.println(cc.getGenericSuperclass().getTypeName());
 //        System.out.println(((ParameterizedType) cc.getGenericSuperclass()).getActualTypeArguments()[0]);
-
     }
-    public static List<Integer> returner(){
-        return new ArrayList<>(List.of(1,2,3)){};
+
+    public static List<Integer> returner() {
+        return new ArrayList<>(List.of(1, 2, 3)) {
+        };
     }
 }

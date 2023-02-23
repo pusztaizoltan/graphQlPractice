@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLInput;
-import org.example.graphql.annotation.GQLType;
 import org.example.test_entity.Reader;
 
 import javax.annotation.Nonnull;
@@ -14,7 +13,7 @@ import java.util.Map;
 @Getter
 @NoArgsConstructor
 @GQLInput()
-public class ReaderDTO{
+public class ReaderDTO {
     @GQLField
     private Integer id;
     @GQLField
@@ -27,7 +26,6 @@ public class ReaderDTO{
         this.fullName = fullName;
         this.email = email;
     }
-
 
     /**
      * Used by reflection as primary GraphQL-input wiring tool

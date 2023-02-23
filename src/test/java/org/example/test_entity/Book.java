@@ -2,7 +2,6 @@ package org.example.test_entity;
 
 import lombok.Getter;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.annotation.GQLType;
 
 import java.util.ArrayList;
 import java.util.List;

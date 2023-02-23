@@ -185,7 +185,7 @@ public class ListDbTestImpl {
         System.out.println("booksByIdList called");
         System.out.println("ids:   " + ids);
         System.out.println("ids.class:   " + ids.getClass());
-        System.out.println("List.class:   " + new ArrayList<>(List.of(1,2,3)).getClass());
+        System.out.println("List.class:   " + new ArrayList<>(List.of(1, 2, 3)).getClass());
         System.out.println("ids.get(0):   " + ids.get(0));
         System.out.println("ids.get(0).class:   " + ids.get(0).getClass());
 //        System.out.println(bookDB.stream().mapToLong(book -> book.getId()).boxed().collect(Collectors.toList()));

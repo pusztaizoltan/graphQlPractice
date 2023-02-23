@@ -2,7 +2,8 @@ package org.example.graphql.generator_component.util;
 
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
-import org.example.graphql.annotation.GQLType;
+import graphql.schema.GraphQLType;
+
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -15,7 +16,8 @@ import java.util.Map;
 import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 
 public abstract class TypeData {
-    private final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
+    protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR;}
+    protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
 
     static {
         SCALAR_MAP.put(boolean.class, Scalars.GraphQLBoolean);
@@ -37,107 +39,113 @@ public abstract class TypeData {
         SCALAR_MAP.put(String.class, Scalars.GraphQLString);
     }
 
-    public final GQLType gqlType;
+    public final Type dataType;
 
-    public TypeData(GQLType gqlType) {
-        this.gqlType = gqlType;
+    public TypeData(Type dataType) {
+        this.dataType = dataType;
     }
-    public abstract Class<?> getContentType();
 
     public static TypeDetails<?> ofMethod(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
-        GQLType gqlType;
+        Type dataType;
         Class<?> contentType;
 //        GraphQLType graphQLType;
         if (SCALAR_MAP.containsKey(returnType)) {
-            gqlType = GQLType.SCALAR;
+            dataType = Type.SCALAR;
             contentType = returnType;
 //            graphQLType = SCALAR_MAP.get(contentType);
         } else if (Collection.class.isAssignableFrom(returnType)) {
-            gqlType = GQLType.LIST;
+            dataType = Type.LIST;
             contentType = genericTypeOfMethod(method);
 //            graphQLType = GraphQLList.list();
         } else if (returnType.isEnum()) {
-            gqlType = GQLType.ENUM;
+            dataType = Type.ENUM;
             contentType = returnType;
         } else if (returnType.isArray()) {
-            gqlType = GQLType.ARRAY;
+            dataType = Type.ARRAY;
             contentType = returnType.componentType();
         } else {
-            gqlType = GQLType.OBJECT;
+            dataType = Type.OBJECT;
             contentType = returnType;
         }
-        return new TypeDetails<>(gqlType, contentType);
+        return new TypeDetails<>(dataType, contentType);
     }
 
     public static TypeData ofParameter(@Nonnull Parameter parameter) {
         Class<?> parameterType = parameter.getType();
-        GQLType gqlType;
+        Type dataType;
         Class<?> contentType;
         if (SCALAR_MAP.containsKey(parameterType)) {
-            gqlType = GQLType.SCALAR;
+            dataType = Type.SCALAR;
             contentType = parameterType;
         } else if (Collection.class.isAssignableFrom(parameterType)) {
-            gqlType = GQLType.LIST;
+            dataType = Type.LIST;
             contentType = genericTypeOfParameter(parameter);
         } else if (parameterType.isEnum()) {
-            gqlType = GQLType.ENUM;
+            dataType = Type.ENUM;
             contentType = parameterType;
         } else if (parameterType.isArray()) {
-            gqlType = GQLType.ARRAY;
+            dataType = Type.ARRAY;
             contentType = parameterType.componentType();
         } else {
-            gqlType = GQLType.OBJECT;
+            dataType = Type.OBJECT;
             contentType = parameterType;
         }
-        return new TypeDetails<>(gqlType, contentType);
+        return new TypeDetails<>(dataType, contentType);
     }
 
     public static TypeData ofField(@Nonnull Field field) {
         Class<?> parameterType = field.getType();
-        GQLType gqlType;
+        Type dataType;
         Class<?> contentType;
         if (SCALAR_MAP.containsKey(parameterType)) {
-            gqlType = GQLType.SCALAR;
+            dataType = Type.SCALAR;
             contentType = parameterType;
         } else if (Collection.class.isAssignableFrom(parameterType)) {
-            gqlType = GQLType.LIST;
+            dataType = Type.LIST;
             contentType = genericTypeOfField(field);
         } else if (parameterType.isEnum()) {
-            gqlType = GQLType.ENUM;
+            dataType = Type.ENUM;
             contentType = parameterType;
         } else if (parameterType.isArray()) {
-            gqlType = GQLType.ARRAY;
+            dataType = Type.ARRAY;
             contentType = parameterType.componentType();
         } else {
-            gqlType = GQLType.OBJECT;
+            dataType = Type.OBJECT;
             contentType = parameterType;
         }
-        return new TypeDetails<>(gqlType, contentType);
+        return new TypeDetails<>(dataType, contentType);
+    }
+
+    public static boolean isScalar(Class<?> classType) {
+        return SCALAR_MAP.containsKey(classType);
+    }
+
+    public abstract Class<?> getContentType();
+
+    public abstract GraphQLType getScalarType();
+
+    public abstract boolean hasScalarContent();
+
+    public boolean isScalar() {
+        return this.dataType == Type.SCALAR;
+    }
+
+    public boolean isEnum() {
+        return this.dataType == Type.ENUM;
+    }
+
+    public boolean isList() {
+        return this.dataType == Type.LIST;
+    }
+
+    public boolean isArray() {
+        return this.dataType == Type.ARRAY;
+    }
+
+    public boolean isObject() {
+        return this.dataType == Type.OBJECT;
     }
 
 
-
-    public boolean isScalar(){
-        return this.gqlType == GQLType.SCALAR;
-    }
-
-    public boolean isEnum(){
-        return this.gqlType == GQLType.ENUM;
-    }
-
-    public boolean isList(){
-        return this.gqlType == GQLType.LIST;
-    }
-
-    public boolean isArray(){
-        return this.gqlType == GQLType.ARRAY;
-    }
-
-    public boolean isObject(){
-        return this.gqlType == GQLType.OBJECT;
-    }
-    private enum Type{
-        ENUM, OBJECT, LIST, ARRAY, SCALAR;
-    }
 }

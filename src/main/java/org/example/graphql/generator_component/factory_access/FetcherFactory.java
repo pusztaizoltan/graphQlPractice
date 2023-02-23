@@ -4,7 +4,6 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.util.TypeData;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
@@ -69,10 +68,9 @@ public class FetcherFactory {
             }
             return (T) list;
         } else {
-            throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() +" for" + parameter);
+            throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + parameter);
         }
     }
-
 //    private static Object mapScalarListArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName){
 //        return
 //    }

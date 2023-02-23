@@ -2,11 +2,11 @@ package org.example.graphql.generator_component.factory_type.type_converters;
 
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputObjectField;
+import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLScalarType;
+import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
 import org.example.graphql.generator_component.util.TypeData;
 import org.example.graphql.generator_component.util.UnimplementedException;
@@ -49,14 +49,14 @@ class FieldFactory {
      * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
-        GQLType gqlType = TypeData.ofField(field).gqlType;
-        if (gqlType.isScalar()) {
+        TypeData data = TypeData.ofField(field);
+        if (data.isScalar()) {
             return scalarInputField(field);
-        } else if (gqlType == GQLType.OBJECT) {
+        } else if (data.isObject()) {
             return objectInputField(field);
-        } else if (gqlType == GQLType.LIST) {
+        } else if (data.isList()) {
             return listInputField(field);
-        } else if (gqlType == GQLType.ENUM) {
+        } else if (data.isEnum()) {
             return enumInputField(field);
         } else {
             throw new UnimplementedException("Unimplemented fieldAdapter for " + field);
@@ -64,10 +64,10 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLFieldDefinition scalarObjectField(@Nonnull Field field) {
-        GraphQLScalarType scalar = GQLType.getScalar(field.getType());
+        TypeData data = TypeData.ofField(field);
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
-                                     .type(scalar)
+                                     .type((GraphQLOutputType) data.getScalarType())
                                      .build();
     }
 
@@ -92,10 +92,10 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLInputObjectField scalarInputField(@Nonnull Field field) {
-        GraphQLScalarType scalar = GQLType.getScalar(field.getType());
+        TypeData data = TypeData.ofField(field);
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
-                                      .type(scalar)
+                                      .type((GraphQLInputType) data.getScalarType())
                                       .build();
     }
 
