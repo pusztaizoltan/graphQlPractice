@@ -8,6 +8,7 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.TypeHolder;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -61,17 +62,18 @@ public class DataAccessFactory {
 
     private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
         GQLType returnType = GQLType.ofMethod(method);
+
         // analogous to GraphQl scalar
-        if (GQLType.isScalar(method.getReturnType())) {
+        if (returnType == GQLType.SCALAR) {
             return GQLType.getScalar(method.getReturnType());
         }
         // analogous to GraphQl enum
-        else if (method.getReturnType().isEnum()) {
+        else if (returnType == GQLType.ENUM) {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
         }
         // analogous to GraphQl list
-        else if (Collection.class.isAssignableFrom(method.getReturnType())){
+        else if (returnType == GQLType.LIST){
             Class<?> genericType = genericTypeOfMethod(method);
             String typeName = genericType.getSimpleName();
             if(GQLType.isScalar(genericType)){
@@ -81,7 +83,7 @@ public class DataAccessFactory {
             }
         }
         // analogous to GraphQl list
-        else if (method.getReturnType().isArray()) {
+        else if (returnType == GQLType.ARRAY) {
             Class<?> componentType = method.getReturnType().componentType();
             String typeName = componentType.getSimpleName();
             if(GQLType.isScalar(componentType)){
@@ -90,11 +92,11 @@ public class DataAccessFactory {
                 return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
             }
 //        } else if (method.getReturnType().componentType()) {
-        } else  {
+        } else if (returnType == GQLType.OBJECT){
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
-//        } else {
-//            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
+        } else {
+            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
         }
     }
 
@@ -110,8 +112,14 @@ public class DataAccessFactory {
             return GraphQLTypeReference.typeRef(typeName);
         } else if (argumentType == GQLType.LIST) {
             // todo problem if scalar return type in list
-            String typeName = genericTypeOfParameter(parameter).getSimpleName();
-            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            Class<?> arg = genericTypeOfParameter(parameter);
+            String typeName = arg.getSimpleName();
+            if(GQLType.isScalar(arg)){
+                return GraphQLList.list(GQLType.getScalar(arg));
+            } else {
+                return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
+            }
+//            return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
         } else {
             throw new UnimplementedException("(Unimplemented argument type for " + argumentType);
         }

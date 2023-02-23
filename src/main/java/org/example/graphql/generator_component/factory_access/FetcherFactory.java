@@ -15,6 +15,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,10 +55,26 @@ public class FetcherFactory {
             return mapEnumArgument(argumentClass, argName);
         } else if (gqlType == GQLType.OBJECT) {
             return mapObjectArgument(argumentClass, argName);
+        } else if (gqlType == GQLType.LIST) {
+            List<Integer> arg = environment.getArgument(argName);
+            System.out.println(argumentClass);
+            System.out.println(environment.getArgument(argName).toString());
+            System.out.println(((List) environment.getArgument(argName)).size());
+            System.out.println(environment.getArgument(argName).getClass());
+//            return environment.getArgument(argName);
+            ArrayList<Long> list = new ArrayList<>();
+            for (int i = 0; i < arg.size(); i++) {
+                list.add(arg.get(i).longValue());
+            }
+            return (T) list;
         } else {
-            throw new UnimplementedException("Unimplemented argumentMapper for" + parameter);
+            throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() +" for" + parameter);
         }
     }
+
+//    private static Object mapScalarListArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName){
+//        return
+//    }
 
     private static <T> @Nonnull T mapEnumArgument(@Nonnull Class<T> argumentClass, @Nonnull String argName) {
         for (T enumConstant : argumentClass.getEnumConstants()) {

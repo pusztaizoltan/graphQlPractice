@@ -78,7 +78,6 @@ public enum GQLType {
      * ShortCut method to differentiate between simple and complex GraphQl schema elements
      */
     public boolean isScalar() {
-//        return this.graphQLScalarType != null;
         return this == SCALAR;
     }
 
