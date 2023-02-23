@@ -8,13 +8,12 @@ import graphql.schema.GraphQLOutputType;
 import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLType;
-import org.example.graphql.generator_component.util.TypeHolder;
+import org.example.graphql.generator_component.util.TypeData;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collection;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfMethod;
 import static org.example.graphql.generator_component.util.ReflectionUtil.genericTypeOfParameter;
