@@ -39,40 +39,6 @@ public enum GQLType {
         map.put(String.class, Scalars.GraphQLString);
     }
 
-    public static GQLType ofClass(@Nonnull Class<?> classType) {
-        if (map.containsKey(classType)) {
-            return SCALAR;
-        } else if (Collection.class.isAssignableFrom(classType)) {
-            return LIST;
-        } else if (classType.isEnum()) {
-            return ENUM;
-        } else if (classType.isArray()) {
-            return ARRAY;
-        } else {
-            return OBJECT;
-        }
-    }
-
-    /**
-     * ShortCut method to access the GQLType of a method annotation
-     */
-    public static GQLType ofMethod(@Nonnull Method method) {
-        return ofClass(method.getReturnType());
-    }
-
-    /**
-     * ShortCut method to access the GQLType of a parameter annotation
-     */
-    public static GQLType ofParameter(@Nonnull Parameter parameter) {
-        return ofClass(parameter.getType());
-    }
-
-    /**
-     * ShortCut method to access the GQLType of a field annotation
-     */
-    public static GQLType ofField(@Nonnull Field field) {
-        return ofClass(field.getType());
-    }
 
     /**
      * ShortCut method to differentiate between simple and complex GraphQl schema elements

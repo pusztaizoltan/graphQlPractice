@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
+import org.example.graphql.generator_component.util.TypeData;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -48,7 +49,7 @@ public class FetcherFactory {
 
     private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, Class<T> argumentClass) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        GQLType gqlType = GQLType.ofParameter(parameter);
+        GQLType gqlType = TypeData.ofParameter(parameter).gqlType;
         if (gqlType.isScalar()) {
             return environment.getArgument(argName);
         } else if (gqlType == GQLType.ENUM) {

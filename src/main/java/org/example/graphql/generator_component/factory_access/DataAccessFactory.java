@@ -60,8 +60,7 @@ public class DataAccessFactory {
     }
 
     private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
-        GQLType returnType = GQLType.ofMethod(method);
-
+        GQLType returnType = TypeData.ofMethod(method).gqlType;
         // analogous to GraphQl scalar
         if (returnType == GQLType.SCALAR) {
             return GQLType.getScalar(method.getReturnType());
@@ -72,10 +71,10 @@ public class DataAccessFactory {
             return GraphQLTypeReference.typeRef(typeName);
         }
         // analogous to GraphQl list
-        else if (returnType == GQLType.LIST){
+        else if (returnType == GQLType.LIST) {
             Class<?> genericType = genericTypeOfMethod(method);
             String typeName = genericType.getSimpleName();
-            if(GQLType.isScalar(genericType)){
+            if (GQLType.isScalar(genericType)) {
                 return GraphQLList.list(GQLType.getScalar(genericType));
             } else {
                 return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
@@ -85,13 +84,13 @@ public class DataAccessFactory {
         else if (returnType == GQLType.ARRAY) {
             Class<?> componentType = method.getReturnType().componentType();
             String typeName = componentType.getSimpleName();
-            if(GQLType.isScalar(componentType)){
+            if (GQLType.isScalar(componentType)) {
                 return GraphQLList.list(GQLType.getScalar(componentType));
             } else {
                 return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
             }
 //        } else if (method.getReturnType().componentType()) {
-        } else if (returnType == GQLType.OBJECT){
+        } else if (returnType == GQLType.OBJECT) {
             String typeName = method.getReturnType().getSimpleName();
             return GraphQLTypeReference.typeRef(typeName);
         } else {
@@ -100,7 +99,7 @@ public class DataAccessFactory {
     }
 
     private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {
-        GQLType argumentType = GQLType.ofParameter(parameter);
+        GQLType argumentType = TypeData.ofParameter(parameter).gqlType;
         if (argumentType.isScalar()) {
             return GQLType.getScalar(parameter.getType());
         } else if (argumentType == GQLType.ENUM) {
@@ -113,7 +112,7 @@ public class DataAccessFactory {
             // todo problem if scalar return type in list
             Class<?> arg = genericTypeOfParameter(parameter);
             String typeName = arg.getSimpleName();
-            if(GQLType.isScalar(arg)){
+            if (GQLType.isScalar(arg)) {
                 return GraphQLList.list(GQLType.getScalar(arg));
             } else {
                 return GraphQLList.list(GraphQLTypeReference.typeRef(typeName));
@@ -123,5 +122,4 @@ public class DataAccessFactory {
             throw new UnimplementedException("(Unimplemented argument type for " + argumentType);
         }
     }
-
 }

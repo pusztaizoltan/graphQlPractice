@@ -8,6 +8,7 @@ import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.annotation.GQLType;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
+import org.example.graphql.generator_component.util.TypeData;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
-        GQLType gqlType = GQLType.ofField(field);
+        GQLType gqlType = TypeData.ofField(field).gqlType;
         if (gqlType.isScalar()) {
             return scalarObjectField(field);
         } else if (gqlType == GQLType.OBJECT) {
@@ -48,7 +49,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
-        GQLType gqlType = GQLType.ofField(field);
+        GQLType gqlType = TypeData.ofField(field).gqlType;
         if (gqlType.isScalar()) {
             return scalarInputField(field);
         } else if (gqlType == GQLType.OBJECT) {

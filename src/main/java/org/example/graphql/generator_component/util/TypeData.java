@@ -41,7 +41,7 @@ public abstract class TypeData {
 
     public abstract Class<?> getContentType();
 
-    public static TypeData ofMethod(@Nonnull Method method) {
+    public static TypeDetails<?> ofMethod(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         GQLType gqlType;
         Class<?> contentType;
