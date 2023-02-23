@@ -49,14 +49,14 @@ public class FetcherFactory {
 
     private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, Class<T> argumentClass) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        GQLType gqlType = TypeData.ofParameter(parameter).gqlType;
-        if (gqlType.isScalar()) {
+        TypeData data = TypeData.ofParameter(parameter);
+        if (data.isScalar()) {
             return environment.getArgument(argName);
-        } else if (gqlType == GQLType.ENUM) {
+        } else if (data.isEnum()) {
             return mapEnumArgument(argumentClass, argName);
-        } else if (gqlType == GQLType.OBJECT) {
+        } else if (data.isObject()) {
             return mapObjectArgument(argumentClass, argName);
-        } else if (gqlType == GQLType.LIST) {
+        } else if (data.isList()) {
             List<Integer> arg = environment.getArgument(argName);
             System.out.println(argumentClass);
             System.out.println(environment.getArgument(argName).toString());

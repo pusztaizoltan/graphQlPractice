@@ -39,18 +39,24 @@ public abstract class TypeData {
 
     public final GQLType gqlType;
 
+    public TypeData(GQLType gqlType) {
+        this.gqlType = gqlType;
+    }
     public abstract Class<?> getContentType();
 
     public static TypeDetails<?> ofMethod(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         GQLType gqlType;
         Class<?> contentType;
+//        GraphQLType graphQLType;
         if (SCALAR_MAP.containsKey(returnType)) {
             gqlType = GQLType.SCALAR;
             contentType = returnType;
+//            graphQLType = SCALAR_MAP.get(contentType);
         } else if (Collection.class.isAssignableFrom(returnType)) {
             gqlType = GQLType.LIST;
             contentType = genericTypeOfMethod(method);
+//            graphQLType = GraphQLList.list();
         } else if (returnType.isEnum()) {
             gqlType = GQLType.ENUM;
             contentType = returnType;
@@ -109,8 +115,29 @@ public abstract class TypeData {
         }
         return new TypeDetails<>(gqlType, contentType);
     }
-    public TypeData(GQLType gqlType) {
-        this.gqlType = gqlType;
+
+
+
+    public boolean isScalar(){
+        return this.gqlType == GQLType.SCALAR;
     }
 
+    public boolean isEnum(){
+        return this.gqlType == GQLType.ENUM;
+    }
+
+    public boolean isList(){
+        return this.gqlType == GQLType.LIST;
+    }
+
+    public boolean isArray(){
+        return this.gqlType == GQLType.ARRAY;
+    }
+
+    public boolean isObject(){
+        return this.gqlType == GQLType.OBJECT;
+    }
+    private enum Type{
+        ENUM, OBJECT, LIST, ARRAY, SCALAR;
+    }
 }

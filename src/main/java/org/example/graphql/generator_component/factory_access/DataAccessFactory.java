@@ -99,8 +99,9 @@ public class DataAccessFactory {
     }
 
     private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {
+        TypeData data = TypeData.ofParameter(parameter);
         GQLType argumentType = TypeData.ofParameter(parameter).gqlType;
-        if (argumentType.isScalar()) {
+        if (data.isScalar()) {
             return GQLType.getScalar(parameter.getType());
         } else if (argumentType == GQLType.ENUM) {
             String typeName = parameter.getType().getSimpleName();

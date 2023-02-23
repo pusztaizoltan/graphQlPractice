@@ -30,14 +30,14 @@ class FieldFactory {
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
-        GQLType gqlType = TypeData.ofField(field).gqlType;
-        if (gqlType.isScalar()) {
+        TypeData data = TypeData.ofField(field);
+        if (data.isScalar()) {
             return scalarObjectField(field);
-        } else if (gqlType == GQLType.OBJECT) {
+        } else if (data.isObject()) {
             return objectObjectField(field);
-        } else if (gqlType == GQLType.LIST) {
+        } else if (data.isList()) {
             return listObjectField(field);
-        } else if (gqlType == GQLType.ENUM) {
+        } else if (data.isEnum()) {
             return enumObjectField(field);
         } else {
             throw new UnimplementedException("Unimplemented fieldAdapter for " + field);
