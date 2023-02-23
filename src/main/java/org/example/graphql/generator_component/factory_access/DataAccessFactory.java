@@ -39,24 +39,24 @@ public class DataAccessFactory {
      */
     public static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition();
+        TypeData<Method> methodData = TypeData.ofMethod(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                builder.argument(createArgumentFor(parameter));
+                TypeData<Parameter> parameterData = TypeData.ofParameter(parameter);
+                builder.argument(createArgumentFor(parameterData));
             }
         }
-        return builder.name(method.getName()).type(returnTypeFrom(method)).build();
+        return builder.name(method.getName()).type(returnTypeFrom(methodData)).build();
     }
 
-    private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull Parameter parameter) {
-        GQLArg annotation = parameter.getAnnotation(GQLArg.class);
+    private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeData<Parameter> data) {
         return GraphQLArgument.newArgument()
-                              .name(annotation.name())
-                              .type(argumentTypeFrom(parameter))
+                              .name(data.getName())
+                              .type(argumentTypeFrom(data))
                               .build();
     }
 
-    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull Method method) {
-        TypeData data = TypeData.ofMethod(method);
+    private static @Nonnull GraphQLOutputType returnTypeFrom(@Nonnull TypeData<Method> data) {
         if (data.isScalar()) {
             return (GraphQLOutputType) data.getScalarType();
         } else if (data.isEnum()) {
@@ -76,12 +76,11 @@ public class DataAccessFactory {
         } else if (data.isObject()) {
             return GraphQLTypeReference.typeRef(data.getContentType().getSimpleName());
         } else {
-            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + method);
+            throw new UnimplementedException("Not implemented output-type for Data-Access field of " + data.getOrigin());
         }
     }
 
-    private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull Parameter parameter) {
-        TypeData data = TypeData.ofParameter(parameter);
+    private static @Nonnull GraphQLInputType argumentTypeFrom(@Nonnull TypeData<Parameter> data) {
         if (data.isScalar()) {
             return (GraphQLInputType) data.getScalarType();
         } else if (data.isEnum()) {
@@ -96,7 +95,7 @@ public class DataAccessFactory {
                 return GraphQLList.list(GraphQLTypeReference.typeRef(data.getContentType().getSimpleName()));
             }
         } else {
-            throw new UnimplementedException("(Unimplemented argument type for " + parameter);
+            throw new UnimplementedException("(Unimplemented argument type for " + data.getOrigin());
         }
     }
 }

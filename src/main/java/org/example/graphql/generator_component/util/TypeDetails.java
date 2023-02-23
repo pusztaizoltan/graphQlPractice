@@ -2,17 +2,19 @@ package org.example.graphql.generator_component.util;
 
 import graphql.schema.GraphQLType;
 
-public class TypeDetails<T> extends TypeData {
-    public final Class<T> contentType;
+import java.lang.reflect.AnnotatedElement;
+
+public class TypeDetails<C,T extends AnnotatedElement> extends TypeData<T> {
+    public final Class<C> contentType;
 //    public TypeData.Type  graphQLType;
 
-    public TypeDetails(TypeData.Type dataType, Class<T> contentType) {
-        super(dataType);
+    public TypeDetails(TypeData.Type dataType, Class<C> contentType,T annotatedElement) {
+        super(dataType, annotatedElement);
         this.contentType = contentType;
     }
 
     @Override
-    public Class<T> getContentType() {
+    public Class<C> getContentType() {
         return contentType;
     }
 

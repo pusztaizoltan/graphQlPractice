@@ -7,6 +7,7 @@ import graphql.schema.GraphQLFieldDefinition;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.generator_component.util.Fetchable;
+import org.example.graphql.generator_component.util.TypeData;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;

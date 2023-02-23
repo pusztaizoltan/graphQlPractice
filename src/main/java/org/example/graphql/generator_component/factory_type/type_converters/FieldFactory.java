@@ -30,7 +30,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
-        TypeData data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.ofField(field);
         if (data.isScalar()) {
             return scalarObjectField(field);
         } else if (data.isObject()) {
@@ -49,7 +49,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
-        TypeData data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.ofField(field);
         if (data.isScalar()) {
             return scalarInputField(field);
         } else if (data.isObject()) {
@@ -64,7 +64,7 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLFieldDefinition scalarObjectField(@Nonnull Field field) {
-        TypeData data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.ofField(field);
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(field.getName())
                                      .type((GraphQLOutputType) data.getScalarType())
@@ -92,7 +92,7 @@ class FieldFactory {
     }
 
     private static @Nonnull GraphQLInputObjectField scalarInputField(@Nonnull Field field) {
-        TypeData data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.ofField(field);
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(field.getName())
                                       .type((GraphQLInputType) data.getScalarType())

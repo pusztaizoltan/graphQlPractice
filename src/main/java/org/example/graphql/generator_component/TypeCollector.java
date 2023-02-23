@@ -32,7 +32,7 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        TypeData data = TypeData.ofMethod(method);
+        TypeData<Method> data = TypeData.ofMethod(method);
         if (!data.isScalar()) {
             collectRecursivelyFromClassFields(data.getContentType());
         }
@@ -47,7 +47,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                TypeData data = TypeData.ofParameter(parameter);
+                TypeData<Parameter> data = TypeData.ofParameter(parameter);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }
@@ -77,7 +77,7 @@ public class TypeCollector {
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                TypeData data = TypeData.ofField(field);
+                TypeData<Field> data = TypeData.ofField(field);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }

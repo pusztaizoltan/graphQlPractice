@@ -48,7 +48,7 @@ public class FetcherFactory {
 
     private static <T> @Nonnull T mapArgument(@Nonnull Parameter parameter, Class<T> argumentClass) {
         String argName = parameter.getAnnotation(GQLArg.class).name();
-        TypeData data = TypeData.ofParameter(parameter);
+        TypeData<Parameter> data = TypeData.ofParameter(parameter);
         if (data.isScalar()) {
             return environment.getArgument(argName);
         } else if (data.isEnum()) {

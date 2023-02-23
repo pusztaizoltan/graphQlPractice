@@ -3,9 +3,11 @@ package org.example.graphql.generator_component.util;
 import graphql.Scalars;
 import graphql.schema.GraphQLScalarType;
 import graphql.schema.GraphQLType;
-
+import org.example.graphql.annotation.GQLArg;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -15,7 +17,7 @@ import java.util.Map;
 
 import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 
-public abstract class TypeData {
+public abstract class TypeData<T extends AnnotatedElement> {
     protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR;}
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
 
@@ -39,13 +41,16 @@ public abstract class TypeData {
         SCALAR_MAP.put(String.class, Scalars.GraphQLString);
     }
 
-    public final Type dataType;
-
-    public TypeData(Type dataType) {
+    private final Type dataType;
+    private final T origin;
+    public TypeData(Type dataType, T annotatedElement) {
         this.dataType = dataType;
+        this.origin = annotatedElement;
     }
 
-    public static TypeDetails<?> ofMethod(@Nonnull Method method) {
+
+
+    public static TypeData<Method> ofMethod(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
         Type dataType;
         Class<?> contentType;
@@ -68,10 +73,10 @@ public abstract class TypeData {
             dataType = Type.OBJECT;
             contentType = returnType;
         }
-        return new TypeDetails<>(dataType, contentType);
+        return new TypeDetails<>(dataType, contentType,method);
     }
 
-    public static TypeData ofParameter(@Nonnull Parameter parameter) {
+    public static TypeData<Parameter> ofParameter(@Nonnull Parameter parameter) {
         Class<?> parameterType = parameter.getType();
         Type dataType;
         Class<?> contentType;
@@ -91,10 +96,10 @@ public abstract class TypeData {
             dataType = Type.OBJECT;
             contentType = parameterType;
         }
-        return new TypeDetails<>(dataType, contentType);
+        return new TypeDetails<>(dataType, contentType,parameter);
     }
 
-    public static TypeData ofField(@Nonnull Field field) {
+    public static TypeData<Field> ofField(@Nonnull Field field) {
         Class<?> parameterType = field.getType();
         Type dataType;
         Class<?> contentType;
@@ -114,7 +119,7 @@ public abstract class TypeData {
             dataType = Type.OBJECT;
             contentType = parameterType;
         }
-        return new TypeDetails<>(dataType, contentType);
+        return new TypeDetails<>(dataType, contentType, field);
     }
 
     public static boolean isScalar(Class<?> classType) {
@@ -126,6 +131,22 @@ public abstract class TypeData {
     public abstract GraphQLType getScalarType();
 
     public abstract boolean hasScalarContent();
+
+    public String getName(){
+        if (origin.isAnnotationPresent(GQLArg.class)){
+            return origin.getAnnotation(GQLArg.class).name();
+        } else if (origin instanceof Field){
+            return ((Field) origin).getName();
+        } else if (origin instanceof Method) {
+            return ((Method) origin).getName();
+        } else {
+            throw new MissingAnnotationException("");
+        }
+    }
+
+    public T getOrigin() {
+        return origin;
+    }
 
     public boolean isScalar() {
         return this.dataType == Type.SCALAR;
