@@ -19,6 +19,7 @@ public class Details<T, A extends AnnotatedElement> extends Data<A> {
         return contentType;
     }
 
+    @Override
     public boolean hasScalarContent() {
         return DataFactory.SCALAR_MAP.containsKey(contentType);
     }

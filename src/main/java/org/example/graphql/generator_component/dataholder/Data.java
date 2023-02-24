@@ -52,6 +52,9 @@ public class Data<E extends AnnotatedElement> {
         }
     }
 
+    public boolean hasScalarContent(){
+        return DataFactory.SCALAR_MAP.containsKey(getContentType());
+    }
     private Class<?> getGenericType() {
         ParameterizedType type;
         if (origin instanceof Method) {

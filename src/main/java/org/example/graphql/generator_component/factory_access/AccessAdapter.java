@@ -22,9 +22,7 @@ public class AccessAdapter implements Fetchable {
     private static final String QUERY_NAME = "Query";
     private static final String MUTATION_NAME = "Mutation";
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    @Getter
     private final GraphQLFieldDefinition accessField;
-    @Getter
     private final boolean isMutation;
 
     public AccessAdapter(@Nonnull Method method, @Nonnull Object dataService) {
@@ -43,7 +41,15 @@ public class AccessAdapter implements Fetchable {
         return isMutation ? MUTATION_NAME : QUERY_NAME;
     }
 
-    public static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
+    public GraphQLFieldDefinition getAccessField() {
+        return accessField;
+    }
+
+    public boolean isMutation() {
+        return isMutation;
+    }
+
+    private static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
         Details<?, Method> methodData = DataFactory.detailOf(method);
         for (Parameter parameter : method.getParameters()) {
