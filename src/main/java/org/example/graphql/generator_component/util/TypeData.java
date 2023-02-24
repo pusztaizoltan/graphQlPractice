@@ -6,19 +6,19 @@ import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLArg;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.example.graphql.generator_component.util.ReflectionUtil.*;
 
 public abstract class TypeData<T extends AnnotatedElement> {
-    protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR;}
+    protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR}
+
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
 
     static {
@@ -43,12 +43,11 @@ public abstract class TypeData<T extends AnnotatedElement> {
 
     private final Type dataType;
     private final T origin;
+
     public TypeData(Type dataType, T annotatedElement) {
         this.dataType = dataType;
         this.origin = annotatedElement;
     }
-
-
 
     public static TypeData<Method> ofMethod(@Nonnull Method method) {
         Class<?> returnType = method.getReturnType();
@@ -73,7 +72,7 @@ public abstract class TypeData<T extends AnnotatedElement> {
             dataType = Type.OBJECT;
             contentType = returnType;
         }
-        return new TypeDetails<>(dataType, contentType,method);
+        return new TypeDetails<>(dataType, contentType, method);
     }
 
     public static TypeData<Parameter> ofParameter(@Nonnull Parameter parameter) {
@@ -96,7 +95,7 @@ public abstract class TypeData<T extends AnnotatedElement> {
             dataType = Type.OBJECT;
             contentType = parameterType;
         }
-        return new TypeDetails<>(dataType, contentType,parameter);
+        return new TypeDetails<>(dataType, contentType, parameter);
     }
 
     public static TypeData<Field> ofField(@Nonnull Field field) {
@@ -132,10 +131,10 @@ public abstract class TypeData<T extends AnnotatedElement> {
 
     public abstract boolean hasScalarContent();
 
-    public String getName(){
-        if (origin.isAnnotationPresent(GQLArg.class)){
+    public String getName() {
+        if (origin.isAnnotationPresent(GQLArg.class)) {
             return origin.getAnnotation(GQLArg.class).name();
-        } else if (origin instanceof Field){
+        } else if (origin instanceof Field) {
             return ((Field) origin).getName();
         } else if (origin instanceof Method) {
             return ((Method) origin).getName();
@@ -168,5 +167,24 @@ public abstract class TypeData<T extends AnnotatedElement> {
         return this.dataType == Type.OBJECT;
     }
 
+    /**
+     * Shortcut method  to determine the Generic Type of afield
+     */
+    private static Class<?> genericTypeOfField(@Nonnull Field field) {
+        return (Class<?>) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+    }
 
+    /**
+     * Shortcut method  to determine the Generic Type of the return of a method
+     */
+    public static Class<?> genericTypeOfMethod(@Nonnull Method method) {
+        return (Class<?>) ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments()[0];
+    }
+
+    /**
+     * Shortcut method  to determine the Generic Type of the return of aan argument
+     */
+    public static Class<?> genericTypeOfParameter(@Nonnull Parameter parameter) {
+        return (Class<?>) ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];
+    }
 }

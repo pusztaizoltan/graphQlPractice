@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class FetcherFactory {
     static DataFetchingEnvironment environment;
-
+    static Map<String, Object> envArgs;
     private FetcherFactory() {
     }
 
@@ -36,6 +36,7 @@ public class FetcherFactory {
     public static @Nonnull DataFetcher<Object> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
         return (DataFetchingEnvironment env) -> {
             environment = env;
+            envArgs = env.getArguments();
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
@@ -46,21 +47,16 @@ public class FetcherFactory {
         };
     }
 
-    private static <T> @Nonnull T mapArgument(@Nonnull TypeDetails<T, Parameter> data) {
+    private static <T> @Nonnull Object mapArgument(@Nonnull TypeDetails<T, Parameter> data) {
         if (data.isScalar()) {
-            return environment.getArgument(data.getName());
+            return envArgs.get(data.getName());
+//            return environment.getArgument(data.getName());
         } else if (data.isEnum()) {
             return mapEnumArgument(data);
         } else if (data.isObject()) {
             return mapObjectArgument(data);
         } else if (data.isList()) {
-            List<Integer> arg = environment.getArgument(data.getName());
-//            return environment.getArgument(argName);
-            ArrayList<Long> list = new ArrayList<>();
-            for (int i = 0; i < arg.size(); i++) {
-                list.add(arg.get(i).longValue());
-            }
-            return (T) list;
+            return mapListArgument(data);
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + data.getOrigin());
         }
@@ -69,9 +65,29 @@ public class FetcherFactory {
 //        return
 //    }
 
+    private static <T> @Nonnull List<T> mapListArgument(TypeDetails<T, Parameter> data) {
+        Iterable<T> arg = environment.getArgument(data.getName());
+//        System.out.println(environment.g);
+        System.out.println(arg);
+        System.out.println(arg.getClass());
+        System.out.println(data.getContentType());
+//        data.getGraphQLType()
+
+        List<Long> aa = new ArrayList<>();
+        ArrayList<T> result = new ArrayList<>();
+        for (T item: (Iterable<T>) environment.getArgument(data.getName())) {
+            result.add(item);
+        }
+        //        var aa =arg.get(0);
+
+        return result;
+
+
+    }
+
     private static <T> @Nonnull T mapEnumArgument(TypeDetails<T, Parameter> data) {
         for (T enumConstant : data.getContentType().getEnumConstants()) {
-            if (((Enum<?>) enumConstant).name().equals(environment.getArgument(data.getName()))) {
+            if (((Enum<?>) enumConstant).name().equals(envArgs.get(data.getName()))) {
                 return enumConstant;
             }
         }
@@ -92,7 +108,7 @@ public class FetcherFactory {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
-                    Map<String, Object> inputArgument = environment.getArgument(data.getName());
+                    Map<String, Object> inputArgument = (Map<String, Object>) envArgs.get(data.getName());
                     return data.getContentType().cast(method.invoke(null, inputArgument));
                 }
             }
@@ -102,7 +118,7 @@ public class FetcherFactory {
 
     private static <T> @Nonnull T mapBySetterMatching(@Nonnull TypeDetails<T, Parameter> data) {
         T inputObject = instantiateInputObject(data);
-        Map<String, Object> arguments = environment.getArgument(data.getName());
+        Map<String, Object> arguments = Map.class.cast( envArgs.get(data.getName()));
         for (Field field : data.getContentType().getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 setInputValue(inputObject, field, arguments.get(field.getName()));
