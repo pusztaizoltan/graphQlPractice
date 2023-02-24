@@ -40,7 +40,7 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                TypeDetails<?, Parameter> data = (TypeDetails<?, Parameter>) TypeData.of(parameters[i]);
+                TypeDetails<?, Parameter> data = TypeDetails.of(parameters[i]);
                 arguments[i] = mapArgument(data);
             }
             return method.invoke(dataService, arguments);

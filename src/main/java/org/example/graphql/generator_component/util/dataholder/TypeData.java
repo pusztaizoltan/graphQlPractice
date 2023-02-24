@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TypeData<T extends AnnotatedElement> {
+public class TypeData<E extends AnnotatedElement> {
     protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR}
 
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
@@ -43,14 +43,14 @@ public class TypeData<T extends AnnotatedElement> {
     }
 
     private final Type dataType;
-    private final T origin;
+    private final E origin;
 
-    public TypeData(TypeData<T> data){
+    public TypeData(TypeData<E> data){
         origin = data.origin;
         dataType = data.dataType;
     }
 
-    public TypeData(T element) {
+    public TypeData(E element) {
         this.origin = element;
         Class<?> simpleType = getSimpleType(element);
         if (SCALAR_MAP.containsKey(simpleType)) {
@@ -66,9 +66,9 @@ public class TypeData<T extends AnnotatedElement> {
         }
     }
 
-    public static <A extends AnnotatedElement> TypeData<A> of(@Nonnull A element) {
+    public static <E extends AnnotatedElement> TypeData<E> of(@Nonnull E element) {
         Class<?> simpleType = getSimpleType(element);
-        TypeData<A> typeData = new TypeData<>(element);
+        TypeData<E> typeData = new TypeData<>(element);
         if (typeData.dataType == Type.ARRAY) {
             return new TypeDetails<>(typeData, simpleType.componentType());
         } else if (typeData.dataType == Type.LIST) {
@@ -83,30 +83,18 @@ public class TypeData<T extends AnnotatedElement> {
     }
 
     public Class<?> getContentType() {
-        return ((TypeDetails<?, T>) this).getContentType();
+        return ((TypeDetails<?, E>) this).getContentType();
     }
 
     public GraphQLType getGraphQLType() {
-        return this.getGraphQLType();
+        return ((TypeDetails<?, E>) this).getGraphQLType();
     }
 
     public boolean hasScalarContent() {
-        return this.hasScalarContent();
+        return ((TypeDetails<?, E>) this).hasScalarContent();
     }
 
-    public String getName() {
-        if (origin.isAnnotationPresent(GQLArg.class)) {
-            return origin.getAnnotation(GQLArg.class).name();
-        } else if (origin instanceof Field) {
-            return ((Field) origin).getName();
-        } else if (origin instanceof Method) {
-            return ((Method) origin).getName();
-        } else {
-            throw new MissingAnnotationException("");
-        }
-    }
-
-    public T getOrigin() {
+    public E getOrigin() {
         return origin;
     }
 
@@ -129,6 +117,19 @@ public class TypeData<T extends AnnotatedElement> {
     public boolean isObject() {
         return this.dataType == Type.OBJECT;
     }
+
+    public String getName() {
+        if (origin.isAnnotationPresent(GQLArg.class)) {
+            return origin.getAnnotation(GQLArg.class).name();
+        } else if (origin instanceof Field) {
+            return ((Field) origin).getName();
+        } else if (origin instanceof Method) {
+            return ((Method) origin).getName();
+        } else {
+            throw new MissingAnnotationException("");
+        }
+    }
+
 
     public static Class<?> getSimpleType(AnnotatedElement element) {
         if (element instanceof Method) {
