@@ -3,7 +3,7 @@ package org.example.graphql.generator_component;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.util.TypeData;
+import org.example.graphql.generator_component.util.dataholder.TypeData;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -32,7 +32,7 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        TypeData<Method> data = TypeData.ofMethod(method);
+        TypeData<Method> data = TypeData.of(method);
         if (!data.isScalar()) {
             collectRecursivelyFromClassFields(data.getContentType());
         }
@@ -47,7 +47,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                TypeData<Parameter> data = TypeData.ofParameter(parameter);
+                TypeData<Parameter> data = TypeData.of(parameter);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }
@@ -77,7 +77,7 @@ public class TypeCollector {
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                TypeData<Field> data = TypeData.ofField(field);
+                TypeData<Field> data = TypeData.of(field);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }

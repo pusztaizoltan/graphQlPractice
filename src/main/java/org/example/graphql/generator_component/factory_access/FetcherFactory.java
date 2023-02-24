@@ -3,8 +3,8 @@ package org.example.graphql.generator_component.factory_access;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.util.TypeData;
-import org.example.graphql.generator_component.util.TypeDetails;
+import org.example.graphql.generator_component.util.dataholder.TypeData;
+import org.example.graphql.generator_component.util.dataholder.TypeDetails;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -40,7 +40,7 @@ public class FetcherFactory {
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                TypeDetails<?, Parameter> data = (TypeDetails<?, Parameter>) TypeData.ofParameter(parameters[i]);
+                TypeDetails<?, Parameter> data = (TypeDetails<?, Parameter>) TypeData.of(parameters[i]);
                 arguments[i] = mapArgument(data);
             }
             return method.invoke(dataService, arguments);

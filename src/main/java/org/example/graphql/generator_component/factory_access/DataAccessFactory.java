@@ -3,12 +3,9 @@ package org.example.graphql.generator_component.factory_access;
 import graphql.schema.GraphQLArgument;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputType;
-import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLOutputType;
-import graphql.schema.GraphQLTypeReference;
 import org.example.graphql.annotation.GQLArg;
-import org.example.graphql.generator_component.util.TypeData;
-import org.example.graphql.generator_component.util.UnimplementedException;
+import org.example.graphql.generator_component.util.dataholder.TypeData;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -39,10 +36,10 @@ public class DataAccessFactory {
      */
     public static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
-        TypeData<Method> methodData = TypeData.ofMethod(method);
+        TypeData<Method> methodData = TypeData.of(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                TypeData<Parameter> parameterData = TypeData.ofParameter(parameter);
+                TypeData<Parameter> parameterData = TypeData.of(parameter);
                 builder.argument(createArgumentFor(parameterData));
             }
         }

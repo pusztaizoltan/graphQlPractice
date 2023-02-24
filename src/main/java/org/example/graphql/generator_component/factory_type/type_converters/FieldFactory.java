@@ -6,7 +6,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.factory_type.TypeFactory;
-import org.example.graphql.generator_component.util.TypeData;
+import org.example.graphql.generator_component.util.dataholder.TypeData;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -25,7 +25,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it.
      */
     static @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Field field) {
-        TypeData<Field> data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.of(field);
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(data.getName())
                                      .type((GraphQLOutputType) data.getGraphQLType())
@@ -37,7 +37,7 @@ class FieldFactory {
      * {@link GQLField} annotation on it
      */
     static @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Field field) {
-        TypeData<Field> data = TypeData.ofField(field);
+        TypeData<Field> data = TypeData.of(field);
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(data.getName())
                                       .type((GraphQLInputType) data.getGraphQLType())

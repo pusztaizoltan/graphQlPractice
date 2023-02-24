@@ -1,8 +1,9 @@
-package org.example.graphql.generator_component.util;
+package org.example.graphql.generator_component.util.dataholder;
 
 import graphql.schema.GraphQLList;
 import graphql.schema.GraphQLType;
 import graphql.schema.GraphQLTypeReference;
+import org.example.graphql.generator_component.util.UnimplementedException;
 
 import java.lang.reflect.AnnotatedElement;
 
