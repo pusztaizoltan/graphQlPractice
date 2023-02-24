@@ -15,8 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-
-public abstract class TypeData<T extends AnnotatedElement> {
+public class TypeData<T extends AnnotatedElement> {
     protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR}
 
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
@@ -49,74 +48,75 @@ public abstract class TypeData<T extends AnnotatedElement> {
         this.origin = annotatedElement;
     }
 
+    public static <T extends AnnotatedElement> TypeData<T> of(@Nonnull T annotatedElement) {
+        return null;
+    }
+
     public static TypeData<Method> ofMethod(@Nonnull Method method) {
-        Class<?> returnType = method.getReturnType();
-        Type dataType;
+        Class<?> simpleType = getSimpleType(method);
+        TypeData typeData;
         Class<?> contentType;
-//        GraphQLType graphQLType;
-        if (SCALAR_MAP.containsKey(returnType)) {
-            dataType = Type.SCALAR;
-            contentType = returnType;
-//            graphQLType = SCALAR_MAP.get(contentType);
-        } else if (Collection.class.isAssignableFrom(returnType)) {
-            dataType = Type.LIST;
+        if (SCALAR_MAP.containsKey(simpleType)) {
+            typeData = new TypeData(Type.SCALAR, method);
+            contentType = simpleType;
+        } else if (Collection.class.isAssignableFrom(simpleType)) {
+            typeData = new TypeData(Type.LIST, method);
             contentType = genericTypeOfMethod(method);
-//            graphQLType = GraphQLList.list();
-        } else if (returnType.isEnum()) {
-            dataType = Type.ENUM;
-            contentType = returnType;
-        } else if (returnType.isArray()) {
-            dataType = Type.ARRAY;
-            contentType = returnType.componentType();
+        } else if (simpleType.isEnum()) {
+            typeData = new TypeData(Type.ENUM, method);
+            contentType = simpleType;
+        } else if (simpleType.isArray()) {
+            typeData = new TypeData(Type.ARRAY, method);
+            contentType = simpleType.componentType();
         } else {
-            dataType = Type.OBJECT;
-            contentType = returnType;
+            typeData = new TypeData(Type.OBJECT, method);
+            contentType = simpleType;
         }
-        return new TypeDetails<>(dataType, contentType, method);
+        return new TypeDetails<>(typeData.dataType, contentType, method);
     }
 
     public static TypeData<Parameter> ofParameter(@Nonnull Parameter parameter) {
-        Class<?> parameterType = parameter.getType();
+        Class<?> simpleType = getSimpleType(parameter);
         Type dataType;
         Class<?> contentType;
-        if (SCALAR_MAP.containsKey(parameterType)) {
+        if (SCALAR_MAP.containsKey(simpleType)) {
             dataType = Type.SCALAR;
-            contentType = parameterType;
-        } else if (Collection.class.isAssignableFrom(parameterType)) {
+            contentType = simpleType;
+        } else if (Collection.class.isAssignableFrom(simpleType)) {
             dataType = Type.LIST;
             contentType = genericTypeOfParameter(parameter);
-        } else if (parameterType.isEnum()) {
+        } else if (simpleType.isEnum()) {
             dataType = Type.ENUM;
-            contentType = parameterType;
-        } else if (parameterType.isArray()) {
+            contentType = simpleType;
+        } else if (simpleType.isArray()) {
             dataType = Type.ARRAY;
-            contentType = parameterType.componentType();
+            contentType = simpleType.componentType();
         } else {
             dataType = Type.OBJECT;
-            contentType = parameterType;
+            contentType = simpleType;
         }
         return new TypeDetails<>(dataType, contentType, parameter);
     }
 
     public static TypeData<Field> ofField(@Nonnull Field field) {
-        Class<?> parameterType = field.getType();
+        Class<?> simpleType = getSimpleType(field);
         Type dataType;
         Class<?> contentType;
-        if (SCALAR_MAP.containsKey(parameterType)) {
+        if (SCALAR_MAP.containsKey(simpleType)) {
             dataType = Type.SCALAR;
-            contentType = parameterType;
-        } else if (Collection.class.isAssignableFrom(parameterType)) {
+            contentType = simpleType;
+        } else if (Collection.class.isAssignableFrom(simpleType)) {
             dataType = Type.LIST;
             contentType = genericTypeOfField(field);
-        } else if (parameterType.isEnum()) {
+        } else if (simpleType.isEnum()) {
             dataType = Type.ENUM;
-            contentType = parameterType;
-        } else if (parameterType.isArray()) {
+            contentType = simpleType;
+        } else if (simpleType.isArray()) {
             dataType = Type.ARRAY;
-            contentType = parameterType.componentType();
+            contentType = simpleType.componentType();
         } else {
             dataType = Type.OBJECT;
-            contentType = parameterType;
+            contentType = simpleType;
         }
         return new TypeDetails<>(dataType, contentType, field);
     }
@@ -125,11 +125,18 @@ public abstract class TypeData<T extends AnnotatedElement> {
         return SCALAR_MAP.containsKey(classType);
     }
 
-    public abstract Class<?> getContentType();
+    public Class<?> getContentType() {
+        return ((TypeDetails<?, T>) this).getContentType();
+    }
 
-    public abstract GraphQLType getGraphQLType();
+    public GraphQLType getGraphQLType(){
+        return ((TypeDetails<?, T>) this).getGraphQLType();
+    }
 
-    public abstract boolean hasScalarContent();
+
+    public boolean hasScalarContent(){
+        return ((TypeDetails<?, T>) this).hasScalarContent();
+    };
 
     public String getName() {
         if (origin.isAnnotationPresent(GQLArg.class)) {
@@ -186,5 +193,17 @@ public abstract class TypeData<T extends AnnotatedElement> {
      */
     public static Class<?> genericTypeOfParameter(@Nonnull Parameter parameter) {
         return (Class<?>) ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0];
+    }
+
+    public static Class<?> getSimpleType(AnnotatedElement element) {
+        if (element instanceof Method) {
+            return ((Method) element).getReturnType();
+        } else if (element instanceof Field) {
+            return ((Field) element).getType();
+        } else if (element instanceof Parameter) {
+            return ((Parameter) element).getType();
+        } else {
+            throw new UnimplementedException("");// todo give message
+        }
     }
 }
