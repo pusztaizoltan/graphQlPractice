@@ -45,32 +45,37 @@ public class TypeData<T extends AnnotatedElement> {
     private final Type dataType;
     private final T origin;
 
-    public TypeData(Type dataType, T annotatedElement) {
-        this.dataType = dataType;
-        this.origin = annotatedElement;
+    public TypeData(TypeData<T> data){
+        origin = data.origin;
+        dataType = data.dataType;
     }
 
-    public static <A extends AnnotatedElement>TypeData<A> of(@Nonnull A element) {
+    public TypeData(T element) {
+        this.origin = element;
         Class<?> simpleType = getSimpleType(element);
-        TypeData<A> typeData;
-        Class<?> contentType;
         if (SCALAR_MAP.containsKey(simpleType)) {
-            typeData = new TypeData<>(Type.SCALAR, element);
-            contentType = simpleType;
+            dataType = Type.SCALAR;
         } else if (Collection.class.isAssignableFrom(simpleType)) {
-            typeData = new TypeData<>(Type.LIST, element);
-            contentType = getGenericType(element);
+            dataType = Type.LIST;
         } else if (simpleType.isEnum()) {
-            typeData = new TypeData<>(Type.ENUM, element);
-            contentType = simpleType;
+            dataType = Type.ENUM;
         } else if (simpleType.isArray()) {
-            typeData = new TypeData<>(Type.ARRAY, element);
-            contentType = simpleType.componentType();
+            dataType = Type.ARRAY;
         } else {
-            typeData = new TypeData<>(Type.OBJECT, element);
-            contentType = simpleType;
+            dataType = Type.OBJECT;
         }
-        return new TypeDetails<>(typeData.dataType, contentType, element);
+    }
+
+    public static <A extends AnnotatedElement> TypeData<A> of(@Nonnull A element) {
+        Class<?> simpleType = getSimpleType(element);
+        TypeData<A> typeData = new TypeData<>(element);
+        if (typeData.dataType == Type.ARRAY) {
+            return new TypeDetails<>(typeData, simpleType.componentType());
+        } else if (typeData.dataType == Type.LIST) {
+            return new TypeDetails<>(typeData, getGenericType(element));
+        } else {
+            return new TypeDetails<>(typeData, simpleType);
+        }
     }
 
     public static boolean isScalar(Class<?> classType) {

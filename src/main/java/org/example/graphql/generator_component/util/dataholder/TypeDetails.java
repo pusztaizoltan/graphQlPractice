@@ -10,8 +10,13 @@ import java.lang.reflect.AnnotatedElement;
 public class TypeDetails<C, T extends AnnotatedElement> extends TypeData<T> {
     private final Class<C> contentType;
 
-    public TypeDetails(TypeData.Type dataType, Class<C> contentType, T annotatedElement) {
-        super(dataType, annotatedElement);
+//    public TypeDetails(TypeData.Type dataType, Class<C> contentType, T annotatedElement) {
+//        super(dataType, annotatedElement);
+//        this.contentType = contentType;
+//    }
+
+    public TypeDetails(TypeData<T> typeData, Class<C> contentType) {
+        super(typeData);
         this.contentType = contentType;
     }
 
