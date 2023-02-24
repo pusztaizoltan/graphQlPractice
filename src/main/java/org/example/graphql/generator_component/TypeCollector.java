@@ -3,7 +3,8 @@ package org.example.graphql.generator_component;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.util.dataholder.TypeData;
+import org.example.graphql.generator_component.dataholder.DataFactory;
+import org.example.graphql.generator_component.dataholder.Data;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -32,7 +33,7 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        TypeData<Method> data = TypeData.of(method);
+        Data<Method> data = DataFactory.dataOf(method);
         if (!data.isScalar()) {
             collectRecursivelyFromClassFields(data.getContentType());
         }
@@ -47,7 +48,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                TypeData<Parameter> data = TypeData.of(parameter);
+                Data<Parameter> data = DataFactory.dataOf(parameter);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }
@@ -67,7 +68,7 @@ public class TypeCollector {
 
     private <T> void collectRecursivelyFromClassFields(@Nonnull Class<T> classType) {
         if (!this.components.contains(classType)) {
-            if (!TypeData.isScalar(classType)) {
+            if (!DataFactory.isScalar(classType)) {
                 this.components.add(classType);
                 collectTypesFromClassFields(classType);
             }
@@ -77,7 +78,7 @@ public class TypeCollector {
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                TypeData<Field> data = TypeData.of(field);
+                Data<Field> data = DataFactory.dataOf(field);
                 if (!data.isScalar()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }

@@ -1,40 +1,48 @@
 package org.example.graphql.generator_component.factory_access;
 
+import graphql.schema.DataFetcher;
+import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLArgument;
+import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
+import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
+import org.example.graphql.annotation.GQLMutation;
+import org.example.graphql.generator_component.util.Fetchable;
 import org.example.graphql.generator_component.dataholder.DataFactory;
 import org.example.graphql.generator_component.dataholder.Details;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-// TODO: missing class level javadoc
-// todo done also in other Classes
 
-/**
- * Static Utility class used in{@link org.example.graphql.generator_component.GraphQLBuilder}
- * to automatically create GraphQLFieldDefinitions for the Query and Mutation type methods
- * of data-service based on method signature witch is processed by the class private factory
- * methods
- */
-public class DataAccessFactory {
-    // TODO: the method level javadocs are more helpful if they describe the intention in the first place,
-    // then the implementation details. In this case I could imagine something like
-    // "Checks if the method should be included into the schema as a list field"
-    // then the rules also can be detailed
-    // todo done also javadoc are rewrote
+public class AccessAdapter implements Fetchable {
+    private static final String QUERY_NAME = "Query";
+    private static final String MUTATION_NAME = "Mutation";
+    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    @Getter
+    private final GraphQLFieldDefinition accessField;
+    @Getter
+    private final boolean isMutation;
 
-    private DataAccessFactory() {
+    public AccessAdapter(@Nonnull Method method, @Nonnull Object dataService) {
+        isMutation = method.isAnnotationPresent(GQLMutation.class);
+        this.accessField = createDataAccessorFor(method);
+        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
+        this.registry.dataFetcher(FieldCoordinates.coordinates(getTypeName(), method.getName()), fetcher);
     }
 
-    /**
-     * Only entry point of the class that generate the GraphQLFieldDefinition for Mutation or Query.
-     * to determine the particulars of the returned object (argument, type) it implicitly uses
-     * the static factory methods of the class
-     */
+    @Override
+    public @Nonnull GraphQLCodeRegistry getRegistry() {
+        return registry.build();
+    }
+
+    String getTypeName() {
+        return isMutation ? MUTATION_NAME : QUERY_NAME;
+    }
+
     public static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
         Details<?, Method> methodData = DataFactory.detailOf(method);

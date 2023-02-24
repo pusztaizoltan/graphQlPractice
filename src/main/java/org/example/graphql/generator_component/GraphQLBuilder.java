@@ -3,9 +3,8 @@ package org.example.graphql.generator_component;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
-import org.example.graphql.generator_component.factory_access.ServiceConverter;
-import org.example.graphql.generator_component.factory_type.TypeFactory;
-import org.example.graphql.generator_component.factory_type.type_converters.ConverterAbstract;
+import org.example.graphql.generator_component.factory_access.AccessAdapter;
+import org.example.graphql.generator_component.type_adapter.AbstractTypeAdapter;
 import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
@@ -39,26 +38,26 @@ public class GraphQLBuilder {
      * with fields each wired to the respective method of the data-service.
      */
     public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
-        ServiceConverter converter = new ServiceConverter(method, dataService);
-        if (converter.isMutation()) {
-            this.mutationType.field(converter.getAccessField());
+        AccessAdapter adapter = new AccessAdapter(method, dataService);
+        if (adapter.isMutation()) {
+            this.mutationType.field(adapter.getAccessField());
         } else {
-            this.queryType.field(converter.getAccessField());
+            this.queryType.field(adapter.getAccessField());
         }
-        this.registry.dataFetchers(converter.getRegistry());
+        this.registry.dataFetchers(adapter.getRegistry());
     }
 
     /**
      * Scans tha argument Class types and add them to the SchemaBuilder and to the RegistryBuilder
      * as GraphQLObjectType, GraphQLEnumType or GraphQLOInputObjectType, using the methods
-     * of {@link org.example.graphql.generator_component.factory_type.TypeFactory}
+     * of {@link }
      */
     public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
         for (Class<?> component : components) {
-            ConverterAbstract<?> converter = TypeFactory.getTypeConverter(component);
-            this.graphQLSchema.additionalType(converter.getGraphQLType());
-            if (converter.isFetchable()) {
-                this.registry.dataFetchers(((Fetchable) converter).getRegistry());
+            AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(component);
+            this.graphQLSchema.additionalType(adapter.getGraphQLType());
+            if (adapter.isFetchable()) {
+                this.registry.dataFetchers(((Fetchable) adapter).getRegistry());
             }
         }
     }

@@ -1,32 +1,53 @@
-package org.example.graphql.generator_component.factory_type.type_converters;
+package org.example.graphql.generator_component.type_adapter;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
 import graphql.schema.GraphQLCodeRegistry;
+import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.util.Fetchable;
+import org.example.graphql.generator_component.dataholder.DataFactory;
+import org.example.graphql.generator_component.dataholder.Details;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class ConverterObject<T> extends ConverterAbstract<T> implements Fetchable {
+public class OutputAdapter<T> extends AbstractTypeAdapter<T> implements Fetchable {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
 
-    public ConverterObject(Class<T> javaType) {
+    public OutputAdapter(Class<T> javaType) {
         super(javaType);
         registerFetchers();
     }
+    @Override
+    public @Nonnull GraphQLCodeRegistry getRegistry() {
+        return registry.build();
+    }
+
 
     @Override
     protected void buildGraphQLAnalogue() {
         GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(super.getName());
         for (Field field : super.javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                builder.field(FieldFactory.GQLObjectFieldFrom(field));
+                Details<?, Field> data = DataFactory.detailOf(field);
+                builder.field(GQLObjectFieldFrom(data));
             }
         }
         super.graphQLType = builder.build();
+    }
+
+    /**
+     * Generate GraphQLFieldDefinition based on field and the required
+     * {@link GQLField} annotation on it.
+     */
+    private @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Details<?, Field> data) {
+        return GraphQLFieldDefinition.newFieldDefinition()
+                                     .name(data.getName())
+                                     .type((GraphQLOutputType) data.getGraphQLType())
+                                     .build();
     }
 
     private void registerFetchers() {
@@ -40,8 +61,4 @@ public class ConverterObject<T> extends ConverterAbstract<T> implements Fetchabl
         }
     }
 
-    @Override
-    public @Nonnull GraphQLCodeRegistry getRegistry() {
-        return registry.build();
-    }
 }
