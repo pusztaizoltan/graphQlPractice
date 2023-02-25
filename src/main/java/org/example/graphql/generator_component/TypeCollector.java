@@ -73,7 +73,7 @@ public class TypeCollector {
     }
 
     private void collectRecursivelyFromClassFields(@Nonnull Class<?> classType) {
-
+        // todo try to do something with this
         if (!this.components.contains(classType)) {
             this.components.add(classType);
             AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(classType);

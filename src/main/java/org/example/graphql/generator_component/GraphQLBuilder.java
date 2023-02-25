@@ -24,20 +24,25 @@ public class GraphQLBuilder {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
     private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(QUERY_NAME);
     private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(MUTATION_NAME);
+    Object dataService;
 
+    public GraphQLBuilder(){}
+    public GraphQLBuilder(Object dataService) {
+        this.dataService= dataService;
+    }
 
     /**
      * Responsible for populating the Mutation and Query entry points of the Schema
      * with fields each wired to the respective method of the data-service.
      */
-    public void addDataAccessFieldForMethod(@Nonnull Method method, @Nonnull Object dataService) {
-        AccessAdapter adapter = new AccessAdapter(method, dataService);
+    public void addDataAccessFieldForMethod(@Nonnull Method method) {
+        AccessAdapter adapter = new AccessAdapter(method, this.dataService);
         if (adapter.isMutation()) {
-            this.mutationType.field(adapter.getAccessField());
+            this.mutationType.field(adapter.getAccessorOf(method));
         } else {
-            this.queryType.field(adapter.getAccessField());
+            this.queryType.field(adapter.getAccessorOf(method));
         }
-        this.registry.dataFetchers(adapter.getRegistry());
+        this.registry.dataFetchers(adapter.getFetcherRegistry(method));
     }
 
     public void addAdditionalTypes(Set<GraphQLType> additionalTypes) {

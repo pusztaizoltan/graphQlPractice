@@ -7,10 +7,8 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
-import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLMutation;
-import org.example.graphql.generator_component.util.Fetchable;
 import org.example.graphql.generator_component.dataholder.DataFactory;
 import org.example.graphql.generator_component.dataholder.Details;
 
@@ -18,22 +16,23 @@ import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-public class AccessAdapter implements Fetchable {
+public class AccessAdapter{
     private static final String QUERY_NAME = "Query";
     private static final String MUTATION_NAME = "Mutation";
-    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    private final GraphQLFieldDefinition accessField;
     private final boolean isMutation;
+    Object dataService;
 
     public AccessAdapter(@Nonnull Method method, @Nonnull Object dataService) {
+        this.dataService = dataService;
         isMutation = method.isAnnotationPresent(GQLMutation.class);
-        this.accessField = createDataAccessorFor(method);
-        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
-        this.registry.dataFetcher(FieldCoordinates.coordinates(getTypeName(), method.getName()), fetcher);
     }
 
-    @Override
-    public @Nonnull GraphQLCodeRegistry getRegistry() {
+
+    public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method) {
+        GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
+        registry.dataFetcher(FieldCoordinates.coordinates(getTypeName(), method.getName()), fetcher);
+
         return registry.build();
     }
 
@@ -41,15 +40,11 @@ public class AccessAdapter implements Fetchable {
         return isMutation ? MUTATION_NAME : QUERY_NAME;
     }
 
-    public GraphQLFieldDefinition getAccessField() {
-        return accessField;
-    }
-
     public boolean isMutation() {
         return isMutation;
     }
 
-    private static @Nonnull GraphQLFieldDefinition createDataAccessorFor(@Nonnull Method method) {
+    public @Nonnull GraphQLFieldDefinition getAccessorOf(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
         Details<?, Method> methodData = DataFactory.detailOf(method);
         for (Parameter parameter : method.getParameters()) {
@@ -58,10 +53,11 @@ public class AccessAdapter implements Fetchable {
                 builder.argument(createArgumentFor(parameterData));
             }
         }
+
         return builder.type((GraphQLOutputType) methodData.getGraphQLType()).build();
     }
 
-    private static @Nonnull GraphQLArgument createArgumentFor(@Nonnull Details<?, Parameter> data) {
+    private @Nonnull GraphQLArgument createArgumentFor(@Nonnull Details<?, Parameter> data) {
         return GraphQLArgument.newArgument()
                               .name(data.getName())
                               .type((GraphQLInputType) data.getGraphQLType())

@@ -16,7 +16,8 @@ import java.lang.reflect.Method;
  */
 public class SchemaGeneratorImpl {
     private final TypeCollector typeCollector = new TypeCollector();
-    private final GraphQLBuilder builder = new GraphQLBuilder();
+
+    private GraphQLBuilder builder;
 
     /**
      * Constructor for SchemaGeneratorImpl
@@ -28,13 +29,14 @@ public class SchemaGeneratorImpl {
         // I think you can find a better pattern to have the method selection rule implemented only once
         // todo done I hope this is what you thought
         for (Object dataService : dataServices) {
+            this.builder = new GraphQLBuilder(dataService);
             for (Method method : dataService.getClass().getMethods()) {
                 if (method.isAnnotationPresent(GQLMutation.class) ||
                     method.isAnnotationPresent(GQLQuery.class)
                 ) {
                     this.typeCollector.collectTypesFromServiceMethodReturn(method);
                     this.typeCollector.collectTypesFromServiceMethodArguments(method);
-                    this.builder.addDataAccessFieldForMethod(method, dataService);
+                    this.builder.addDataAccessFieldForMethod(method);
                 }
             }
         }
