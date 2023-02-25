@@ -37,6 +37,6 @@ public class TypeFactory {
     }
 
     public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> contentOf(@Nonnull E element) {
-        return new TypeData<>(element).toTypeContent();
+        return new TypeData<>(element).toTypeDetail();
     }
 }

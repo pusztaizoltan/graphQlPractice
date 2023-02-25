@@ -24,11 +24,11 @@ public class TypeData<E extends AnnotatedElement> {
         this.simpleType = getSimpleType();
     }
 
-    public TypeDetail<?, E> toTypeContent() {
-        return new TypeDetail<>(this.origin, getContentType());
+    public TypeDetail<?, E> toTypeDetail() {
+        return new TypeDetail<>(this.origin, getContentClass());
     }
 
-    public Class<?> getContentType() {
+    public Class<?> getContentClass() {
         if (this.isArray()) {
             return getSimpleType().componentType();
         } else if (this.isList()) {
@@ -39,7 +39,7 @@ public class TypeData<E extends AnnotatedElement> {
     }
 
     public boolean hasScalarContent() {
-        return TypeFactory.OUTPUT_MAP.containsKey(getContentType());
+        return TypeFactory.OUTPUT_MAP.containsKey(getContentClass());
     }
 
     private Class<?> getGenericType() {
@@ -79,7 +79,7 @@ public class TypeData<E extends AnnotatedElement> {
             throw new UnimplementedException("");// todo give message
         }
     }
-    
+
     public boolean isScalar() {
         return OUTPUT_MAP.containsKey(simpleType);
     }

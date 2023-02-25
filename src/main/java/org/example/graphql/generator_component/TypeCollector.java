@@ -41,7 +41,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
         TypeData<Method> typeData = TypeFactory.dataOf(method);
         if (!typeData.hasScalarContent()) {
-            collectRecursivelyFromClassFields(typeData.getContentType());
+            collectRecursivelyFromClassFields(typeData.getContentClass());
         }
     }
 
@@ -56,7 +56,7 @@ public class TypeCollector {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
                 TypeData<Parameter> typeData = TypeFactory.dataOf(parameter);
                 if (!typeData.hasScalarContent()) {
-                    collectRecursivelyFromClassFields(typeData.getContentType());
+                    collectRecursivelyFromClassFields(typeData.getContentClass());
                 }
             }
         }
@@ -90,7 +90,7 @@ public class TypeCollector {
             if (field.isAnnotationPresent(GQLField.class)) {
                 TypeData<Field> typeData = TypeFactory.dataOf(field);
                 if (!typeData.hasScalarContent()) {
-                    collectRecursivelyFromClassFields(typeData.getContentType());
+                    collectRecursivelyFromClassFields(typeData.getContentClass());
                 }
             }
         }

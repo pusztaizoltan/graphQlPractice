@@ -15,7 +15,7 @@ public class TypeDetail<T, E extends AnnotatedElement> extends TypeData<E> {
     }
 
     @Override
-    public Class<T> getContentType() {
+    public Class<T> getContentClass() {
         return content;
     }
 

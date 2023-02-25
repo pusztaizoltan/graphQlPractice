@@ -61,7 +61,7 @@ public class FetcherFactory {
     }
 
     private <T> @Nonnull T mapEnumArgument(TypeDetail<T, Parameter> data) {
-        for (T enumConstant : data.getContentType().getEnumConstants()) {
+        for (T enumConstant : data.getContentClass().getEnumConstants()) {
             if (((Enum<?>) enumConstant).name().equals(environment.getArgument(data.getName()))) {
                 return enumConstant;
             }
@@ -79,22 +79,22 @@ public class FetcherFactory {
 
     private <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull TypeDetail<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
-        for (Method method : data.getContentType().getMethods()) {
+        for (Method method : data.getContentClass().getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length == 1 && parameters[0].getType().equals(Map.class)) {
                     Map<String, Object> inputArgument = environment.getArgument(data.getName());
-                    return data.getContentType().cast(method.invoke(null, inputArgument));
+                    return data.getContentClass().cast(method.invoke(null, inputArgument));
                 }
             }
         }
-        throw new UnimplementedException(exceptionMessage + data.getContentType());
+        throw new UnimplementedException(exceptionMessage + data.getContentClass());
     }
 
     private <T> @Nonnull T mapBySetterMatching(@Nonnull TypeDetail<T, Parameter> data) {
         T inputObject = instantiateInputObject(data);
         Map<String, Object> arguments = environment.getArgument(data.getName());
-        for (Field field : data.getContentType().getDeclaredFields()) {
+        for (Field field : data.getContentClass().getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 setInputValue(inputObject, field, arguments.get(field.getName()));
             }
@@ -105,12 +105,12 @@ public class FetcherFactory {
     private <T> @Nonnull T instantiateInputObject(@Nonnull TypeDetail<T, Parameter> data) {
         String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
-            return data.getContentType().getDeclaredConstructor().newInstance();
+            return data.getContentClass().getDeclaredConstructor().newInstance();
         } catch (NoSuchMethodException |
                  InstantiationException |
                  IllegalAccessException |
                  InvocationTargetException e) {
-            throw new UnimplementedException(exceptionMessage + data.getContentType());
+            throw new UnimplementedException(exceptionMessage + data.getContentClass());
         }
     }
 
