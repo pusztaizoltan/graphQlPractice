@@ -181,18 +181,6 @@ public class ListDbTestImpl {
 
     @GQLQuery
     public List<Book> booksByIdList(@GQLArg(name = "ids") List<Long> ids) {
-        System.out.println("----------");
-        System.out.println("booksByIdList called");
-        System.out.println("ids:   " + ids);
-        System.out.println("ids.class:   " + ids.getClass());
-        System.out.println("List.class:   " + new ArrayList<>(List.of(1, 2, 3)).getClass());
-        System.out.println("ids.get(0):   " + ids.get(0));
-        System.out.println("ids.get(0).class:   " + ids.get(0).getClass());
-//        System.out.println(bookDB.stream().mapToLong(book -> book.getId()).boxed().collect(Collectors.toList()));
-//        System.out.println(ids.get(0));
-//        bookDB.forEach(book -> System.out.println(
-//                ids + " " + ids.getClass() +" "+ ids.get(0).getClass()));
-//        ids.contains(Long.valueOf(book.getId()))
         return bookDB.stream().filter(book -> ids.contains(book.getId())).collect(Collectors.toList());
     }
 

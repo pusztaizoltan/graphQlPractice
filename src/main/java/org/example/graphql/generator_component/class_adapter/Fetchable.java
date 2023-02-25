@@ -1,4 +1,4 @@
-package org.example.graphql.generator_component.util;
+package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLCodeRegistry;
 

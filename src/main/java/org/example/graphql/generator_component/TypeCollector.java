@@ -8,7 +8,7 @@ import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.dataholder.TypeData;
 import org.example.graphql.generator_component.dataholder.TypeFactory;
 import org.example.graphql.generator_component.class_adapter.AbstractClassAdapter;
-import org.example.graphql.generator_component.util.Fetchable;
+import org.example.graphql.generator_component.class_adapter.Fetchable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;

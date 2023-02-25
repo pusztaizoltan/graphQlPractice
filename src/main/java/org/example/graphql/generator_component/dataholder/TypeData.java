@@ -10,10 +10,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
 
-import static org.example.graphql.generator_component.dataholder.TypeFactory.SCALAR_MAP;
+import static org.example.graphql.generator_component.dataholder.TypeFactory.OUTPUT_MAP;
 
 public class TypeData<E extends AnnotatedElement> {
     Class<?> simpleType;
@@ -25,12 +24,8 @@ public class TypeData<E extends AnnotatedElement> {
         this.simpleType = getSimpleType();
     }
 
-    public TypeContent<?, E> toTypeContent() {
-        return new TypeContent<>(this.origin, getContentType());
-    }
-
-    public TypeDetail<?, E> toTypeDetail() {
-        return new TypeDetail<>(this.origin, getAnnotatedType());
+    public TypeDetail<?, E> toTypeContent() {
+        return new TypeDetail<>(this.origin, getContentType());
     }
 
     public Class<?> getContentType() {
@@ -44,7 +39,7 @@ public class TypeData<E extends AnnotatedElement> {
     }
 
     public boolean hasScalarContent() {
-        return TypeFactory.SCALAR_MAP.containsKey(getContentType());
+        return TypeFactory.OUTPUT_MAP.containsKey(getContentType());
     }
 
     private Class<?> getGenericType() {
@@ -84,21 +79,9 @@ public class TypeData<E extends AnnotatedElement> {
             throw new UnimplementedException("");// todo give message
         }
     }
-
-    Type getAnnotatedType() {
-        if (origin instanceof Method) {
-            return ((Method) origin).getAnnotatedReturnType().getType();
-        } else if (origin instanceof Field) {
-            return ((Field) origin).getAnnotatedType().getType();
-        } else if (origin instanceof Parameter) {
-            return ((Parameter) origin).getAnnotatedType().getType();
-        } else {
-            throw new UnimplementedException("");// todo give message
-        }
-    }
-
+    
     public boolean isScalar() {
-        return SCALAR_MAP.containsKey(simpleType);
+        return OUTPUT_MAP.containsKey(simpleType);
     }
 
     public boolean isEnum() {

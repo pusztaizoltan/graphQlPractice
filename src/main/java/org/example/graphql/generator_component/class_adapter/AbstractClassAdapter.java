@@ -2,7 +2,6 @@ package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLInput;
-import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 

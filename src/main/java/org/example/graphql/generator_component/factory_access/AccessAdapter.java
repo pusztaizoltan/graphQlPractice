@@ -9,7 +9,7 @@ import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.generator_component.dataholder.TypeFactory;
-import org.example.graphql.generator_component.dataholder.TypeContent;
+import org.example.graphql.generator_component.dataholder.TypeDetail;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -25,25 +25,24 @@ public class AccessAdapter {
 
     public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method, String typeName) {
         GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-        var methodDetail = TypeFactory.detailOf(method);
-        DataFetcher<?> fetcher = fetcherFactory.createFetcherFor(methodDetail);
+        DataFetcher<?> fetcher = fetcherFactory.createFetcherFor(method);
         registry.dataFetcher(FieldCoordinates.coordinates(typeName, method.getName()), fetcher);
         return registry.build();
     }
 
     public @Nonnull GraphQLFieldDefinition getAccessorOf(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
-        TypeContent<?, Method> methodData = TypeFactory.contentOf(method);
+        TypeDetail<?, Method> methodData = TypeFactory.contentOf(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                TypeContent<?, Parameter> parameterData = TypeFactory.contentOf(parameter);
+                TypeDetail<?, Parameter> parameterData = TypeFactory.contentOf(parameter);
                 builder.argument(createArgumentFor(parameterData));
             }
         }
         return builder.type((GraphQLOutputType) methodData.getGraphQLType()).build();
     }
 
-    private @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeContent<?, Parameter> data) {
+    private @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeDetail<?, Parameter> data) {
         return GraphQLArgument.newArgument()
                               .name(data.getName())
                               .type((GraphQLInputType) data.getGraphQLType())

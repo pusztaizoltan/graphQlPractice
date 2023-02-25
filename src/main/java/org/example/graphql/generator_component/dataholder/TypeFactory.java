@@ -1,6 +1,7 @@
 package org.example.graphql.generator_component.dataholder;
 
 import graphql.Scalars;
+import graphql.scalars.ExtendedScalars;
 import graphql.schema.GraphQLScalarType;
 
 import javax.annotation.Nonnull;
@@ -9,37 +10,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeFactory {
-    protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
+    protected final static Map<Class<?>, GraphQLScalarType> OUTPUT_MAP = new HashMap<>();
 
     static {
-        SCALAR_MAP.put(boolean.class, Scalars.GraphQLBoolean);
-        SCALAR_MAP.put(Boolean.class, Scalars.GraphQLBoolean);
-        SCALAR_MAP.put(byte.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(Byte.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(short.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(Short.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(int.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(Integer.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(long.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(Long.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(float.class, Scalars.GraphQLFloat);
-        SCALAR_MAP.put(Float.class, Scalars.GraphQLFloat);
-        SCALAR_MAP.put(double.class, Scalars.GraphQLFloat);
-        SCALAR_MAP.put(Double.class, Scalars.GraphQLFloat);
-        SCALAR_MAP.put(char.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(Character.class, Scalars.GraphQLInt);
-        SCALAR_MAP.put(String.class, Scalars.GraphQLString);
+        OUTPUT_MAP.put(boolean.class, Scalars.GraphQLBoolean);
+        OUTPUT_MAP.put(Boolean.class, Scalars.GraphQLBoolean);
+        OUTPUT_MAP.put(byte.class, ExtendedScalars.GraphQLByte);
+        OUTPUT_MAP.put(Byte.class, ExtendedScalars.GraphQLByte);
+        OUTPUT_MAP.put(short.class, ExtendedScalars.GraphQLShort);
+        OUTPUT_MAP.put(Short.class, ExtendedScalars.GraphQLShort);
+        OUTPUT_MAP.put(int.class, Scalars.GraphQLInt);
+        OUTPUT_MAP.put(Integer.class, Scalars.GraphQLInt);
+        OUTPUT_MAP.put(long.class, ExtendedScalars.GraphQLLong);
+        OUTPUT_MAP.put(Long.class, ExtendedScalars.GraphQLLong);
+        OUTPUT_MAP.put(float.class, Scalars.GraphQLFloat);
+        OUTPUT_MAP.put(Float.class, Scalars.GraphQLFloat);
+        OUTPUT_MAP.put(double.class, Scalars.GraphQLFloat); //todo nodouble
+        OUTPUT_MAP.put(Double.class, Scalars.GraphQLFloat); //todo nodouble
+        OUTPUT_MAP.put(char.class, ExtendedScalars.GraphQLChar);
+        OUTPUT_MAP.put(Character.class, ExtendedScalars.GraphQLChar);
+        OUTPUT_MAP.put(String.class, Scalars.GraphQLString);
     }
 
     public static <E extends AnnotatedElement> @Nonnull TypeData<E> dataOf(@Nonnull E element) {
         return new TypeData<>(element);
     }
 
-    public static <E extends AnnotatedElement> @Nonnull TypeContent<?, E> contentOf(@Nonnull E element) {
+    public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> contentOf(@Nonnull E element) {
         return new TypeData<>(element).toTypeContent();
-    }
-
-    public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> detailOf(@Nonnull E element) {
-        return new TypeData<>(element).toTypeDetail();
     }
 }

@@ -37,7 +37,7 @@ public class MutationTest {
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{readerById(id: 200) {id}}");
         query.getErrors().forEach(System.out::println);
-        int idFromQuery = (Integer) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
+        long idFromQuery = (long) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
                 () -> assertEquals(200, idFromQuery));
@@ -59,7 +59,7 @@ public class MutationTest {
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{readerById(id: 0) {id}}");
         query.getErrors().forEach(System.out::println);
-        int idFromQuery = (Integer) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
+        long idFromQuery = (long) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("readerById"))).get("id");
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
                 () -> assertEquals(0, idFromQuery));
@@ -82,7 +82,7 @@ public class MutationTest {
         mutation.getErrors().forEach(System.out::println);
         ExecutionResult query = build.execute("{authorById(id: 0) {id}}");
         query.getErrors().forEach(System.out::println);
-        int idFromQuery = (Integer) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("authorById"))).get("id");
+        long idFromQuery = (long) ((Map<?, ?>) (((Map<?, ?>) query.getData()).get("authorById"))).get("id");
         assertAll(
                 () -> assertEquals(0, mutation.getErrors().size()),
                 () -> assertEquals(0, idFromQuery));
