@@ -1,4 +1,4 @@
-package org.example.graphql.generator_component.type_adapter;
+package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.FieldCoordinates;
@@ -8,13 +8,13 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.util.Fetchable;
-import org.example.graphql.generator_component.dataholder.DataFactory;
-import org.example.graphql.generator_component.dataholder.Details;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
+import org.example.graphql.generator_component.dataholder.TypeDetail;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class OutputAdapter<T> extends AbstractTypeAdapter<T> implements Fetchable {
+public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchable {
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
 
     public OutputAdapter(Class<T> javaType) {
@@ -32,7 +32,7 @@ public class OutputAdapter<T> extends AbstractTypeAdapter<T> implements Fetchabl
         GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(super.getName());
         for (Field field : super.javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                Details<?, Field> data = DataFactory.detailOf(field);
+                TypeDetail<?, Field> data = TypeFactory.detailOf(field);
                 builder.field(GQLObjectFieldFrom(data));
             }
         }
@@ -43,7 +43,7 @@ public class OutputAdapter<T> extends AbstractTypeAdapter<T> implements Fetchabl
      * Generate GraphQLFieldDefinition based on field and the required
      * {@link GQLField} annotation on it.
      */
-    private @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull Details<?, Field> data) {
+    private @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull TypeDetail<?, Field> data) {
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(data.getName())
                                      .type((GraphQLOutputType) data.getGraphQLType())

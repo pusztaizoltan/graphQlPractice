@@ -5,9 +5,9 @@ import graphql.schema.GraphQLType;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.dataholder.Data;
-import org.example.graphql.generator_component.dataholder.DataFactory;
-import org.example.graphql.generator_component.type_adapter.AbstractTypeAdapter;
+import org.example.graphql.generator_component.dataholder.TypeData;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
+import org.example.graphql.generator_component.class_adapter.AbstractClassAdapter;
 import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
@@ -39,9 +39,9 @@ public class TypeCollector {
      * data-service call.
      */
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
-        Data<Method> data = DataFactory.dataOf(method);
-        if (!data.hasScalarContent()) {
-            collectRecursivelyFromClassFields(data.getContentType());
+        TypeData<Method> typeData = TypeFactory.dataOf(method);
+        if (!typeData.hasScalarContent()) {
+            collectRecursivelyFromClassFields(typeData.getContentType());
         }
     }
 
@@ -54,9 +54,9 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodArguments(@Nonnull Method method) {
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                Data<Parameter> data = DataFactory.dataOf(parameter);
-                if (!data.hasScalarContent()) {
-                    collectRecursivelyFromClassFields(data.getContentType());
+                TypeData<Parameter> typeData = TypeFactory.dataOf(parameter);
+                if (!typeData.hasScalarContent()) {
+                    collectRecursivelyFromClassFields(typeData.getContentType());
                 }
             }
         }
@@ -76,7 +76,7 @@ public class TypeCollector {
         // todo try to do something with this
         if (!this.components.contains(classType)) {
             this.components.add(classType);
-            AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(classType);
+            AbstractClassAdapter<?> adapter = AbstractClassAdapter.adapterOf(classType);
             if (adapter.isFetchable()) {
                 this.typeRegistry.dataFetchers(((Fetchable) adapter).getRegistry());
             }
@@ -88,9 +88,9 @@ public class TypeCollector {
     private <T> void collectTypesFromClassFields(@Nonnull Class<T> classType) {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                Data<Field> data = DataFactory.dataOf(field);
-                if (!data.hasScalarContent()) {
-                    collectRecursivelyFromClassFields(data.getContentType());
+                TypeData<Field> typeData = TypeFactory.dataOf(field);
+                if (!typeData.hasScalarContent()) {
+                    collectRecursivelyFromClassFields(typeData.getContentType());
                 }
             }
         }

@@ -6,12 +6,9 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLMutation;
 import org.example.graphql.generator_component.factory_access.AccessAdapter;
-import org.example.graphql.generator_component.type_adapter.AbstractTypeAdapter;
-import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.Set;
 
 /**

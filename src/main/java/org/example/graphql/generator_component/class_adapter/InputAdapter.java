@@ -1,16 +1,16 @@
-package org.example.graphql.generator_component.type_adapter;
+package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLInputObjectField;
 import graphql.schema.GraphQLInputObjectType;
 import graphql.schema.GraphQLInputType;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.dataholder.DataFactory;
-import org.example.graphql.generator_component.dataholder.Details;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
+import org.example.graphql.generator_component.dataholder.TypeDetail;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class InputAdapter<T> extends AbstractTypeAdapter<T> {
+public class InputAdapter<T> extends AbstractClassAdapter<T> {
     public InputAdapter(Class<T> javaType) {
         super(javaType);
     }
@@ -20,7 +20,7 @@ public class InputAdapter<T> extends AbstractTypeAdapter<T> {
         GraphQLInputObjectType.Builder builder = GraphQLInputObjectType.newInputObject().name(super.getName());
         for (Field field : javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                Details<? ,Field> data = DataFactory.detailOf(field);
+                TypeDetail<? ,Field> data = TypeFactory.detailOf(field);
                 builder.field(GQLInputFieldFrom(data));
             }
         }
@@ -31,7 +31,7 @@ public class InputAdapter<T> extends AbstractTypeAdapter<T> {
      * Generate GraphQLInputObjectField based on field and the required
      * {@link GQLField} annotation on it
      */
-    private @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull Details<? ,Field> data) {
+    private @Nonnull GraphQLInputObjectField GQLInputFieldFrom(@Nonnull TypeDetail<? ,Field> data) {
         return GraphQLInputObjectField.newInputObjectField()
                                       .name(data.getName())
                                       .type((GraphQLInputType) data.getGraphQLType())

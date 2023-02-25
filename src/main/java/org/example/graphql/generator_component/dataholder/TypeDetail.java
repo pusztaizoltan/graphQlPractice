@@ -6,10 +6,10 @@ import graphql.schema.GraphQLTypeReference;
 
 import java.lang.reflect.AnnotatedElement;
 
-public class Details<T, A extends AnnotatedElement> extends Data<A> {
+public class TypeDetail<T, E extends AnnotatedElement> extends TypeData<E> {
     private final Class<T> contentType;
 
-    public Details(Data<A> typeData, Class<T> contentType) {
+    public TypeDetail(TypeData<E> typeData, Class<T> contentType) {
         super(typeData);
         this.contentType = contentType;
     }
@@ -21,7 +21,7 @@ public class Details<T, A extends AnnotatedElement> extends Data<A> {
 
     @Override
     public boolean hasScalarContent() {
-        return DataFactory.SCALAR_MAP.containsKey(contentType);
+        return TypeFactory.SCALAR_MAP.containsKey(contentType);
     }
 
     private boolean isAggregation() {
@@ -38,29 +38,10 @@ public class Details<T, A extends AnnotatedElement> extends Data<A> {
 
     private GraphQLType GraphQLTypeByReferenceType() {
         if (hasScalarContent()) {
-            return DataFactory.SCALAR_MAP.get(contentType);
+            return TypeFactory.SCALAR_MAP.get(contentType);
         } else {
             return GraphQLTypeReference.typeRef(contentType.getSimpleName());
         }
     }
 
-    public boolean isScalar() {
-        return this.dataType == DataFactory.Type.SCALAR;
-    }
-
-    public boolean isEnum() {
-        return this.dataType == DataFactory.Type.ENUM;
-    }
-
-    public boolean isList() {
-        return this.dataType == DataFactory.Type.LIST;
-    }
-
-    public boolean isArray() {
-        return this.dataType == DataFactory.Type.ARRAY;
-    }
-
-    public boolean isObject() {
-        return this.dataType == DataFactory.Type.OBJECT;
-    }
 }

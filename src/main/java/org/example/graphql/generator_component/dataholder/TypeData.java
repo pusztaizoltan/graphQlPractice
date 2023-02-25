@@ -9,40 +9,45 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 
-import static org.example.graphql.generator_component.dataholder.DataFactory.SCALAR_MAP;
-import static org.example.graphql.generator_component.dataholder.DataFactory.Type;
+import static org.example.graphql.generator_component.dataholder.TypeFactory.SCALAR_MAP;
 
-public class Data<E extends AnnotatedElement> {
-    protected final Type dataType;
+public class TypeData<E extends AnnotatedElement> {
+    //    protected final DataType dataType;
+    Class<?> simpleType;
     private final E origin;
 
-    public Data(Data<E> data) {
-        origin = data.origin;
-        dataType = data.dataType;
+    public TypeData(TypeData<E> typeData) {
+        origin = typeData.origin;
+        this.simpleType = typeData.simpleType;
+//        dataType = typeData.dataType;
     }
 
-    public Data(E element) {
+    public TypeData(E element) {
         this.origin = element;
-        Class<?> simpleType = getSimpleType();
-        if (SCALAR_MAP.containsKey(simpleType)) {
-            dataType = Type.SCALAR;
-        } else if (Collection.class.isAssignableFrom(simpleType)) {
-            dataType = Type.LIST;
-        } else if (simpleType.isEnum()) {
-            dataType = Type.ENUM;
-        } else if (simpleType.isArray()) {
-            dataType = Type.ARRAY;
-        } else {
-            dataType = Type.OBJECT;
-        }
+        this.simpleType = getSimpleType();
+//        var at = getAnnotatedType();
+//
+//        System.out.println(at);
+//        if (SCALAR_MAP.containsKey(simpleType)) {
+//            dataType = DataType.SCALAR;
+//        } else if (Collection.class.isAssignableFrom(simpleType)) {
+//            dataType = DataType.LIST;
+//        } else if (simpleType.isEnum()) {
+//            dataType = DataType.ENUM;
+//        } else if (simpleType.isArray()) {
+//            dataType = DataType.ARRAY;
+//        } else {
+//            dataType = DataType.OBJECT;
+//        }
     }
 
     public Class<?> getContentType() {
-        if (dataType == Type.ARRAY) {
+        if (this.isArray()) {
             return getSimpleType().componentType();
-        } else if (dataType == Type.LIST) {
+        } else if (this.isList()) {
             return getGenericType();
         } else {
             return getSimpleType();
@@ -50,7 +55,7 @@ public class Data<E extends AnnotatedElement> {
     }
 
     public boolean hasScalarContent() {
-        return DataFactory.SCALAR_MAP.containsKey(getContentType());
+        return TypeFactory.SCALAR_MAP.containsKey(getContentType());
     }
 
     private Class<?> getGenericType() {
@@ -89,5 +94,38 @@ public class Data<E extends AnnotatedElement> {
         } else {
             throw new UnimplementedException("");// todo give message
         }
+    }
+
+    Type getAnnotatedType() {
+        if (origin instanceof Method) {
+            return ((Method) origin).getAnnotatedReturnType().getType();
+        } else if (origin instanceof Field) {
+            return ((Field) origin).getAnnotatedType().getType();
+        } else if (origin instanceof Parameter) {
+            return ((Parameter) origin).getAnnotatedType().getType();
+        } else {
+            throw new UnimplementedException("");// todo give message
+        }
+    }
+
+    public boolean isScalar() {
+        return SCALAR_MAP.containsKey(simpleType);
+    }
+
+    public boolean isEnum() {
+        return this.simpleType.isEnum();
+    }
+
+    public boolean isList() {
+        return Collection.class.isAssignableFrom(simpleType);
+    }
+
+    public boolean isArray() {
+        return this.simpleType.isArray();
+    }
+
+    public boolean isObject() {
+        // todo
+        return !isScalar() && !isEnum() && !isList() && !isArray();
     }
 }

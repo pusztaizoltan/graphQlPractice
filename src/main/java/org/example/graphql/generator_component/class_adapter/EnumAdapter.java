@@ -1,8 +1,8 @@
-package org.example.graphql.generator_component.type_adapter;
+package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLEnumType;
 
-public class EnumAdapter<T> extends AbstractTypeAdapter<T> {
+public class EnumAdapter<T> extends AbstractClassAdapter<T> {
     public EnumAdapter(Class<T> javaType) {
         super(javaType);
     }

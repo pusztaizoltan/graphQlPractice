@@ -8,8 +8,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DataFactory {
-    protected enum Type {ENUM, OBJECT, LIST, ARRAY, SCALAR}
+public class TypeFactory {
+    protected enum DataType {ENUM, OBJECT, LIST, ARRAY, SCALAR}
 
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
 
@@ -33,12 +33,12 @@ public class DataFactory {
         SCALAR_MAP.put(String.class, Scalars.GraphQLString);
     }
 
-    public static <E extends AnnotatedElement> @Nonnull Data<E> dataOf(@Nonnull E element) {
-        return new Data<>(element);
+    public static <E extends AnnotatedElement> @Nonnull TypeData<E> dataOf(@Nonnull E element) {
+        return new TypeData<>(element);
     }
 
-    public static <E extends AnnotatedElement> Details<?, E> detailOf(@Nonnull E element) {
-        Data<E> typeData = new Data<>(element);
-        return new Details<>(typeData, typeData.getContentType());
+    public static <E extends AnnotatedElement> TypeDetail<?, E> detailOf(@Nonnull E element) {
+        TypeData<E> typeData = new TypeData<>(element);
+        return new TypeDetail<>(typeData, typeData.getContentType());
     }
 }

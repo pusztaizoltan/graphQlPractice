@@ -1,4 +1,4 @@
-package org.example.graphql.generator_component.type_adapter;
+package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLInput;
@@ -6,11 +6,11 @@ import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 
-public abstract class AbstractTypeAdapter<T> {
+public abstract class AbstractClassAdapter<T> {
     protected final Class<T> javaType;
     protected GraphQLType graphQLType;
 
-    protected AbstractTypeAdapter(@Nonnull Class<T> javaType) {
+    protected AbstractClassAdapter(@Nonnull Class<T> javaType) {
         this.javaType = javaType;
         buildGraphQLAnalogue();
     }
@@ -32,7 +32,7 @@ public abstract class AbstractTypeAdapter<T> {
     /**
      * Factory method of TypeFactory
      */
-    public static <T> @Nonnull AbstractTypeAdapter<T> adapterOf(@Nonnull Class<T> javaType) {
+    public static <T> @Nonnull AbstractClassAdapter<T> adapterOf(@Nonnull Class<T> javaType) {
         if (javaType.isEnum()) {
             return new EnumAdapter<>(javaType);
         } else if (javaType.isAnnotationPresent(GQLInput.class)) {

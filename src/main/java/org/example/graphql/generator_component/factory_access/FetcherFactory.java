@@ -3,8 +3,8 @@ package org.example.graphql.generator_component.factory_access;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.dataholder.DataFactory;
-import org.example.graphql.generator_component.dataholder.Details;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
+import org.example.graphql.generator_component.dataholder.TypeDetail;
 import org.example.graphql.generator_component.util.UnimplementedException;
 
 import javax.annotation.Nonnull;
@@ -43,14 +43,14 @@ public class FetcherFactory{
             Parameter[] parameters = method.getParameters();
             Object[] arguments = new Object[parameters.length];
             for (int i = 0; i < parameters.length; i++) {
-                Details<?, Parameter> data = DataFactory.detailOf(parameters[i]);
+                TypeDetail<?, Parameter> data = TypeFactory.detailOf(parameters[i]);
                 arguments[i] = mapArgument(data);
             }
             return method.invoke(this.dataService, arguments);
         };
     }
 
-    private <T> @Nonnull Object mapArgument(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull Object mapArgument(@Nonnull TypeDetail<T, Parameter> data) {
         if (data.isScalar()) {
             return envArgs.get(data.getName());
 //            return environment.getArgument(data.getName());
@@ -68,7 +68,7 @@ public class FetcherFactory{
 //        return
 //    }
 
-    private <T> @Nonnull List<T> mapListArgument(Details<T, Parameter> data) {
+    private <T> @Nonnull List<T> mapListArgument(TypeDetail<T, Parameter> data) {
         Iterable<T> arg = environment.getArgument(data.getName());
 //        System.out.println(environment.g);
         System.out.println(arg);
@@ -88,7 +88,7 @@ public class FetcherFactory{
 
     }
 
-    private <T> @Nonnull T mapEnumArgument(Details<T, Parameter> data) {
+    private <T> @Nonnull T mapEnumArgument(TypeDetail<T, Parameter> data) {
         for (T enumConstant : data.getContentType().getEnumConstants()) {
             if (((Enum<?>) enumConstant).name().equals(envArgs.get(data.getName()))) {
                 return enumConstant;
@@ -97,7 +97,7 @@ public class FetcherFactory{
         throw new IllegalArgumentException("Invalid enum constant");
     }
 
-    private <T> @Nonnull T mapObjectArgument(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T mapObjectArgument(@Nonnull TypeDetail<T, Parameter> data) {
         try {
             return tryMappingByStaticMapperMethod(data);
         } catch (UnimplementedException | InvocationTargetException | IllegalAccessException e) {
@@ -105,7 +105,7 @@ public class FetcherFactory{
         }
     }
 
-    private <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull Details<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
+    private <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull TypeDetail<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
         for (Method method : data.getContentType().getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
@@ -119,7 +119,7 @@ public class FetcherFactory{
         throw new UnimplementedException(exceptionMessage + data.getContentType());
     }
 
-    private <T> @Nonnull T mapBySetterMatching(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T mapBySetterMatching(@Nonnull TypeDetail<T, Parameter> data) {
         T inputObject = instantiateInputObject(data);
         Map<String, Object> arguments = Map.class.cast( envArgs.get(data.getName()));
         for (Field field : data.getContentType().getDeclaredFields()) {
@@ -130,7 +130,7 @@ public class FetcherFactory{
         return inputObject;
     }
 
-    private <T> @Nonnull T instantiateInputObject(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T instantiateInputObject(@Nonnull TypeDetail<T, Parameter> data) {
         String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
             return data.getContentType().getDeclaredConstructor().newInstance();

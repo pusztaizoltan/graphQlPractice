@@ -8,8 +8,8 @@ import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLArg;
-import org.example.graphql.generator_component.dataholder.DataFactory;
-import org.example.graphql.generator_component.dataholder.Details;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
+import org.example.graphql.generator_component.dataholder.TypeDetail;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
@@ -32,17 +32,17 @@ public class AccessAdapter {
 
     public @Nonnull GraphQLFieldDefinition getAccessorOf(@Nonnull Method method) {
         GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
-        Details<?, Method> methodData = DataFactory.detailOf(method);
+        TypeDetail<?, Method> methodData = TypeFactory.detailOf(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
-                Details<?, Parameter> parameterData = DataFactory.detailOf(parameter);
+                TypeDetail<?, Parameter> parameterData = TypeFactory.detailOf(parameter);
                 builder.argument(createArgumentFor(parameterData));
             }
         }
         return builder.type((GraphQLOutputType) methodData.getGraphQLType()).build();
     }
 
-    private @Nonnull GraphQLArgument createArgumentFor(@Nonnull Details<?, Parameter> data) {
+    private @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeDetail<?, Parameter> data) {
         return GraphQLArgument.newArgument()
                               .name(data.getName())
                               .type((GraphQLInputType) data.getGraphQLType())
