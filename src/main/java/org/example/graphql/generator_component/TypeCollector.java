@@ -73,6 +73,7 @@ public class TypeCollector {
     }
 
     private void collectRecursivelyFromClassFields(@Nonnull Class<?> classType) {
+
         if (!this.components.contains(classType)) {
             this.components.add(classType);
             AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(classType);
@@ -88,7 +89,7 @@ public class TypeCollector {
         for (Field field : classType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 Data<Field> data = DataFactory.dataOf(field);
-                if (!data.isScalar()) {
+                if (!data.hasScalarContent()) {
                     collectRecursivelyFromClassFields(data.getContentType());
                 }
             }

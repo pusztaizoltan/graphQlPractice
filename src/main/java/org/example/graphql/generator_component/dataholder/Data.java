@@ -11,7 +11,8 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 
-import static org.example.graphql.generator_component.dataholder.DataFactory.*;
+import static org.example.graphql.generator_component.dataholder.DataFactory.SCALAR_MAP;
+import static org.example.graphql.generator_component.dataholder.DataFactory.Type;
 
 public class Data<E extends AnnotatedElement> {
     protected final Type dataType;
@@ -38,10 +39,6 @@ public class Data<E extends AnnotatedElement> {
         }
     }
 
-    public boolean isScalar() {
-        return this.dataType == Type.SCALAR;
-    }
-
     public Class<?> getContentType() {
         if (dataType == Type.ARRAY) {
             return getSimpleType().componentType();
@@ -52,9 +49,10 @@ public class Data<E extends AnnotatedElement> {
         }
     }
 
-    public boolean hasScalarContent(){
+    public boolean hasScalarContent() {
         return DataFactory.SCALAR_MAP.containsKey(getContentType());
     }
+
     private Class<?> getGenericType() {
         ParameterizedType type;
         if (origin instanceof Method) {
@@ -80,6 +78,7 @@ public class Data<E extends AnnotatedElement> {
             throw new MissingAnnotationException("");
         }
     }
+
     private Class<?> getSimpleType() {
         if (origin instanceof Method) {
             return ((Method) origin).getReturnType();

@@ -44,6 +44,10 @@ public class Details<T, A extends AnnotatedElement> extends Data<A> {
         }
     }
 
+    public boolean isScalar() {
+        return this.dataType == DataFactory.Type.SCALAR;
+    }
+
     public boolean isEnum() {
         return this.dataType == DataFactory.Type.ENUM;
     }
