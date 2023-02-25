@@ -3,12 +3,14 @@ package org.example.graphql.generator_component;
 import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
+import graphql.schema.GraphQLType;
 import org.example.graphql.generator_component.factory_access.AccessAdapter;
 import org.example.graphql.generator_component.type_adapter.AbstractTypeAdapter;
 import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -23,15 +25,6 @@ public class GraphQLBuilder {
     private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(QUERY_NAME);
     private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(MUTATION_NAME);
 
-    /**
-     * Finalize the building process
-     */
-    public @Nonnull GraphQLSchema build() {
-        this.graphQLSchema.query(queryType.build());
-        this.graphQLSchema.mutation(mutationType.build());
-        this.graphQLSchema.codeRegistry(registry.build());
-        return this.graphQLSchema.build();
-    }
 
     /**
      * Responsible for populating the Mutation and Query entry points of the Schema
@@ -47,18 +40,22 @@ public class GraphQLBuilder {
         this.registry.dataFetchers(adapter.getRegistry());
     }
 
-    /**
-     * Scans tha argument Class types and add them to the SchemaBuilder and to the RegistryBuilder
-     * as GraphQLObjectType, GraphQLEnumType or GraphQLOInputObjectType, using the methods
-     * of {@link }
-     */
-    public void addTypesForComponentClasses(@Nonnull Set<Class<?>> components) {
-        for (Class<?> component : components) {
-            AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(component);
-            this.graphQLSchema.additionalType(adapter.getGraphQLType());
-            if (adapter.isFetchable()) {
-                this.registry.dataFetchers(((Fetchable) adapter).getRegistry());
-            }
-        }
+    public void addAdditionalTypes(Set<GraphQLType> additionalTypes) {
+        this.graphQLSchema.additionalTypes(additionalTypes);
     }
+
+    public void addFetchers(GraphQLCodeRegistry fetcherRegistry) {
+        this.registry.dataFetchers( fetcherRegistry);
+    }
+    /**
+     * Finalize the building process
+     */
+    public @Nonnull GraphQLSchema build() {
+        this.graphQLSchema.query(queryType.build());
+        this.graphQLSchema.mutation(mutationType.build());
+        this.graphQLSchema.codeRegistry(registry.build());
+        return this.graphQLSchema.build();
+    }
+
+
 }

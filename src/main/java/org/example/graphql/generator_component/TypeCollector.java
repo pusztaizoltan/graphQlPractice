@@ -1,10 +1,14 @@
 package org.example.graphql.generator_component;
 
+import graphql.schema.GraphQLCodeRegistry;
+import graphql.schema.GraphQLType;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.dataholder.Data;
 import org.example.graphql.generator_component.dataholder.DataFactory;
+import org.example.graphql.generator_component.type_adapter.AbstractTypeAdapter;
+import org.example.graphql.generator_component.util.Fetchable;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -22,9 +26,11 @@ import java.util.HashSet;
  * weather defined by client or automatically extracted from provided
  * data-service method.
  */
+@Getter
 public class TypeCollector {
-    @Getter
     private final HashSet<Class<?>> components = new HashSet<>();
+    private final HashSet<GraphQLType> graphQLTypes = new HashSet<>();
+    private final GraphQLCodeRegistry.Builder typeRegistry = GraphQLCodeRegistry.newCodeRegistry();
 
     /**
      * Collect unique composite classes or enums recursively
@@ -35,7 +41,7 @@ public class TypeCollector {
     public void collectTypesFromServiceMethodReturn(@Nonnull Method method) {
         Data<Method> data = DataFactory.dataOf(method);
         if (!data.hasScalarContent()) {
-            collectRecursivelyFromClassFields(data);
+            collectRecursivelyFromClassFields(data.getContentType());
         }
     }
 
@@ -50,7 +56,7 @@ public class TypeCollector {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
                 Data<Parameter> data = DataFactory.dataOf(parameter);
                 if (!data.hasScalarContent()) {
-                    collectRecursivelyFromClassFields(data);
+                    collectRecursivelyFromClassFields(data.getContentType());
                 }
             }
         }
@@ -62,17 +68,19 @@ public class TypeCollector {
      */
     public void collectAdditionalTypesFromClasses(@Nonnull Class<?>... classes) {
         for (Class<?> classType : classes) {
-            if (!this.components.contains(classType)) {
-                this.components.add(classType);
-                collectTypesFromClassFields(classType);
-            }
+            collectRecursivelyFromClassFields(classType);
         }
     }
 
-    private void collectRecursivelyFromClassFields(@Nonnull Data<?> data) {
-        if (!this.components.contains(data.getContentType())) {
-            this.components.add(data.getContentType());
-            collectTypesFromClassFields(data.getContentType());
+    private void collectRecursivelyFromClassFields(@Nonnull Class<?> classType) {
+        if (!this.components.contains(classType)) {
+            this.components.add(classType);
+            AbstractTypeAdapter<?> adapter = AbstractTypeAdapter.adapterOf(classType);
+            if (adapter.isFetchable()) {
+                this.typeRegistry.dataFetchers(((Fetchable) adapter).getRegistry());
+            }
+            this.graphQLTypes.add(adapter.getGraphQLType());
+            collectTypesFromClassFields(classType);
         }
     }
 
@@ -81,7 +89,7 @@ public class TypeCollector {
             if (field.isAnnotationPresent(GQLField.class)) {
                 Data<Field> data = DataFactory.dataOf(field);
                 if (!data.isScalar()) {
-                    collectRecursivelyFromClassFields(data);
+                    collectRecursivelyFromClassFields(data.getContentType());
                 }
             }
         }

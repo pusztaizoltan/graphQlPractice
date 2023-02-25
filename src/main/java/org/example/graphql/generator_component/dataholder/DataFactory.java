@@ -41,8 +41,4 @@ public class DataFactory {
         Data<E> typeData = new Data<>(element);
         return new Details<>(typeData, typeData.getContentType());
     }
-
-    public static boolean isScalar(Class<?> classType) {
-        return SCALAR_MAP.containsKey(classType);
-    }
 }
