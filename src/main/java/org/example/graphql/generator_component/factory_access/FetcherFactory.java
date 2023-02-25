@@ -24,16 +24,19 @@ import java.util.Map;
  * to automatically create DataFetcher for the Query and Mutation type methods of data-service
  * based on the signature of the method.
  */
-public class FetcherFactory {
-    static DataFetchingEnvironment environment;
-    static Map<String, Object> envArgs;
-    private FetcherFactory() {
+public class FetcherFactory{
+    private DataFetchingEnvironment environment;
+    private Map<String, Object> envArgs;
+    private final Object dataService;
+
+    public FetcherFactory(Object dataService) {
+        this.dataService = dataService;
     }
 
     /**
      * Factory method of the class.
      */
-    public static @Nonnull DataFetcher<Object> createFetcherFor(@Nonnull Method method, @Nonnull Object dataService) {
+    public @Nonnull DataFetcher<Object> createFetcherFor(@Nonnull Method method) {
         return (DataFetchingEnvironment env) -> {
             environment = env;
             envArgs = env.getArguments();
@@ -43,11 +46,11 @@ public class FetcherFactory {
                 Details<?, Parameter> data = DataFactory.detailOf(parameters[i]);
                 arguments[i] = mapArgument(data);
             }
-            return method.invoke(dataService, arguments);
+            return method.invoke(this.dataService, arguments);
         };
     }
 
-    private static <T> @Nonnull Object mapArgument(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull Object mapArgument(@Nonnull Details<T, Parameter> data) {
         if (data.isScalar()) {
             return envArgs.get(data.getName());
 //            return environment.getArgument(data.getName());
@@ -65,7 +68,7 @@ public class FetcherFactory {
 //        return
 //    }
 
-    private static <T> @Nonnull List<T> mapListArgument(Details<T, Parameter> data) {
+    private <T> @Nonnull List<T> mapListArgument(Details<T, Parameter> data) {
         Iterable<T> arg = environment.getArgument(data.getName());
 //        System.out.println(environment.g);
         System.out.println(arg);
@@ -85,7 +88,7 @@ public class FetcherFactory {
 
     }
 
-    private static <T> @Nonnull T mapEnumArgument(Details<T, Parameter> data) {
+    private <T> @Nonnull T mapEnumArgument(Details<T, Parameter> data) {
         for (T enumConstant : data.getContentType().getEnumConstants()) {
             if (((Enum<?>) enumConstant).name().equals(envArgs.get(data.getName()))) {
                 return enumConstant;
@@ -94,7 +97,7 @@ public class FetcherFactory {
         throw new IllegalArgumentException("Invalid enum constant");
     }
 
-    private static <T> @Nonnull T mapObjectArgument(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T mapObjectArgument(@Nonnull Details<T, Parameter> data) {
         try {
             return tryMappingByStaticMapperMethod(data);
         } catch (UnimplementedException | InvocationTargetException | IllegalAccessException e) {
@@ -102,7 +105,7 @@ public class FetcherFactory {
         }
     }
 
-    private static <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull Details<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
+    private <T> @Nonnull T tryMappingByStaticMapperMethod(@Nonnull Details<T, Parameter> data) throws InvocationTargetException, IllegalAccessException {
         String exceptionMessage = "Unimplemented preferential input-wiring method with required signature for ";
         for (Method method : data.getContentType().getMethods()) {
             if (Modifier.isStatic(method.getModifiers()) && method.getName().equals("fromMap")) {
@@ -116,7 +119,7 @@ public class FetcherFactory {
         throw new UnimplementedException(exceptionMessage + data.getContentType());
     }
 
-    private static <T> @Nonnull T mapBySetterMatching(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T mapBySetterMatching(@Nonnull Details<T, Parameter> data) {
         T inputObject = instantiateInputObject(data);
         Map<String, Object> arguments = Map.class.cast( envArgs.get(data.getName()));
         for (Field field : data.getContentType().getDeclaredFields()) {
@@ -127,7 +130,7 @@ public class FetcherFactory {
         return inputObject;
     }
 
-    private static <T> @Nonnull T instantiateInputObject(@Nonnull Details<T, Parameter> data) {
+    private <T> @Nonnull T instantiateInputObject(@Nonnull Details<T, Parameter> data) {
         String exceptionMessage = "Unimplemented default constructor for secondary input-wiring solution for ";
         try {
             return data.getContentType().getDeclaredConstructor().newInstance();
@@ -139,7 +142,7 @@ public class FetcherFactory {
         }
     }
 
-    private static void setInputValue(@Nonnull Object inputObject, @Nonnull Field property, @Nonnull Object inputValue) {
+    private void setInputValue(@Nonnull Object inputObject, @Nonnull Field property, @Nonnull Object inputValue) {
         String exceptionMessage = "Unimplemented public setter for secondary input-wiring solution for ";
         try {
             new PropertyDescriptor(property.getName(), property.getDeclaringClass())

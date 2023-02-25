@@ -16,15 +16,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class AccessAdapter {
-    Object dataService;
+    FetcherFactory fetcherFactory;
 
     public AccessAdapter(@Nonnull Object dataService) {
-        this.dataService = dataService;
+        fetcherFactory = new FetcherFactory(dataService);
+
     }
 
     public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method, String typeName) {
         GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-        DataFetcher<?> fetcher = FetcherFactory.createFetcherFor(method, dataService);
+        DataFetcher<?> fetcher = fetcherFactory.createFetcherFor(method);
         registry.dataFetcher(FieldCoordinates.coordinates(typeName, method.getName()), fetcher);
         return registry.build();
     }
