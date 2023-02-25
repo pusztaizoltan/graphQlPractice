@@ -1,5 +1,6 @@
 package org.example.graphql.generator_component.dataholder;
 
+import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.generator_component.util.MissingAnnotationException;
 import org.example.graphql.generator_component.util.UnimplementedException;
@@ -15,33 +16,21 @@ import java.util.Collection;
 import static org.example.graphql.generator_component.dataholder.TypeFactory.SCALAR_MAP;
 
 public class TypeData<E extends AnnotatedElement> {
-    //    protected final DataType dataType;
     Class<?> simpleType;
+    @Getter
     private final E origin;
-
-    public TypeData(TypeData<E> typeData) {
-        origin = typeData.origin;
-        this.simpleType = typeData.simpleType;
-//        dataType = typeData.dataType;
-    }
 
     public TypeData(E element) {
         this.origin = element;
         this.simpleType = getSimpleType();
-//        var at = getAnnotatedType();
-//
-//        System.out.println(at);
-//        if (SCALAR_MAP.containsKey(simpleType)) {
-//            dataType = DataType.SCALAR;
-//        } else if (Collection.class.isAssignableFrom(simpleType)) {
-//            dataType = DataType.LIST;
-//        } else if (simpleType.isEnum()) {
-//            dataType = DataType.ENUM;
-//        } else if (simpleType.isArray()) {
-//            dataType = DataType.ARRAY;
-//        } else {
-//            dataType = DataType.OBJECT;
-//        }
+    }
+
+    public TypeContent<?, E> toTypeContent() {
+        return new TypeContent<>(this.origin, getContentType());
+    }
+
+    public TypeDetail<?, E> toTypeDetail() {
+        return new TypeDetail<>(this.origin, getAnnotatedType());
     }
 
     public Class<?> getContentType() {

@@ -1,47 +1,17 @@
 package org.example.graphql.generator_component.dataholder;
 
-import graphql.schema.GraphQLList;
-import graphql.schema.GraphQLType;
-import graphql.schema.GraphQLTypeReference;
-
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Type;
 
-public class TypeDetail<T, E extends AnnotatedElement> extends TypeData<E> {
-    private final Class<T> contentType;
+public class TypeDetail<T extends Type,E extends AnnotatedElement> extends TypeData<E>{
+    private T type;
 
-    public TypeDetail(TypeData<E> typeData, Class<T> contentType) {
-        super(typeData);
-        this.contentType = contentType;
+    public TypeDetail(E element, T type) {
+        super(element);
+        this.type = type;
     }
 
-    @Override
-    public Class<T> getContentType() {
-        return contentType;
+    public T getType() {
+        return type;
     }
-
-    @Override
-    public boolean hasScalarContent() {
-        return TypeFactory.SCALAR_MAP.containsKey(contentType);
-    }
-
-    private boolean isAggregation() {
-        return isArray() || isList();
-    }
-
-    public GraphQLType getGraphQLType() {
-        if (isAggregation()) {
-            return GraphQLList.list(this.GraphQLTypeByReferenceType());
-        } else {
-            return this.GraphQLTypeByReferenceType();
-        }
-    }
-
-    private GraphQLType GraphQLTypeByReferenceType() {
-        if (hasScalarContent()) {
-            return TypeFactory.SCALAR_MAP.get(contentType);
-        } else {
-            return GraphQLTypeReference.typeRef(contentType.getSimpleName());
-        }
-    }
-
 }

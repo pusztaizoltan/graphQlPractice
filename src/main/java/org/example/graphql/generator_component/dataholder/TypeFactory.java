@@ -9,8 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TypeFactory {
-    protected enum DataType {ENUM, OBJECT, LIST, ARRAY, SCALAR}
-
     protected final static Map<Class<?>, GraphQLScalarType> SCALAR_MAP = new HashMap<>();
 
     static {
@@ -37,8 +35,11 @@ public class TypeFactory {
         return new TypeData<>(element);
     }
 
-    public static <E extends AnnotatedElement> TypeDetail<?, E> detailOf(@Nonnull E element) {
-        TypeData<E> typeData = new TypeData<>(element);
-        return new TypeDetail<>(typeData, typeData.getContentType());
+    public static <E extends AnnotatedElement> @Nonnull TypeContent<?, E> contentOf(@Nonnull E element) {
+        return new TypeData<>(element).toTypeContent();
+    }
+
+    public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> detailOf(@Nonnull E element) {
+        return new TypeData<>(element).toTypeDetail();
     }
 }

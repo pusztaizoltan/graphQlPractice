@@ -9,7 +9,7 @@ import graphql.schema.GraphQLOutputType;
 import org.example.graphql.annotation.GQLField;
 import org.example.graphql.generator_component.util.Fetchable;
 import org.example.graphql.generator_component.dataholder.TypeFactory;
-import org.example.graphql.generator_component.dataholder.TypeDetail;
+import org.example.graphql.generator_component.dataholder.TypeContent;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -32,7 +32,7 @@ public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchab
         GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(super.getName());
         for (Field field : super.javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                TypeDetail<?, Field> data = TypeFactory.detailOf(field);
+                TypeContent<?, Field> data = TypeFactory.contentOf(field);
                 builder.field(GQLObjectFieldFrom(data));
             }
         }
@@ -43,7 +43,7 @@ public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchab
      * Generate GraphQLFieldDefinition based on field and the required
      * {@link GQLField} annotation on it.
      */
-    private @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull TypeDetail<?, Field> data) {
+    private @Nonnull GraphQLFieldDefinition GQLObjectFieldFrom(@Nonnull TypeContent<?, Field> data) {
         return GraphQLFieldDefinition.newFieldDefinition()
                                      .name(data.getName())
                                      .type((GraphQLOutputType) data.getGraphQLType())
