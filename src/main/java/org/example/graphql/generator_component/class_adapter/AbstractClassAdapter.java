@@ -5,20 +5,11 @@ import org.example.graphql.annotation.GQLInput;
 
 import javax.annotation.Nonnull;
 
-public abstract class AbstractClassAdapter<T> {
-    protected final Class<T> javaType;
-
-    protected AbstractClassAdapter(@Nonnull Class<T> javaType) {
-        this.javaType = javaType;
+public abstract class AbstractClassAdapter {
+    protected AbstractClassAdapter() {
     }
 
-    public abstract GraphQLType getGraphQLType();
-
-    public String getName() {
-        return javaType.getSimpleName();
-    }
-
-
+    public abstract @Nonnull GraphQLType getGraphQLType();
 
     public boolean isFetchable() {
         return this instanceof Fetchable;
@@ -27,7 +18,7 @@ public abstract class AbstractClassAdapter<T> {
     /**
      * Factory method of TypeFactory
      */
-    public static <T> @Nonnull AbstractClassAdapter<T> adapterOf(@Nonnull Class<T> javaType) {
+    public static <T> @Nonnull AbstractClassAdapter adapterOf(@Nonnull Class<T> javaType) {
         if (javaType.isEnum()) {
             return new EnumAdapter<>(javaType);
         } else if (javaType.isAnnotationPresent(GQLInput.class)) {

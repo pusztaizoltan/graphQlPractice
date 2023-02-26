@@ -76,7 +76,7 @@ public class TypeCollector {
         // todo try to do something with this
         if (!this.components.contains(classType)) {
             this.components.add(classType);
-            AbstractClassAdapter<?> adapter = AbstractClassAdapter.adapterOf(classType);
+            AbstractClassAdapter adapter = AbstractClassAdapter.adapterOf(classType);
             if (adapter.isFetchable()) {
                 this.typeRegistry.dataFetchers(((Fetchable) adapter).getFetcherRegistry());
             }

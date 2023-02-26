@@ -14,12 +14,15 @@ import org.example.graphql.generator_component.dataholder.TypeFactory;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchable {
-    private final GraphQLObjectType.Builder outputBuilder = GraphQLObjectType.newObject().name(super.javaType.getSimpleName());
+public class OutputAdapter<T> extends AbstractClassAdapter implements Fetchable {
+    private final Class<T> javaType;
+    private final GraphQLObjectType.Builder outputBuilder = GraphQLObjectType.newObject();
     private final GraphQLCodeRegistry.Builder fetcherRegistry = GraphQLCodeRegistry.newCodeRegistry();
 
-    public OutputAdapter(Class<T> javaType) {
-        super(javaType);
+    protected OutputAdapter(@Nonnull Class<T> javaType) {
+        super();
+        this.javaType = javaType;
+        this.outputBuilder.name(javaType.getSimpleName());
     }
 
     @Override
@@ -29,15 +32,16 @@ public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchab
                 Class<?> fieldType = field.getType();
                 String fieldName = fieldType.getSimpleName();
                 DataFetcher<?> fetcher = env -> fieldType.cast(field.get(javaType.cast(env.getSource())));
-                this.fetcherRegistry.dataFetcher(FieldCoordinates.coordinates(super.getName(), fieldName), fetcher);
+                FieldCoordinates coordinate = FieldCoordinates.coordinates(javaType.getSimpleName(), fieldName);
+                this.fetcherRegistry.dataFetcher(coordinate, fetcher);
             }
         }
         return fetcherRegistry.build();
     }
 
     @Override
-    public GraphQLType getGraphQLType() {
-        for (Field field : super.javaType.getDeclaredFields()) {
+    public @Nonnull GraphQLType getGraphQLType() {
+        for (Field field : javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 TypeDetail<?, Field> data = TypeFactory.detailOf(field);
                 outputBuilder.field(GQLObjectFieldFrom(data));

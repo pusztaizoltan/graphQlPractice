@@ -7,6 +7,7 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLInputType;
 import graphql.schema.GraphQLOutputType;
+import org.example.graphql.annotation.GQLAccess;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.generator_component.dataholder.TypeDetail;
 import org.example.graphql.generator_component.dataholder.TypeFactory;
@@ -16,29 +17,34 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class AccessAdapter {
-    GraphQLCodeRegistry.Builder fetcherRegistry = GraphQLCodeRegistry.newCodeRegistry();
     FetcherFactory fetcherFactory;
 
     public AccessAdapter(@Nonnull Object dataService) {
         fetcherFactory = new FetcherFactory(dataService);
     }
 
-    public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method, String typeName) {
+    public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method) {
+        String typeName = method.getAnnotation(GQLAccess.class).type().accessName;
         DataFetcher<?> fetcher = fetcherFactory.createFetcherFor(method);
         FieldCoordinates coordinates = FieldCoordinates.coordinates(typeName, method.getName());
-        return fetcherRegistry.dataFetcher(coordinates, fetcher).build();
+        return GraphQLCodeRegistry.newCodeRegistry()
+                                  .dataFetcher(coordinates, fetcher)
+                                  .build();
+
     }
 
     public @Nonnull GraphQLFieldDefinition getAccessorOf(@Nonnull Method method) {
-        GraphQLFieldDefinition.Builder builder = GraphQLFieldDefinition.newFieldDefinition().name(method.getName());
-        TypeDetail<?, Method> methodData = TypeFactory.detailOf(method);
+        GraphQLFieldDefinition.Builder accessBuilder = GraphQLFieldDefinition.newFieldDefinition();
+        TypeDetail<?, Method> detail = TypeFactory.detailOf(method);
         for (Parameter parameter : method.getParameters()) {
             if (parameter.isAnnotationPresent(GQLArg.class)) {
                 TypeDetail<?, Parameter> parameterData = TypeFactory.detailOf(parameter);
-                builder.argument(createArgumentFor(parameterData));
+                accessBuilder.argument(createArgumentFor(parameterData));
             }
         }
-        return builder.type((GraphQLOutputType) methodData.getGraphQLType()).build();
+        return accessBuilder.name(detail.getName())
+                            .type((GraphQLOutputType) detail.getGraphQLType())
+                            .build();
     }
 
     private @Nonnull GraphQLArgument createArgumentFor(@Nonnull TypeDetail<?, Parameter> data) {

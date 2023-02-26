@@ -11,16 +11,18 @@ import org.example.graphql.generator_component.dataholder.TypeFactory;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
-public class InputAdapter<T> extends AbstractClassAdapter<T> {
-    GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject()
-                                                                        .name(super.javaType.getSimpleName());
+public class InputAdapter<T> extends AbstractClassAdapter {
+    private final Class<T> javaType;
+    private final GraphQLInputObjectType.Builder inputBuilder = GraphQLInputObjectType.newInputObject();
 
-    public InputAdapter(Class<T> javaType) {
-        super(javaType);
+    protected InputAdapter(@Nonnull Class<T> javaType) {
+        super();
+        this.javaType = javaType;
+        this.inputBuilder.name(javaType.getSimpleName());
     }
 
     @Override
-    public GraphQLType getGraphQLType() {
+    public @Nonnull GraphQLType getGraphQLType() {
         for (Field field : javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
                 TypeDetail<?, Field> data = TypeFactory.detailOf(field);

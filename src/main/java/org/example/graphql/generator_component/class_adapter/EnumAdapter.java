@@ -3,16 +3,21 @@ package org.example.graphql.generator_component.class_adapter;
 import graphql.schema.GraphQLEnumType;
 import graphql.schema.GraphQLType;
 
-public class EnumAdapter<T> extends AbstractClassAdapter<T> {
-    GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum().name(super.javaType.getSimpleName());
+import javax.annotation.Nonnull;
 
-    public EnumAdapter(Class<T> javaType) {
-        super(javaType);
+public class EnumAdapter<T> extends AbstractClassAdapter {
+    private final Class<T> javaType;
+    private final GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum();
+
+    protected EnumAdapter(@Nonnull Class<T> javaType) {
+        super();
+        this.javaType = javaType;
+        this.enumBuilder.name(javaType.getSimpleName());
     }
 
     @Override
-    public GraphQLType getGraphQLType() {
-        Enum<?>[] enumConstants = super.javaType.asSubclass(Enum.class).getEnumConstants();
+    public @Nonnull GraphQLType getGraphQLType() {
+        Enum<?>[] enumConstants = javaType.asSubclass(Enum.class).getEnumConstants();
         for (Enum<?> enumConstant : enumConstants) {
             enumBuilder.value(enumConstant.name());
         }

@@ -17,17 +17,14 @@ import java.util.Set;
  * data-service methods.
  */
 public class GraphQLBuilder {
-    private static final String QUERY_NAME = "Query";
-    private static final String MUTATION_NAME = "Mutation";
     private final GraphQLSchema.Builder graphQLSchema = GraphQLSchema.newSchema();
     private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
-    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(QUERY_NAME);
-    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(MUTATION_NAME);
-    AccessAdapter adapter;
+    private final GraphQLObjectType.Builder queryType = GraphQLObjectType.newObject().name(TypeFactory.AccessType.QUERY.accessName);
+    private final GraphQLObjectType.Builder mutationType = GraphQLObjectType.newObject().name(TypeFactory.AccessType.MUTATION.accessName);
+    private final AccessAdapter adapter;
 
     public GraphQLBuilder(Object dataService) {
         adapter = new AccessAdapter(dataService);
-
     }
 
     /**
@@ -37,12 +34,10 @@ public class GraphQLBuilder {
     public void addDataAccessFieldForMethod(@Nonnull Method method) {
         if (method.getAnnotation(GQLAccess.class).type() == TypeFactory.AccessType.MUTATION) {
             this.mutationType.field(adapter.getAccessorOf(method));
-            this.registry.dataFetchers(adapter.getFetcherRegistry(method,MUTATION_NAME));
         } else {
             this.queryType.field(adapter.getAccessorOf(method));
-            this.registry.dataFetchers(adapter.getFetcherRegistry(method,QUERY_NAME));
         }
-
+        this.registry.dataFetchers(adapter.getFetcherRegistry(method));
     }
 
     public void addAdditionalTypes(Set<GraphQLType> additionalTypes) {
@@ -50,8 +45,9 @@ public class GraphQLBuilder {
     }
 
     public void addFetchers(GraphQLCodeRegistry fetcherRegistry) {
-        this.registry.dataFetchers( fetcherRegistry);
+        this.registry.dataFetchers(fetcherRegistry);
     }
+
     /**
      * Finalize the building process
      */
@@ -61,6 +57,4 @@ public class GraphQLBuilder {
         this.graphQLSchema.codeRegistry(registry.build());
         return this.graphQLSchema.build();
     }
-
-
 }

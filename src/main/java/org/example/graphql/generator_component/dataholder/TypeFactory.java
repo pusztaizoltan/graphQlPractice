@@ -43,10 +43,10 @@ public class TypeFactory {
     public enum AccessType{
         QUERY("Query"),
         MUTATION("Mutation");
-        final String name;
+        public final String accessName;
 
-        AccessType(String name) {
-            this.name = name;
+        AccessType(String accessName) {
+            this.accessName = accessName;
         }
     }
 
