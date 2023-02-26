@@ -6,36 +6,44 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLFieldDefinition;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
+import graphql.schema.GraphQLType;
 import org.example.graphql.annotation.GQLField;
-import org.example.graphql.generator_component.dataholder.TypeFactory;
 import org.example.graphql.generator_component.dataholder.TypeDetail;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 
 public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchable {
-    private final GraphQLCodeRegistry.Builder registry = GraphQLCodeRegistry.newCodeRegistry();
+    private final GraphQLObjectType.Builder outputBuilder = GraphQLObjectType.newObject().name(super.javaType.getSimpleName());
+    private final GraphQLCodeRegistry.Builder fetcherRegistry = GraphQLCodeRegistry.newCodeRegistry();
 
     public OutputAdapter(Class<T> javaType) {
         super(javaType);
-        registerFetchers();
-    }
-    @Override
-    public @Nonnull GraphQLCodeRegistry getRegistry() {
-        return registry.build();
     }
 
-
     @Override
-    protected void buildGraphQLAnalogue() {
-        GraphQLObjectType.Builder builder = GraphQLObjectType.newObject().name(super.getName());
-        for (Field field : super.javaType.getDeclaredFields()) {
+    public @Nonnull GraphQLCodeRegistry getFetcherRegistry() {
+        for (Field field : javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
-                TypeDetail<?, Field> data = TypeFactory.contentOf(field);
-                builder.field(GQLObjectFieldFrom(data));
+                Class<?> fieldType = field.getType();
+                String fieldName = fieldType.getSimpleName();
+                DataFetcher<?> fetcher = env -> fieldType.cast(field.get(javaType.cast(env.getSource())));
+                this.fetcherRegistry.dataFetcher(FieldCoordinates.coordinates(super.getName(), fieldName), fetcher);
             }
         }
-        super.graphQLType = builder.build();
+        return fetcherRegistry.build();
+    }
+
+    @Override
+    public GraphQLType getGraphQLType() {
+        for (Field field : super.javaType.getDeclaredFields()) {
+            if (field.isAnnotationPresent(GQLField.class)) {
+                TypeDetail<?, Field> data = TypeFactory.detailOf(field);
+                outputBuilder.field(GQLObjectFieldFrom(data));
+            }
+        }
+        return outputBuilder.build();
     }
 
     /**
@@ -48,16 +56,4 @@ public class OutputAdapter<T> extends AbstractClassAdapter<T> implements Fetchab
                                      .type((GraphQLOutputType) data.getGraphQLType())
                                      .build();
     }
-
-    private void registerFetchers() {
-        for (Field field : javaType.getDeclaredFields()) {
-            if (field.isAnnotationPresent(GQLField.class)) {
-                Class<?> fieldType = field.getType();
-                String fieldName = fieldType.getSimpleName();
-                DataFetcher<?> fetcher = env -> fieldType.cast(field.get(javaType.cast(env.getSource())));
-                this.registry.dataFetcher(FieldCoordinates.coordinates(super.getName(), fieldName), fetcher);
-            }
-        }
-    }
-
 }

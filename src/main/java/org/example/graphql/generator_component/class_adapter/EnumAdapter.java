@@ -1,19 +1,21 @@
 package org.example.graphql.generator_component.class_adapter;
 
 import graphql.schema.GraphQLEnumType;
+import graphql.schema.GraphQLType;
 
 public class EnumAdapter<T> extends AbstractClassAdapter<T> {
+    GraphQLEnumType.Builder enumBuilder = GraphQLEnumType.newEnum().name(super.javaType.getSimpleName());
+
     public EnumAdapter(Class<T> javaType) {
         super(javaType);
     }
 
     @Override
-    public void buildGraphQLAnalogue() {
-        GraphQLEnumType.Builder builder = GraphQLEnumType.newEnum().name(super.getName());
+    public GraphQLType getGraphQLType() {
         Enum<?>[] enumConstants = super.javaType.asSubclass(Enum.class).getEnumConstants();
         for (Enum<?> enumConstant : enumConstants) {
-            builder.value(enumConstant.name());
+            enumBuilder.value(enumConstant.name());
         }
-        super.graphQLType = builder.build();
+        return enumBuilder.build();
     }
 }

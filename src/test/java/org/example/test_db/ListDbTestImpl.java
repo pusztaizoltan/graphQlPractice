@@ -1,8 +1,7 @@
 package org.example.test_db;
 
 import org.example.graphql.annotation.GQLArg;
-import org.example.graphql.annotation.GQLMutation;
-import org.example.graphql.annotation.GQLQuery;
+import org.example.graphql.annotation.GQLAccess;
 import org.example.test_dto.AuthorDTO;
 import org.example.test_dto.ReaderDTO;
 import org.example.test_entity.Author;
@@ -16,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.example.graphql.generator_component.dataholder.TypeFactory.AccessType.MUTATION;
+import static org.example.graphql.generator_component.dataholder.TypeFactory.AccessType.QUERY;
+
 @SuppressWarnings("unused")
 public class ListDbTestImpl {
     private static final String EXCEPTION_MESSAGE = "invalid id";
@@ -25,31 +27,31 @@ public class ListDbTestImpl {
     private final List<Book> bookDB = new ArrayList<>();
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<TestClass> allTestClass() {
         return testClassDB;
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public TestClass[] allTestClassAsArray() {
         return testClassDB.toArray(testClassDB.toArray(TestClass[]::new));
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public long[] allTestClassIdAsArray() {
         return testClassDB.stream().mapToLong(TestClass::getId).toArray();
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Long> allTestClassIdAsList() {
         return testClassDB.stream().mapToLong(TestClass::getId).boxed().collect(Collectors.toList());
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public TestClass testClassById(@GQLArg(name = "id") long id) {
         // TODO: within our project we ar not using streams because of the side effects produced by them:
         // - lots of unwanted small objects are created which in a big scale (millions of occurrences)
@@ -62,19 +64,19 @@ public class ListDbTestImpl {
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public Reader readerById(@GQLArg(name = "id") long id) {
         return readerDB.stream().filter(reader -> reader.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public Book bookById(@GQLArg(name = "id") long id) {
         return bookDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public Author authorById(@GQLArg(name = "id") long id) {
         return authorDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
@@ -82,42 +84,42 @@ public class ListDbTestImpl {
     // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
     // todo for human reader No but for JVM it is a useful shortcut
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Reader> allReader() {
         return readerDB;
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Book> allBook() {
         return bookDB;
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Author> allAuthor() {
         return authorDB;
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Book> bookByGenre(@GQLArg(name = "genre") GenreType genre) {
         return bookDB.stream().filter(book -> book.getGenre() == genre).collect(Collectors.toList());
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Author> authorByIsAlive(@GQLArg(name = "isAlive") boolean isAlive) {
         return authorDB.stream().filter(author -> author.isAlive() == isAlive).collect(Collectors.toList());
     }
 
     @Nonnull
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Book> bookByTitleContent(@GQLArg(name = "titleContent") String titleContent) {
         return bookDB.stream().filter(book -> book.getTitle().contains(titleContent)).collect(Collectors.toList());
     }
 
-    @GQLMutation
+    @GQLAccess(type = MUTATION)
     public long newReaderByInputObject(@GQLArg(name = "readerDTO") @Nonnull ReaderDTO readerDTO) {
         if (readerDTO.getId() == null) {
             long newId = this.readerDB.stream().mapToLong(Reader::getId).max().orElse(0);
@@ -132,7 +134,7 @@ public class ListDbTestImpl {
         }
     }
 
-    @GQLMutation
+    @GQLAccess(type = MUTATION)
     public long newReaderByFieldArgsWithId(
             @GQLArg(name = "id") int id,
             @GQLArg(name = "fullName") @Nonnull String fullName,
@@ -145,7 +147,7 @@ public class ListDbTestImpl {
         return id;
     }
 
-    @GQLMutation
+    @GQLAccess(type = MUTATION)
     public long newReaderByFieldArgsWithoutId(
             @GQLArg(name = "fullName") @Nonnull String fullName,
             @GQLArg(name = "email") @Nonnull String email) {
@@ -154,7 +156,7 @@ public class ListDbTestImpl {
         return newId;
     }
 
-    @GQLMutation
+    @GQLAccess(type = MUTATION)
     public long newAuthorByInputObject(@GQLArg(name = "authorDTO") @Nonnull AuthorDTO authorDTO) {
         if (authorDTO.getId() == null) {
             long newId = this.authorDB.stream().mapToLong(Author::getId).max().orElse(0);
@@ -169,17 +171,17 @@ public class ListDbTestImpl {
         }
     }
 
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public GenreType genreOfBookById(@GQLArg(name = "id") long id) {
         return bookById(id).getGenre();
     }
 
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public boolean isAliveOfAuthorById(@GQLArg(name = "id") long id) {
         return authorById(id).isAlive();
     }
 
-    @GQLQuery
+    @GQLAccess(type = QUERY)
     public List<Book> booksByIdList(@GQLArg(name = "ids") List<Long> ids) {
         return bookDB.stream().filter(book -> ids.contains(book.getId())).collect(Collectors.toList());
     }

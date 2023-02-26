@@ -78,7 +78,7 @@ public class TypeCollector {
             this.components.add(classType);
             AbstractClassAdapter<?> adapter = AbstractClassAdapter.adapterOf(classType);
             if (adapter.isFetchable()) {
-                this.typeRegistry.dataFetchers(((Fetchable) adapter).getRegistry());
+                this.typeRegistry.dataFetchers(((Fetchable) adapter).getFetcherRegistry());
             }
             this.graphQLTypes.add(adapter.getGraphQLType());
             collectTypesFromClassFields(classType);

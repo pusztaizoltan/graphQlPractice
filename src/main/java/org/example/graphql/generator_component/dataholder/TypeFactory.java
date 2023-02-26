@@ -36,7 +36,18 @@ public class TypeFactory {
         return new TypeData<>(element);
     }
 
-    public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> contentOf(@Nonnull E element) {
+    public static <E extends AnnotatedElement> @Nonnull TypeDetail<?, E> detailOf(@Nonnull E element) {
         return new TypeData<>(element).toTypeDetail();
     }
+
+    public enum AccessType{
+        QUERY("Query"),
+        MUTATION("Mutation");
+        final String name;
+
+        AccessType(String name) {
+            this.name = name;
+        }
+    }
+
 }

@@ -1,9 +1,7 @@
 package org.example.graphql;
 
 import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
-import org.example.graphql.annotation.GQLMutation;
-import org.example.graphql.annotation.GQLQuery;
+import org.example.graphql.annotation.GQLAccess;
 import org.example.graphql.generator_component.GraphQLBuilder;
 import org.example.graphql.generator_component.TypeCollector;
 
@@ -31,9 +29,7 @@ public class SchemaGeneratorImpl {
         for (Object dataService : dataServices) {
             this.builder = new GraphQLBuilder(dataService);
             for (Method method : dataService.getClass().getMethods()) {
-                if (method.isAnnotationPresent(GQLMutation.class) ||
-                    method.isAnnotationPresent(GQLQuery.class)
-                ) {
+                if (method.isAnnotationPresent(GQLAccess.class)) {
                     this.typeCollector.collectTypesFromServiceMethodReturn(method);
                     this.typeCollector.collectTypesFromServiceMethodArguments(method);
                     this.builder.addDataAccessFieldForMethod(method);

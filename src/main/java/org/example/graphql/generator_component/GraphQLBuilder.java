@@ -4,7 +4,8 @@ import graphql.schema.GraphQLCodeRegistry;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.GraphQLType;
-import org.example.graphql.annotation.GQLMutation;
+import org.example.graphql.annotation.GQLAccess;
+import org.example.graphql.generator_component.dataholder.TypeFactory;
 import org.example.graphql.generator_component.factory_access.AccessAdapter;
 
 import javax.annotation.Nonnull;
@@ -34,7 +35,7 @@ public class GraphQLBuilder {
      * with fields each wired to the respective method of the data-service.
      */
     public void addDataAccessFieldForMethod(@Nonnull Method method) {
-        if (method.isAnnotationPresent(GQLMutation.class)) {
+        if (method.getAnnotation(GQLAccess.class).type() == TypeFactory.AccessType.MUTATION) {
             this.mutationType.field(adapter.getAccessorOf(method));
             this.registry.dataFetchers(adapter.getFetcherRegistry(method,MUTATION_NAME));
         } else {

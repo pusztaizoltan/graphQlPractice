@@ -7,22 +7,18 @@ import javax.annotation.Nonnull;
 
 public abstract class AbstractClassAdapter<T> {
     protected final Class<T> javaType;
-    protected GraphQLType graphQLType;
 
     protected AbstractClassAdapter(@Nonnull Class<T> javaType) {
         this.javaType = javaType;
-        buildGraphQLAnalogue();
     }
 
-    protected abstract void buildGraphQLAnalogue();
+    public abstract GraphQLType getGraphQLType();
 
     public String getName() {
         return javaType.getSimpleName();
     }
 
-    public GraphQLType getGraphQLType() {
-        return graphQLType;
-    }
+
 
     public boolean isFetchable() {
         return this instanceof Fetchable;

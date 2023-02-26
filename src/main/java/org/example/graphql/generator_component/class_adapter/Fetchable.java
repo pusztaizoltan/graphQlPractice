@@ -6,5 +6,5 @@ import javax.annotation.Nonnull;
 
 public interface Fetchable {
     @Nonnull
-    GraphQLCodeRegistry getRegistry();
+    GraphQLCodeRegistry getFetcherRegistry();
 }
