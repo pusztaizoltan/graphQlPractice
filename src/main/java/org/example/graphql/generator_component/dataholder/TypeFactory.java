@@ -40,7 +40,7 @@ public class TypeFactory {
         return new TypeData<>(element).toTypeDetail();
     }
 
-    public enum AccessType{
+    public enum AccessType {
         QUERY("Query"),
         MUTATION("Mutation");
         public final String accessName;
@@ -49,5 +49,4 @@ public class TypeFactory {
             this.accessName = accessName;
         }
     }
-
 }

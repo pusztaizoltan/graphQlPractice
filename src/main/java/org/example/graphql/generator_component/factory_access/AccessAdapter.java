@@ -23,7 +23,7 @@ public class AccessAdapter {
         fetcherFactory = new FetcherFactory(dataService);
     }
 
-    public @Nonnull GraphQLCodeRegistry getFetcherRegistry(Method method) {
+    public @Nonnull GraphQLCodeRegistry getFetcherRegistry(@Nonnull Method method) {
         String typeName = method.getAnnotation(GQLAccess.class).type().accessName;
         DataFetcher<?> fetcher = fetcherFactory.createFetcherFor(method);
         FieldCoordinates coordinates = FieldCoordinates.coordinates(typeName, method.getName());

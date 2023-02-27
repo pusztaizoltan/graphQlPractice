@@ -16,10 +16,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntFunction;
 
 /**
  * Static Utility class used in{@link org.example.graphql.generator_component.GraphQLBuilder}
@@ -61,17 +59,16 @@ public class FetcherFactory {
             return environment.getArgument(data.getName());
         } else if (data.isArray()) {
             return mapArrayArgument(data);
-
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + data.getName());
         }
     }
 
     @Nonnull
-    private <T> T[] mapArrayArgument(@Nonnull TypeDetail<T, Parameter> data){
+    private <T> T[] mapArrayArgument(@Nonnull TypeDetail<T, Parameter> data) {
         List<T> envArg = environment.getArgument(data.getName());
         @SuppressWarnings("unchecked")
-        T[] arrayArg = (T[])Array.newInstance( data.getContentClass() , envArg.size());
+        T[] arrayArg = (T[]) Array.newInstance(data.getContentClass(), envArg.size());
         return envArg.toArray(arrayArg);
     }
 
