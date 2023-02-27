@@ -16,8 +16,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.IntFunction;
 
 /**
  * Static Utility class used in{@link org.example.graphql.generator_component.GraphQLBuilder}
@@ -65,30 +67,15 @@ public class FetcherFactory {
         }
     }
 
-    private <T> T[] mapArrayArgument(TypeDetail<T, Parameter> data){
+    @Nonnull
+    private <T> T[] mapArrayArgument(@Nonnull TypeDetail<T, Parameter> data){
         List<T> envArg = environment.getArgument(data.getName());
-        var arg = Array.newInstance(data.getContentClass() , envArg.size());
-        System.out.println(envArg.toArray(new Object[]{Array.newInstance(data.getContentClass(), envArg.size())}));
-
-        System.out.println("1");
-        System.out.println(data.getContentClass());
-//        envArg.t
-        System.out.println("2");
-        System.out.println(arg);
-        System.out.println("3");
-        System.out.println(arg.getClass());
-        System.out.println("4");
-//        for (int i = 0; i < envArg.size(); i++) {
-//            arg[i]
-
-//        }
-//        envArg.toArray(arg);
-//        System.out.println(envarg.toString());
-//        T[] result =  new Object[envArg.size()];
-        return null;
+        @SuppressWarnings("unchecked")
+        T[] arrayArg = (T[])Array.newInstance( data.getContentClass() , envArg.size());
+        return envArg.toArray(arrayArg);
     }
 
-    private <T> @Nonnull T mapEnumArgument(TypeDetail<T, Parameter> data) {
+    private <T> @Nonnull T mapEnumArgument(@Nonnull TypeDetail<T, Parameter> data) {
         for (T enumConstant : data.getContentClass().getEnumConstants()) {
             if (((Enum<?>) enumConstant).name().equals(environment.getArgument(data.getName()))) {
                 return enumConstant;
