@@ -12,6 +12,7 @@ import org.example.test_entity.TestClass;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -184,6 +185,16 @@ public class ListDbTestImpl {
     @GQLAccess(type = QUERY)
     public List<Book> booksByIdList(@GQLArg(name = "ids") List<Long> ids) {
         return bookDB.stream().filter(book -> ids.contains(book.getId())).collect(Collectors.toList());
+    }
+
+    @GQLAccess(type = QUERY)
+    public List<Book> booksByIdArrayPrimitive(@GQLArg(name = "ids") long[] ids) {
+        return bookDB.stream().filter(book -> Arrays.stream(ids).anyMatch(id->id==book.getId())).collect(Collectors.toList());
+    }
+
+    @GQLAccess(type = QUERY)
+    public List<Book> booksByIdArrayWrapper(@GQLArg(name = "ids") Long[] ids) {
+        return bookDB.stream().filter(book -> Arrays.stream(ids).anyMatch(id->id==book.getId())).collect(Collectors.toList());
     }
 
     public void initDb() {

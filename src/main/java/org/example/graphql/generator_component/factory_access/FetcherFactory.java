@@ -10,11 +10,13 @@ import org.example.graphql.generator_component.util.UnimplementedException;
 import javax.annotation.Nonnull;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,9 +57,35 @@ public class FetcherFactory {
             return mapObjectArgument(data);
         } else if (data.isList()) {
             return environment.getArgument(data.getName());
+        } else if (data.isArray()) {
+            return mapArrayArgument(data);
+
         } else {
             throw new UnimplementedException("Unimplemented argumentMapper in  " + FetcherFactory.class.getSimpleName() + " for" + data.getName());
         }
+    }
+
+    private <T> T[] mapArrayArgument(TypeDetail<T, Parameter> data){
+        List<T> envArg = environment.getArgument(data.getName());
+        var arg = Array.newInstance(data.getContentClass() , envArg.size());
+        System.out.println(envArg.toArray(new Object[]{Array.newInstance(data.getContentClass(), envArg.size())}));
+
+        System.out.println("1");
+        System.out.println(data.getContentClass());
+//        envArg.t
+        System.out.println("2");
+        System.out.println(arg);
+        System.out.println("3");
+        System.out.println(arg.getClass());
+        System.out.println("4");
+//        for (int i = 0; i < envArg.size(); i++) {
+//            arg[i]
+
+//        }
+//        envArg.toArray(arg);
+//        System.out.println(envarg.toString());
+//        T[] result =  new Object[envArg.size()];
+        return null;
     }
 
     private <T> @Nonnull T mapEnumArgument(TypeDetail<T, Parameter> data) {
