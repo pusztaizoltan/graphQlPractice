@@ -25,8 +25,8 @@ public class TypeFactory {
         OUTPUT_MAP.put(Long.class, ExtendedScalars.GraphQLLong);
         OUTPUT_MAP.put(float.class, Scalars.GraphQLFloat);
         OUTPUT_MAP.put(Float.class, Scalars.GraphQLFloat);
-        OUTPUT_MAP.put(double.class, Scalars.GraphQLFloat); //todo nodouble
-        OUTPUT_MAP.put(Double.class, Scalars.GraphQLFloat); //todo nodouble
+        OUTPUT_MAP.put(double.class, Scalars.GraphQLFloat);
+        OUTPUT_MAP.put(Double.class, Scalars.GraphQLFloat);
         OUTPUT_MAP.put(char.class, ExtendedScalars.GraphQLChar);
         OUTPUT_MAP.put(Character.class, ExtendedScalars.GraphQLChar);
         OUTPUT_MAP.put(String.class, Scalars.GraphQLString);

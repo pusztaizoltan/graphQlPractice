@@ -3,10 +3,6 @@ package org.example.test_entity;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLField;
 
-// TODO: is the 'Getter' annotation used anywhere? (and the lombok lib also)
-// todo not for all fields but ListDbTestImpl use it
-// TODO: also missing Javadocs
-// todo: no Part of Production code What are the rules for javadocs in Test?
 @Getter
 public class TestClass {
     @GQLField

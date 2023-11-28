@@ -53,7 +53,7 @@ public class TypeData<E extends AnnotatedElement> {
         } else if (origin instanceof Parameter) {
             type = (ParameterizedType) ((Parameter) origin).getParameterizedType();
         } else {
-            throw new UnimplementedException("");// todo give message
+            throw new UnimplementedException("UnimplementedException");
         }
         return (Class<?>) type.getActualTypeArguments()[0];
     }
@@ -78,7 +78,7 @@ public class TypeData<E extends AnnotatedElement> {
         } else if (origin instanceof Parameter) {
             return ((Parameter) origin).getType();
         } else {
-            throw new UnimplementedException("");// todo give message
+            throw new UnimplementedException("UnimplementedException");
         }
     }
 
@@ -99,7 +99,6 @@ public class TypeData<E extends AnnotatedElement> {
     }
 
     public boolean isObject() {
-        // todo
         return !isScalar() && !isEnum() && !isList() && !isArray();
     }
 

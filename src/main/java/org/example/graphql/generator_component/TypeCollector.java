@@ -15,11 +15,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
-// TODO: I think the 'parse' term is misleading, because in this case you build a model
-// from an already parsed class. The class is parsed by the Java compiler
-// TODO: as I see the purpose of this class is more like a 'model class holder' because it's only functionality to
-// collect the types from methods returns and store in a HashMap
-// todo done renamed
 
 /**
  * Class responsible for collecting java types as schema type base

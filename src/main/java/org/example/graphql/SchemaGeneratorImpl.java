@@ -22,10 +22,6 @@ public class SchemaGeneratorImpl {
      * with required dataSource instance as argument
      */
     public SchemaGeneratorImpl(@Nonnull Object... dataServices) {
-        // TODO: the following two methods implement the same rule how to select ad what to do with methods
-        // which is redundant. If the rule changes, there is two places where the code must be maintained.
-        // I think you can find a better pattern to have the method selection rule implemented only once
-        // todo done I hope this is what you thought
         for (Object dataService : dataServices) {
             this.builder = new GraphQLBuilder(dataService);
             for (Method method : dataService.getClass().getMethods()) {

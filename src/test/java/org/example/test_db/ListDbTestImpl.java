@@ -54,13 +54,6 @@ public class ListDbTestImpl {
     @Nonnull
     @GQLAccess(type = QUERY)
     public TestClass testClassById(@GQLArg(name = "id") long id) {
-        // TODO: within our project we ar not using streams because of the side effects produced by them:
-        // - lots of unwanted small objects are created which in a big scale (millions of occurrences)
-        //   may cause server garbage collection breakdown
-        // TODO 2: using lists for lookup has not the best efficiency considering a possible larger
-        // set of data, the code will iterate through the whole set. For such cases we are using HashMaps
-        // todo done no longer part of production code so cannot cause issues because size is controlled
-        // and  stream solutions removed from production code not testing relevant too
         return testClassDB.stream().filter(item -> item.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
@@ -82,8 +75,6 @@ public class ListDbTestImpl {
         return authorDB.stream().filter(book -> book.getId() == id).findFirst().orElseThrow(() -> new IllegalArgumentException(EXCEPTION_MESSAGE));
     }
 
-    // TODO: in this case the annotation doesn't hold too much info, because it is obvious that it's list
-    // todo for human reader No but for JVM it is a useful shortcut
     @Nonnull
     @GQLAccess(type = QUERY)
     public List<Reader> allReader() {
