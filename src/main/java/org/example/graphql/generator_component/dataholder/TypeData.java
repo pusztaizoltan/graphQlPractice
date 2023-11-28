@@ -1,5 +1,7 @@
 package org.example.graphql.generator_component.dataholder;
 
+import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import lombok.Getter;
 import org.example.graphql.annotation.GQLArg;
 import org.example.graphql.generator_component.util.MissingAnnotationException;
@@ -99,5 +101,11 @@ public class TypeData<E extends AnnotatedElement> {
     public boolean isObject() {
         // todo
         return !isScalar() && !isEnum() && !isList() && !isArray();
+    }
+
+    DataFetcher<Object> getFetcher(){
+        return(DataFetchingEnvironment env) -> {
+            return env.getArgument(getName());
+        };
     }
 }

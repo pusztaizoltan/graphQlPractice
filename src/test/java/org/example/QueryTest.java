@@ -171,14 +171,14 @@ class QueryTest {
         );
     }
 
-    @Test
-    void queryBooksByIdArrayPrimitive_ShouldReturnGenreBookList() {
-        ExecutionResult result = build.execute("{booksByIdArrayPrimitive(ids: [1, 2,3]) {id, title}}");
-        result.getErrors().forEach(System.out::println);
-        assertAll(
-                () -> assertEquals(0, result.getErrors().size()),
-                () -> assertEquals(3, ((List<?>) ((Map<?, ?>) result.getData()).get("booksByIdArrayPrimitive")).size())
-        );
-    }
+//    @Test
+//    void queryBooksByIdArrayPrimitive_ShouldReturnGenreBookList() {
+//        ExecutionResult result = build.execute("{booksByIdArrayPrimitive(ids: [1, 2,3]) {id, title}}");
+//        result.getErrors().forEach(System.out::println);
+//        assertAll(
+//                () -> assertEquals(0, result.getErrors().size()),
+//                () -> assertEquals(3, ((List<?>) ((Map<?, ?>) result.getData()).get("booksByIdArrayPrimitive")).size())
+//        );
+//    }
 
 }

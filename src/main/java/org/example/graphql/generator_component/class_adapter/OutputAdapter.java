@@ -29,6 +29,8 @@ public class OutputAdapter<T> extends AbstractClassAdapter implements Fetchable 
     public @Nonnull GraphQLCodeRegistry getFetcherRegistry() {
         for (Field field : javaType.getDeclaredFields()) {
             if (field.isAnnotationPresent(GQLField.class)) {
+                TypeDetail<?, Field> data = TypeFactory.detailOf(field);
+                // try to make fetcherregistry in field
                 Class<?> fieldType = field.getType();
                 String fieldName = fieldType.getSimpleName();
                 DataFetcher<?> fetcher = env -> fieldType.cast(field.get(javaType.cast(env.getSource())));
